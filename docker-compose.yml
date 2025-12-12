@@ -1,0 +1,80 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: se_portal_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-se_training_portal}
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: se_portal_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-se_training_portal}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-your-client-id-here}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET:-your-client-secret-here}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID:-your-tenant-id-here}
+      - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-admin@cpdemo.com}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-Cpwins!1}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:9999}
+      - PROXMOX_HOST=${PROXMOX_HOST:-192.168.1.100}
+      - PROXMOX_USER=${PROXMOX_USER:-root@pam}
+      - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-your-proxmox-password}
+      - PROXMOX_NODE=${PROXMOX_NODE:-pve}
+      - PROXMOX_MOCK=${PROXMOX_MOCK:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: se_portal_frontend
+    restart: always
+    ports:
+      - "9999:9999"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # pgAdmin (optional, for database management)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: se_portal_pgadmin
+    restart: always
+    profiles:
+      - tools
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  db_data:

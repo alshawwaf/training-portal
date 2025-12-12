@@ -1,0 +1,368 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ========================================
+     PREMIUM THEME SYSTEM
+     ======================================== */
+
+  /* Light Mode - Clean, Modern, Professional */
+  :root {
+    /* Backgrounds - Subtle warm off-whites */
+    --bg-primary: 250 251 252;
+    --bg-secondary: 244 246 248;
+    --bg-elevated: 255 255 255;
+    
+    /* Text - High contrast slate tones */
+    --text-primary: 15 23 42;
+    --text-secondary: 71 85 105;
+    --text-muted: 148 163 184;
+    
+    /* Borders & Dividers */
+    --border-color: 226 232 240;
+    --border-subtle: 241 245 249;
+    
+    /* Cards - Clean whites with depth */
+    --card-bg: 255 255 255;
+    --card-border: 226 232 240;
+    
+    /* Accent Colors */
+    --accent-primary: 99 102 241;
+    --accent-secondary: 139 92 246;
+    
+    /* Scrollbar */
+    --scrollbar-track: 241 245 249;
+    --scrollbar-thumb: 203 213 225;
+    --scrollbar-thumb-hover: 148 163 184;
+    
+    /* Shadows for light mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+  }
+
+  /* Dark Mode - Rich, Deep, Immersive */
+  .dark {
+    /* Backgrounds - Deep blues with subtle warmth */
+    --bg-primary: 8 10 20;
+    --bg-secondary: 15 18 30;
+    --bg-elevated: 22 26 42;
+    
+    /* Text - Soft whites for reduced eye strain */
+    --text-primary: 248 250 252;
+    --text-secondary: 148 163 184;
+    --text-muted: 100 116 139;
+    
+    /* Borders - Subtle glow effect */
+    --border-color: 45 55 72;
+    --border-subtle: 30 38 55;
+    
+    /* Cards - Rich dark surfaces */
+    --card-bg: 20 24 40;
+    --card-border: 40 50 70;
+    
+    /* Accent Colors - Slightly brighter for dark backgrounds */
+    --accent-primary: 129 140 248;
+    --accent-secondary: 167 139 250;
+    
+    /* Scrollbar */
+    --scrollbar-track: 15 18 30;
+    --scrollbar-thumb: 45 55 72;
+    --scrollbar-thumb-hover: 71 85 105;
+    
+    /* Shadows for dark mode - softer, with subtle glow */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  }
+
+  body {
+    background-color: rgb(var(--bg-primary));
+    color: rgb(var(--text-primary));
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Smooth scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: rgb(var(--scrollbar-track));
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--scrollbar-thumb));
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--scrollbar-thumb-hover));
+  }
+}
+
+@layer components {
+  /* ========================================
+     CARD COMPONENTS
+     ======================================== */
+  
+  .card {
+    background-color: rgba(var(--card-bg), 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(var(--card-border), 0.5);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
+  
+  .card-elevated {
+    background-color: rgb(var(--card-bg));
+    border: 1px solid rgba(var(--card-border), 0.6);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-xl);
+    transition: all 0.3s ease;
+  }
+  
+  .card-elevated:hover {
+    box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Dark mode card glow effect */
+  .dark .card-elevated:hover {
+    box-shadow: 0 25px 30px -10px rgba(99, 102, 241, 0.1);
+  }
+
+  /* ========================================
+     BUTTON VARIANTS
+     ======================================== */
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 
+           text-white font-semibold py-2.5 px-6 rounded-xl 
+           transition-all duration-300 transform 
+           hover:-translate-y-0.5 hover:shadow-xl
+           flex items-center justify-center gap-2;
+    background-size: 200% 100%;
+    background-position: left center;
+  }
+  
+  .btn-primary:hover {
+    background-position: right center;
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+  }
+  
+  .btn-secondary {
+    background-color: rgb(var(--bg-elevated));
+    border: 1px solid rgb(var(--border-color));
+    color: rgb(var(--text-primary));
+    font-weight: 500;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.75rem;
+    transition: all 0.25s ease;
+  }
+  
+  .btn-secondary:hover {
+    background-color: rgb(var(--bg-secondary));
+    border-color: rgb(var(--accent-primary));
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-ghost {
+    color: rgb(var(--text-secondary));
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .btn-ghost:hover {
+    color: rgb(var(--text-primary));
+    background-color: rgba(var(--accent-primary), 0.1);
+  }
+  
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-600 to-rose-600 
+           text-white font-semibold py-2.5 px-5 rounded-xl 
+           transition-all duration-300 transform 
+           hover:-translate-y-0.5 hover:shadow-lg
+           flex items-center justify-center gap-2;
+  }
+  
+  .btn-danger:hover {
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
+  }
+
+  /* ========================================
+     INPUT STYLES
+     ======================================== */
+  
+  .input {
+    background-color: rgb(var(--bg-secondary));
+    border: 1.5px solid rgb(var(--border-color));
+    color: rgb(var(--text-primary));
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    width: 100%;
+    transition: all 0.25s ease;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: rgb(var(--accent-primary));
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary), 0.15);
+    background-color: rgb(var(--bg-elevated));
+  }
+  
+  .input::placeholder {
+    color: rgb(var(--text-muted));
+  }
+
+  .input-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(var(--text-primary));
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
+  }
+
+  /* ========================================
+     BADGE STYLES
+     ======================================== */
+  
+  .badge {
+    @apply px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5;
+    transition: all 0.2s ease;
+  }
+  
+  .badge-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.1));
+    color: rgb(5 150 105); /* Darker green for light mode readability */
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .badge-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+    color: rgb(180 83 9); /* Darker amber for light mode */
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  
+  .badge-info {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+    color: rgb(79 70 229); /* Darker indigo for light mode */
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+  
+  .badge-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(248, 113, 113, 0.1));
+    color: rgb(185 28 28); /* Darker red for light mode */
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  
+  /* Dark mode badge adjustments */
+  .dark .badge-success {
+    color: rgb(52 211 153);
+  }
+  .dark .badge-warning {
+    color: rgb(251 191 36);
+  }
+  .dark .badge-info {
+    color: rgb(129 140 248);
+  }
+  .dark .badge-danger {
+    color: rgb(248 113 113);
+  }
+
+  /* ========================================
+     THEME-AWARE UTILITIES
+     ======================================== */
+  
+  .text-primary {
+    color: rgb(var(--text-primary));
+  }
+  .text-secondary {
+    color: rgb(var(--text-secondary));
+  }
+  .text-muted {
+    color: rgb(var(--text-muted));
+  }
+  .bg-primary {
+    background-color: rgb(var(--bg-primary));
+  }
+  .bg-secondary {
+    background-color: rgb(var(--bg-secondary));
+  }
+  .bg-elevated {
+    background-color: rgb(var(--bg-elevated));
+  }
+  .border-theme {
+    border-color: rgb(var(--border-color));
+  }
+  .border-subtle {
+    border-color: rgb(var(--border-subtle));
+  }
+
+  /* ========================================
+     SPECIAL EFFECTS
+     ======================================== */
+  
+  /* Gradient text for headings */
+  .gradient-text {
+    background: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Glow effect for interactive elements */
+  .glow-on-hover {
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .glow-on-hover:hover {
+    box-shadow: 0 0 20px rgba(var(--accent-primary), 0.3);
+  }
+  
+  /* Frosted glass effect */
+  .glass {
+    background: rgba(var(--card-bg), 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(var(--border-color), 0.3);
+  }
+  
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: rgb(var(--card-bg));
+    border-radius: 1rem;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}

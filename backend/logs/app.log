@@ -1,0 +1,187 @@
+2025-12-12 02:04:48,138 - se_portal - INFO - main.py:55 - Starting up application...
+2025-12-12 02:04:48,169 - se_portal - INFO - main.py:61 - Seeding default admin user...
+2025-12-12 02:04:48,190 - se_portal - INFO - main.py:71 - Default admin created with ID: 1
+2025-12-12 02:12:28,537 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-12 02:12:28,560 - se_portal - INFO - main.py:70 - Seeding default admin user...
+2025-12-12 02:12:28,595 - se_portal - ERROR - main.py:102 - Failed to seed database: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-12-12 02:14:48,989 - se_portal - INFO - main.py:60 - Starting up application...
+2025-12-12 02:14:49,015 - se_portal - INFO - main.py:69 - Seeding default admin user...
+2025-12-12 02:14:49,467 - se_portal - INFO - main.py:79 - Default admin created.
+2025-12-12 02:25:31,645 - se_portal - INFO - main.py:60 - Starting up application...
+2025-12-12 02:25:31,677 - se_portal - INFO - main.py:69 - Seeding default admin user...
+2025-12-12 02:25:32,120 - se_portal - INFO - main.py:79 - Default admin created.
+2025-12-12 02:41:42,929 - se_portal - INFO - main.py:60 - Starting up application...
+2025-12-12 02:53:54,003 - se_portal - INFO - main.py:60 - Starting up application...
+2025-12-12 03:21:55,290 - se_portal - INFO - main.py:60 - Starting up application...
+2025-12-12 03:21:55,466 - se_portal - ERROR - main.py:112 - Failed to seed database or load services: 'ProxmoxService' object has no attribute 'load_config'
+2025-12-12 03:22:47,371 - se_portal - INFO - main.py:60 - Starting up application...
+2025-12-12 03:22:47,599 - se_portal - ERROR - main.py:112 - Failed to seed database or load services: name 'email_service' is not defined
+2025-12-12 03:23:24,871 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-12 03:49:21,528 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-12 04:02:50,899 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-11 23:34:02,373 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-11 23:34:02,399 - se_portal - ERROR - main.py:113 - Failed to seed database or load services: (sqlite3.OperationalError) no such column: users.hashed_password
+[SQL: SELECT users.id AS users_id, users.email AS users_email, users.name AS users_name, users.role AS users_role, users.hashed_password AS users_hashed_password, users.oid AS users_oid 
+FROM users 
+WHERE users.email = ?
+ LIMIT ? OFFSET ?]
+[parameters: ('admin@cpdemo.com', 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-11 23:34:37,768 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-11 23:34:37,797 - se_portal - INFO - main.py:67 - Seeding superadmin user...
+2025-12-11 23:34:38,186 - se_portal - ERROR - main.py:113 - Failed to seed database or load services: type object 'UserRole' has no attribute 'admin'
+2025-12-11 23:35:10,210 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-11 23:35:10,229 - se_portal - INFO - main.py:67 - Seeding superadmin user...
+2025-12-12 00:03:43,319 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-12 00:03:43,387 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:13:44,415 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-12 00:13:44,513 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:19:36,893 - se_portal - INFO - main.py:61 - Starting up application...
+2025-12-12 00:19:36,985 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:19:40,198 - se_portal - INFO - main.py:70 - Starting up application...
+2025-12-12 00:19:40,259 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:19:59,274 - se_portal - INFO - main.py:70 - Starting up application...
+2025-12-12 00:19:59,346 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:22:49,725 - se_portal - INFO - main.py:70 - Starting up application...
+2025-12-12 00:22:49,788 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:25:19,168 - se_portal - INFO - main.py:70 - Starting up application...
+2025-12-12 00:25:19,237 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:27:40,074 - se_portal - INFO - main.py:70 - Starting up application...
+2025-12-12 00:27:40,142 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:35:01,856 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 00:35:01,951 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:35:46,148 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 00:35:46,219 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:38:34,087 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 00:38:34,184 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:42:57,620 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:43:43,099 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:43:52,210 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:44:07,334 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:44:35,520 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:44:43,301 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:45:09,030 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:45:18,622 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 00:55:29,110 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 00:55:29,197 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:17:54,153 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:17:59,055 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:18:04,374 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:20:03,310 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 01:20:03,396 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:20:47,626 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Timed out connecting to 203.0.113.250 on port 25, check your credentials or email service configuration
+2025-12-12 01:23:54,221 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:24:24,419 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Timed out connecting to 10.1.2.250 on port 25, check your credentials or email service configuration
+2025-12-12 01:30:16,406 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:30:37,587 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Timed out connecting to 10.1.2.250 on port 25, check your credentials or email service configuration
+2025-12-12 01:31:47,980 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:32:01,102 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 01:32:22,325 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Timed out connecting to 10.1.2.250 on port 25, check your credentials or email service configuration
+2025-12-12 01:50:04,245 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Timed out connecting to 10.1.2.250 on port 25, check your credentials or email service configuration
+2025-12-12 02:09:56,360 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:10:05,071 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS)., check your credentials or email service configuration
+2025-12-12 02:11:44,773 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:11:54,778 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised SMTP STARTTLS extension not supported by server., check your credentials or email service configuration
+2025-12-12 02:12:18,151 - se_portal - DEBUG - main.py:151 - Root endpoint called. Proxmox Status: Mock Mode
+2025-12-12 02:12:59,943 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:13:05,738 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:13:09,361 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:13:43,562 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 203.0.113.111 on port 465: [Errno 10061] Connect call failed ('203.0.113.111', 465), check your credentials or email service configuration
+2025-12-12 02:15:00,880 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:15:07,263 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:15:36,383 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 02:15:36,447 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:16:46,532 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS)., check your credentials or email service configuration
+2025-12-12 02:19:55,553 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:19:59,869 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:20:13,883 - se_portal.email_service - INFO - email_service.py:79 - Email sent to ['admininstrator@americas-ses.com']
+2025-12-12 02:33:27,931 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 02:33:28,027 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:41:41,687 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:41:44,461 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 02:42:02,700 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 07:52:02,209 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 07:52:02,398 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 07:57:34,109 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 07:57:34,205 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 07:59:51,868 - se_portal - DEBUG - main.py:151 - Root endpoint called. Proxmox Status: Mock Mode
+2025-12-12 08:01:11,671 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:11,903 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS)., check your credentials or email service configuration
+2025-12-12 08:01:50,442 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:50,462 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:50,491 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:50,512 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:50,543 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:50,563 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:01:50,586 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:11,631 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 10.1.2.250 on port 25: [Errno 111] Connect call failed ('10.1.2.250', 25), check your credentials or email service configuration
+2025-12-12 08:02:18,375 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,394 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,414 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,432 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,450 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,471 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,492 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:02:18,525 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS)., check your credentials or email service configuration
+2025-12-12 08:03:34,469 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:03:34,614 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:41,938 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:41,963 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:41,996 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:42,020 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:42,040 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:42,060 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:42,080 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:03:42,197 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised The SMTP AUTH extension is not supported by this server. Try connecting via TLS (or STARTTLS)., check your credentials or email service configuration
+2025-12-12 08:04:29,422 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:04:29,589 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,382 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,404 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,425 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,445 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,464 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,484 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,502 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,521 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:04:37,614 - se_portal.email_service - INFO - email_service.py:79 - Email sent to ['admininstrator@americas-ses.com']
+2025-12-12 08:05:10,462 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:06:11,439 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:06:59,679 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:07:14,656 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:07:14,788 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:07:24,969 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:07:33,682 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:09:23,678 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: [SMTPRecipientRefused(554, '5.7.1 <admin@cpdemo.com>: Recipient address rejected: Access denied', 'admin@cpdemo.com')]
+2025-12-12 08:10:36,618 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,642 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,666 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,690 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,731 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,755 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,774 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,792 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:10:36,860 - se_portal.email_service - INFO - email_service.py:79 - Email sent to ['administrator@americas-ses.com']
+2025-12-12 08:11:55,012 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:11:55,096 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:14:13,673 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:14:13,812 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:18:13,544 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:18:13,627 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:23:33,510 - se_portal.email_service - INFO - email_service.py:79 - Email sent to ['info@americas-ses.com']
+2025-12-12 08:32:38,551 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:32:38,646 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:35:29,871 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:35:29,971 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:40:38,560 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:40:38,682 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:42:17,513 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:42:17,592 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 08:47:18,511 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 08:47:18,604 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 09:05:00,014 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 09:05:00,105 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 09:06:09,161 - se_portal - INFO - templates.py:107 - Updated template: Advanced Security
+2025-12-12 17:40:10,524 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 17:40:10,606 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 17:43:18,227 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 17:43:18,310 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
