@@ -30,6 +30,14 @@ export const SkytapIcon = (props: any) => (
     <img src="/skytap.png" alt="Skytap" {...props} className={`${props.className || ''} object-contain`} />
 );
 
+export const VMwareIcon = (props: any) => (
+    <img src="/vsphere.png" alt="VMware vSphere" {...props} className={`${props.className || ''} object-contain`} />
+);
+
+export const ProxmoxIcon = (props: any) => (
+    <img src="/proxmox.png" alt="Proxmox" {...props} className={`${props.className || ''} object-contain`} />
+);
+
 export const getProviderIcon = (providerId: string) => {
     switch (providerId?.toLowerCase()) {
         case 'aws':
@@ -42,7 +50,12 @@ export const getProviderIcon = (providerId: string) => {
             return CloudShareIcon;
         case 'skytap':
             return SkytapIcon;
+        case 'vmware':
+        case 'vmware vsphere':
+        case 'vsphere':
+            return VMwareIcon;
         case 'proxmox':
+            return ProxmoxIcon;
         default:
             return Server;
     }

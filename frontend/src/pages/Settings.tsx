@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
-import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List } from 'lucide-react';
+import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List, Eye, EyeOff } from 'lucide-react';
 import Modal from '../components/Modal';
 import SettingsSection from '../components/SettingsSection';
-import { AwsIcon, AzureIcon, GcpIcon, CloudShareIcon, SkytapIcon } from '../components/ProviderIcons';
+import { AwsIcon, AzureIcon, GcpIcon, CloudShareIcon, SkytapIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
 
 interface SystemSetting {
     key: string;
@@ -44,6 +44,11 @@ const Settings: React.FC = () => {
     const [vsphereConnected, setVsphereConnected] = useState(false);
     const [vsphereTesting, setVsphereTesting] = useState(false);
     const [vsphereSaving, setVsphereSaving] = useState(false);
+    
+    // vSphere Form State (separate from displayed settings)
+    const [vsphereForm, setVsphereForm] = useState<Record<string, string>>({});
+    const [vsphereOriginal, setVsphereOriginal] = useState<Record<string, string>>({});
+    const [showVspherePassword, setShowVspherePassword] = useState(false);
 
     // Cloud Provider State
     interface CloudProvider {
@@ -119,6 +124,16 @@ const Settings: React.FC = () => {
         try {
             const res = await api.get('/settings/');
             setSystemSettings(res.data);
+            
+            // Initialize vSphere form from settings
+            const vsphereSettings: Record<string, string> = {};
+            res.data.forEach((s: SystemSetting) => {
+                if (s.key.startsWith('vsphere_')) {
+                    vsphereSettings[s.key] = s.value;
+                }
+            });
+            setVsphereForm(vsphereSettings);
+            setVsphereOriginal(vsphereSettings);
         } catch (e) {
             console.error(e);
             showToast('Failed to load settings', 'error');
@@ -527,8 +542,8 @@ const Settings: React.FC = () => {
                             <div className="card-elevated overflow-hidden">
                                 <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border-b border-theme px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
-                                            <Server className="w-5 h-5 text-white" />
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-theme">
+                                            <ProxmoxIcon className="w-7 h-7" />
                                         </div>
                                         <div>
                                             <h3 className="text-lg font-semibold text-primary">Proxmox VE</h3>
@@ -664,10 +679,10 @@ const Settings: React.FC = () => {
 
                             {/* VMware vSphere Card */}
                             <div className="card-elevated overflow-hidden">
-                                <div className="bg-gradient-to-r from-blue-500/10 to-sky-500/10 border-b border-theme px-6 py-4">
+                                <div className="bg-gradient-to-r from-green-500/10 to-lime-500/10 border-b border-theme px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center shadow-lg">
-                                            <Cloud className="w-5 h-5 text-white" />
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-theme">
+                                            <VMwareIcon className="w-7 h-7" />
                                         </div>
                                         <div>
                                             <h3 className="text-lg font-semibold text-primary">VMware vSphere</h3>
@@ -680,77 +695,58 @@ const Settings: React.FC = () => {
                                         <div className="space-y-1.5 lg:col-span-2">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">vCenter / ESXi Host</label>
                                             <input type="text" className="input" placeholder="vcenter.example.com" 
-                                                value={systemSettings.find(s => s.key === 'vsphere_host')?.value || ''}
-                                                onChange={(e) => {
-                                                    const exists = systemSettings.some(s => s.key === 'vsphere_host');
-                                                    if (exists) {
-                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_host' ? {...s, value: e.target.value} : s));
-                                                    } else {
-                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_host', value: e.target.value, category: 'vsphere', description: 'vSphere Host', is_secret: false }]);
-                                                    }
-                                                }}
+                                                value={vsphereForm['vsphere_host'] || ''}
+                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_host: e.target.value}))}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Port</label>
                                             <input type="text" className="input" placeholder="443" 
-                                                value={systemSettings.find(s => s.key === 'vsphere_port')?.value || '443'}
-                                                onChange={(e) => {
-                                                    const exists = systemSettings.some(s => s.key === 'vsphere_port');
-                                                    if (exists) {
-                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_port' ? {...s, value: e.target.value} : s));
-                                                    } else {
-                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_port', value: e.target.value, category: 'vsphere', description: 'vSphere Port', is_secret: false }]);
-                                                    }
-                                                }}
+                                                value={vsphereForm['vsphere_port'] || '443'}
+                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_port: e.target.value}))}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
                                             <input type="text" className="input" placeholder="administrator@vsphere.local" 
-                                                value={systemSettings.find(s => s.key === 'vsphere_user')?.value || ''}
-                                                onChange={(e) => {
-                                                    const exists = systemSettings.some(s => s.key === 'vsphere_user');
-                                                    if (exists) {
-                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_user' ? {...s, value: e.target.value} : s));
-                                                    } else {
-                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_user', value: e.target.value, category: 'vsphere', description: 'vSphere User', is_secret: false }]);
-                                                    }
-                                                }}
+                                                value={vsphereForm['vsphere_user'] || ''}
+                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_user: e.target.value}))}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Password</label>
-                                            <input type="password" className="input" placeholder="••••••••" 
-                                                value={systemSettings.find(s => s.key === 'vsphere_password')?.value || ''}
-                                                onChange={(e) => {
-                                                    const exists = systemSettings.some(s => s.key === 'vsphere_password');
-                                                    if (exists) {
-                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_password' ? {...s, value: e.target.value} : s));
-                                                    } else {
-                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_password', value: e.target.value, category: 'vsphere', description: 'vSphere Password', is_secret: true }]);
-                                                    }
-                                                }}
-                                            />
+                                            <div className="relative">
+                                                <input 
+                                                    type={showVspherePassword ? "text" : "password"} 
+                                                    className="input pr-10" 
+                                                    placeholder="Enter password..." 
+                                                    value={vsphereForm['vsphere_password'] || ''}
+                                                    onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_password: e.target.value}))}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowVspherePassword(!showVspherePassword)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
+                                                >
+                                                    {showVspherePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
+                                            {vsphereOriginal['vsphere_password'] === '********' && vsphereForm['vsphere_password'] === '********' && (
+                                                <p className="text-xs text-amber-500 mt-1">Password is masked. Enter a new value to update.</p>
+                                            )}
                                         </div>
                                         <div className="flex items-end">
                                             <label className="flex items-center gap-3 cursor-pointer group">
-                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${systemSettings.find(s => s.key === 'vsphere_verify_ssl')?.value === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
-                                                    onClick={() => {
-                                                        const current = systemSettings.find(s => s.key === 'vsphere_verify_ssl');
-                                                        if (current) {
-                                                            setSystemSettings(prev => prev.map(s => s.key === 'vsphere_verify_ssl' ? {...s, value: s.value === 'true' ? 'false' : 'true'} : s));
-                                                        } else {
-                                                            setSystemSettings(prev => [...prev, { key: 'vsphere_verify_ssl', value: 'true', category: 'vsphere', description: 'Verify SSL', is_secret: false }]);
-                                                        }
-                                                    }}
+                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${vsphereForm['vsphere_verify_ssl'] === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                                    onClick={() => setVsphereForm(prev => ({...prev, vsphere_verify_ssl: prev['vsphere_verify_ssl'] === 'true' ? 'false' : 'true'}))}
                                                 >
-                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${systemSettings.find(s => s.key === 'vsphere_verify_ssl')?.value === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${vsphereForm['vsphere_verify_ssl'] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
                                                 </div>
                                                 <span className="text-sm text-secondary group-hover:text-primary transition-colors">Verify SSL</span>
                                             </label>
                                         </div>
                                     </div>
+
                                     <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-sm text-secondary">
                                             <div className={`w-2 h-2 rounded-full ${vsphereConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
@@ -806,14 +802,14 @@ const Settings: React.FC = () => {
                                                 className="btn-secondary"
                                                 onClick={async () => {
                                                     try {
-                                                        const host = systemSettings.find(s => s.key === 'vsphere_host')?.value || '';
-                                                        const port = parseInt(systemSettings.find(s => s.key === 'vsphere_port')?.value || '443');
-                                                        const user = systemSettings.find(s => s.key === 'vsphere_user')?.value || '';
-                                                        const password = systemSettings.find(s => s.key === 'vsphere_password')?.value || '';
-                                                        const verify_ssl = systemSettings.find(s => s.key === 'vsphere_verify_ssl')?.value === 'true';
+                                                        const host = vsphereForm['vsphere_host'] || '';
+                                                        const port = parseInt(vsphereForm['vsphere_port'] || '443');
+                                                        const user = vsphereForm['vsphere_user'] || '';
+                                                        const password = vsphereForm['vsphere_password'] || '';
+                                                        const verify_ssl = vsphereForm['vsphere_verify_ssl'] === 'true';
                                                         
-                                                        if (!host || !user || !password) {
-                                                            showToast('Host, user, and password are required', 'warning');
+                                                        if (!host || !user) {
+                                                            showToast('Host and user are required', 'warning');
                                                             return;
                                                         }
                                                         
@@ -840,15 +836,25 @@ const Settings: React.FC = () => {
                                             </button>
                                             <button 
                                                 className="btn-primary"
+                                                disabled={vsphereSaving || (
+                                                    vsphereForm['vsphere_host'] === vsphereOriginal['vsphere_host'] &&
+                                                    vsphereForm['vsphere_port'] === vsphereOriginal['vsphere_port'] &&
+                                                    vsphereForm['vsphere_user'] === vsphereOriginal['vsphere_user'] &&
+                                                    vsphereForm['vsphere_password'] === vsphereOriginal['vsphere_password'] &&
+                                                    vsphereForm['vsphere_verify_ssl'] === vsphereOriginal['vsphere_verify_ssl']
+                                                )}
                                                 onClick={async () => {
                                                     try {
                                                         setVsphereSaving(true);
                                                         const settings: Record<string, string> = {};
                                                         ['vsphere_host', 'vsphere_port', 'vsphere_user', 'vsphere_password', 'vsphere_verify_ssl'].forEach(key => {
-                                                            const val = systemSettings.find(s => s.key === key)?.value;
+                                                            const val = vsphereForm[key];
                                                             if (val !== undefined) settings[key] = val;
                                                         });
                                                         await api.post('/infrastructure/vsphere/save', { settings, category: 'vsphere' });
+                                                        
+                                                        // Update original to reflect saved state
+                                                        setVsphereOriginal({...vsphereForm});
                                                         
                                                         // Refresh connection status after save
                                                         try {

@@ -3,6 +3,7 @@ import api from '../api';
 import { Plus, Search, Calendar, Users, Trash2, Edit, Eye, Server, Key, Layers, Save, ChevronDown } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
+import { getProviderIcon } from '../components/ProviderIcons';
 
 interface ClassModel {
     id: number;
@@ -45,7 +46,7 @@ const Classes: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Templates from API
-    const [templates, setTemplates] = useState<{id: number; name: string; description: string; icon: string}[]>([]);
+    const [templates, setTemplates] = useState<{id: number; name: string; description: string; icon: string; provider: string}[]>([]);
 
     // Create form state
     const [createForm, setCreateForm] = useState({
@@ -70,7 +71,7 @@ const Classes: React.FC = () => {
     const fetchTemplates = async () => {
         try {
             const res = await api.get('/templates/');
-            setTemplates(res.data.map((t: any) => ({ id: t.id, name: t.name, description: t.description || '', icon: t.icon })));
+            setTemplates(res.data.map((t: any) => ({ id: t.id, name: t.name, description: t.description || '', icon: t.icon, provider: t.provider || 'vSphere' })));
         } catch (e) {
             console.error("Failed to fetch templates", e);
         }
@@ -282,9 +283,22 @@ const Classes: React.FC = () => {
                     {filteredClasses.map(cls => (
                         <div key={cls.id} className="card-elevated p-6 hover:border-theme transition-all group">
                             <div className="flex items-start justify-between mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                    {cls.name.charAt(0)}
-                                </div>
+                                {(() => {
+                                    const tpl = templates.find(t => String(t.id) === cls.blueprint_id);
+                                    if (tpl) {
+                                        const ProviderIcon = getProviderIcon(tpl.provider);
+                                        return (
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center shadow-lg border border-theme">
+                                                <ProviderIcon className="w-7 h-7" />
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                            {cls.name.charAt(0)}
+                                        </div>
+                                    );
+                                })()}
                                 {getStatusBadge(cls.status)}
                             </div>
                             
@@ -422,23 +436,39 @@ const Classes: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3">
-                            {templates.map((tpl) => (
-                                <button
-                                    key={tpl.id}
-                                    type="button"
-                                    onClick={() => setCreateForm({...createForm, blueprint_id: String(tpl.id)})}
-                                    className={`p-4 rounded-xl border text-left transition-all ${
-                                        createForm.blueprint_id === String(tpl.id)
-                                            ? 'border-blue-500 bg-blue-500/10'
-                                            : 'border-theme hover:border-blue-500/50 bg-secondary/30'
-                                    }`}
+                        <div className="flex items-center gap-3">
+                            {/* Dynamic Provider Icon */}
+                            {(() => {
+                                const selectedTpl = templates.find(t => String(t.id) === createForm.blueprint_id);
+                                if (selectedTpl) {
+                                    const ProviderIcon = getProviderIcon(selectedTpl.provider);
+                                    return (
+                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                            <ProviderIcon className="w-5 h-5 text-blue-500" />
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                                        <Layers className="w-5 h-5 text-secondary" />
+                                    </div>
+                                );
+                            })()}
+                            <div className="relative flex-1">
+                                <select
+                                    className="input appearance-none pr-10"
+                                    value={createForm.blueprint_id}
+                                    onChange={e => setCreateForm({...createForm, blueprint_id: e.target.value})}
                                 >
-                                    <span className="text-xl mb-1 block">{tpl.icon}</span>
-                                    <p className="font-medium text-primary text-sm">{tpl.name}</p>
-                                    <p className="text-xs text-secondary mt-0.5">{tpl.description}</p>
-                                </button>
-                            ))}
+                                    <option value="">Select a template...</option>
+                                    {templates.map((tpl) => (
+                                        <option key={tpl.id} value={String(tpl.id)}>
+                                            {tpl.name} ({tpl.provider}) {tpl.description ? `- ${tpl.description}` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
                         </div>
                     </div>
 
@@ -576,16 +606,41 @@ const Classes: React.FC = () => {
                     
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="input-label">Blueprint ID</label>
-                            <select 
-                                className="input"
-                                value={editForm.blueprint_id || ''}
-                                onChange={e => setEditForm({...editForm, blueprint_id: e.target.value})}
-                            >
-                                <option value="1">Template 1 - Base Environment</option>
-                                <option value="2">Template 2 - Advanced Security</option>
-                                <option value="3">Template 3 - Network Simulation</option>
-                            </select>
+                            <label className="input-label">Blueprint / Template</label>
+                            <div className="flex items-center gap-3 mt-1">
+                                {/* Dynamic Provider Icon */}
+                                {(() => {
+                                    const selectedTpl = templates.find(t => String(t.id) === editForm.blueprint_id);
+                                    if (selectedTpl) {
+                                        const ProviderIcon = getProviderIcon(selectedTpl.provider);
+                                        return (
+                                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                                <ProviderIcon className="w-4 h-4 text-blue-500" />
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <div className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                                            <Layers className="w-4 h-4 text-secondary" />
+                                        </div>
+                                    );
+                                })()}
+                                <div className="relative flex-1">
+                                    <select 
+                                        className="input appearance-none pr-10"
+                                        value={editForm.blueprint_id || ''}
+                                        onChange={e => setEditForm({...editForm, blueprint_id: e.target.value})}
+                                    >
+                                        <option value="">Select a template...</option>
+                                        {templates.map((tpl) => (
+                                            <option key={tpl.id} value={String(tpl.id)}>
+                                                {tpl.name} ({tpl.provider}) {tpl.description ? `- ${tpl.description}` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label className="input-label">Status</label>

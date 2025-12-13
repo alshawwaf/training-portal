@@ -30,7 +30,7 @@ class VSphereTestRequest(BaseModel):
     host: str
     port: int = 443
     user: str
-    password: str
+    password: Optional[str] = None  # Optional - will use stored password if not provided or masked
     verify_ssl: bool = False
 
 
@@ -112,10 +112,19 @@ async def get_proxmox_status(db: Session = Depends(get_db)):
 async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Depends(get_db)):
     """Test vSphere connection with provided credentials."""
     try:
+        # Get the actual password to use
+        # If password is not provided, empty, or masked (********), use stored password
+        password = request.password
+        if not password or password == "********":
+            # Use the password from vsphere_service (loaded from .env/database)
+            password = vsphere_service.password
+            if not password:
+                return {"success": False, "message": "No password configured. Please enter a password."}
+        
         result = vsphere_service.test_connection(
             host=request.host,
             user=request.user,
-            password=request.password,
+            password=password,
             port=request.port,
             verify_ssl=request.verify_ssl
         )
