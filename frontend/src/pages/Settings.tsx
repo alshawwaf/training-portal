@@ -45,6 +45,14 @@ const Settings: React.FC = () => {
     const [vsphereTesting, setVsphereTesting] = useState(false);
     const [vsphereSaving, setVsphereSaving] = useState(false);
     
+    // Proxmox Form State
+    const [proxmoxForm, setProxmoxForm] = useState<Record<string, string>>({});
+    const [proxmoxOriginal, setProxmoxOriginal] = useState<Record<string, string>>({});
+    const [showProxmoxSecret, setShowProxmoxSecret] = useState(false);
+    const [proxmoxTesting, setProxmoxTesting] = useState(false);
+    const [proxmoxSaving, setProxmoxSaving] = useState(false);
+    const [proxmoxConnected, setProxmoxConnected] = useState(false);
+
     // vSphere Form State (separate from displayed settings)
     const [vsphereForm, setVsphereForm] = useState<Record<string, string>>({});
     const [vsphereOriginal, setVsphereOriginal] = useState<Record<string, string>>({});
@@ -110,6 +118,69 @@ const Settings: React.FC = () => {
         }
     };
 
+    const handleSaveProxmox = async () => {
+        setProxmoxSaving(true);
+        try {
+            // Filter only changed settings
+            const settingsToSave: Record<string, string> = {};
+            let hasChanges = false;
+            
+            Object.entries(proxmoxForm).forEach(([key, value]) => {
+                if (value !== proxmoxOriginal[key]) {
+                    settingsToSave[key] = value;
+                    hasChanges = true;
+                }
+            });
+
+            if (!hasChanges) {
+                showToast('No changes to save', 'info');
+                return;
+            }
+
+            await api.post('/infrastructure/proxmox/save', { 
+                settings: settingsToSave, 
+                category: 'proxmox' 
+            });
+            
+            showToast('Proxmox settings saved', 'success');
+            await fetchSettings(); // Reload to update original state
+        } catch {
+            showToast('Failed to save Proxmox settings', 'error');
+        } finally {
+            setProxmoxSaving(false);
+        }
+    };
+
+    const handleTestProxmox = async () => {
+        setProxmoxTesting(true);
+        try {
+            // Use form values
+            const res = await api.post('/infrastructure/proxmox/test', {
+                host: proxmoxForm['proxmox_host'] || '',
+                port: parseInt(proxmoxForm['proxmox_port'] || '8006'),
+                user: proxmoxForm['proxmox_user'] || '',
+                password: proxmoxForm['proxmox_password'] || '',
+                token_id: proxmoxForm['proxmox_token_id'],
+                token_secret: proxmoxForm['proxmox_token_secret'],
+                node: proxmoxForm['proxmox_node'] || 'pve',
+                verify_ssl: proxmoxForm['proxmox_verify_ssl'] === 'true'
+            });
+            
+            if (res.data.success) {
+                showToast(`Connected! ${res.data.message}`, 'success');
+                setProxmoxConnected(true);
+            } else {
+                showToast(res.data.message || 'Connection failed', 'error');
+                setProxmoxConnected(false);
+            }
+        } catch (e: any) {
+            showToast(e.response?.data?.detail || 'Connection test failed', 'error');
+            setProxmoxConnected(false);
+        } finally {
+            setProxmoxTesting(false);
+        }
+    };
+
     useEffect(() => {
         if (user?.role === 'admin') {
             fetchSettings();
@@ -127,19 +198,31 @@ const Settings: React.FC = () => {
             
             // Initialize vSphere form from settings
             const vsphereSettings: Record<string, string> = {};
+            const proxmoxSettings: Record<string, string> = {};
+            
             res.data.forEach((s: SystemSetting) => {
                 if (s.key.startsWith('vsphere_')) {
                     vsphereSettings[s.key] = s.value;
                 }
+                if (s.key.startsWith('proxmox_')) {
+                    proxmoxSettings[s.key] = s.value;
+                }
             });
+            
             setVsphereForm(vsphereSettings);
             setVsphereOriginal(vsphereSettings);
+            
+            setProxmoxForm(proxmoxSettings);
+            setProxmoxOriginal(proxmoxSettings);
+            
         } catch (e) {
             console.error(e);
             showToast('Failed to load settings', 'error');
         } finally {
             setLoadingSettings(false);
         }
+        // ... (check status)
+
 
         // Check vSphere status
         try {
@@ -556,58 +639,79 @@ const Settings: React.FC = () => {
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Host / IP Address</label>
                                             <input type="text" className="input" placeholder="192.168.1.10" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_host')?.value || ''}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_host' ? {...s, value: e.target.value} : s))}
+                                                value={proxmoxForm['proxmox_host'] || ''}
+                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_host: e.target.value})}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Port</label>
                                             <input type="text" className="input" placeholder="8006" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_port')?.value || '8006'}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_port' ? {...s, value: e.target.value} : s))}
+                                                value={proxmoxForm['proxmox_port'] || '8006'}
+                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_port: e.target.value})}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Target Node</label>
                                             <input type="text" className="input" placeholder="pve" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_node')?.value || ''}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_node' ? {...s, value: e.target.value} : s))}
+                                                value={proxmoxForm['proxmox_node'] || ''}
+                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_node: e.target.value})}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
                                             <input type="text" className="input" placeholder="root@pam" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_user')?.value || ''}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_user' ? {...s, value: e.target.value} : s))}
+                                                value={proxmoxForm['proxmox_user'] || ''}
+                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_user: e.target.value})}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Realm</label>
-                                            <input type="text" className="input" placeholder="pam" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_realm')?.value || 'pam'}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_realm' ? {...s, value: e.target.value} : s))}
-                                            />
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Password</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type={showProxmoxSecret ? "text" : "password"} 
+                                                    className="input pr-10" 
+                                                    placeholder="Enter password..." 
+                                                    value={proxmoxForm['proxmox_password'] || ''}
+                                                    onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_password: e.target.value})}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowProxmoxSecret(!showProxmoxSecret)}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
+                                                >
+                                                    {showProxmoxSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                            </div>
+                                            {proxmoxOriginal['proxmox_password'] === '********' && proxmoxForm['proxmox_password'] === '********' && (
+                                                <p className="text-xs text-amber-500 mt-1">Password is masked. Enter a new value to update.</p>
+                                            )}
                                         </div>
+                                        
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token ID</label>
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token ID (Optional)</label>
                                             <input type="text" className="input" placeholder="user@pam!tokenid" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_token_id')?.value || ''}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_token_id' ? {...s, value: e.target.value} : s))}
+                                                value={proxmoxForm['proxmox_token_id'] || ''}
+                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_token_id: e.target.value})}
                                             />
                                         </div>
-                                        <div className="space-y-1.5 lg:col-span-2">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token Secret</label>
-                                            <input type="password" className="input" placeholder="••••••••••••••••" 
-                                                value={systemSettings.find(s => s.key === 'proxmox_token_secret')?.value || ''}
-                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_token_secret' ? {...s, value: e.target.value} : s))}
-                                            />
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token Secret (Optional)</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type={showProxmoxSecret ? "text" : "password"} 
+                                                    className="input pr-10" 
+                                                    placeholder="••••••••••••••••" 
+                                                    value={proxmoxForm['proxmox_token_secret'] || ''}
+                                                    onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_token_secret: e.target.value})}
+                                                />
+                                            </div>
                                         </div>
                                         <div className="flex items-end">
                                             <label className="flex items-center gap-3 cursor-pointer group">
-                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${systemSettings.find(s => s.key === 'proxmox_verify_ssl')?.value === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
-                                                    onClick={() => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_verify_ssl' ? {...s, value: s.value === 'true' ? 'false' : 'true'} : s))}
+                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${proxmoxForm['proxmox_verify_ssl'] === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                                    onClick={() => setProxmoxForm(prev => ({...prev, proxmox_verify_ssl: prev['proxmox_verify_ssl'] === 'true' ? 'false' : 'true'}))}
                                                 >
-                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${systemSettings.find(s => s.key === 'proxmox_verify_ssl')?.value === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${proxmoxForm['proxmox_verify_ssl'] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
                                                 </div>
                                                 <span className="text-sm text-secondary group-hover:text-primary transition-colors">Verify SSL</span>
                                             </label>
@@ -615,61 +719,32 @@ const Settings: React.FC = () => {
                                     </div>
                                     <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
                                         <div className="flex items-center gap-2 text-sm text-secondary">
-                                            <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                                            <span>Not connected</span>
+                                            <div className={`w-2 h-2 rounded-full ${proxmoxConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                                            <span>{proxmoxConnected ? 'Connected' : 'Not connected'}</span>
                                         </div>
                                         <div className="flex gap-3">
                                             <button 
                                                 className="btn-secondary"
-                                                onClick={async () => {
-                                                    try {
-                                                        const settings = {
-                                                            proxmox_host: systemSettings.find(s => s.key === 'proxmox_host')?.value || '',
-                                                            proxmox_port: systemSettings.find(s => s.key === 'proxmox_port')?.value || '8006',
-                                                            proxmox_node: systemSettings.find(s => s.key === 'proxmox_node')?.value || '',
-                                                            proxmox_user: systemSettings.find(s => s.key === 'proxmox_user')?.value || '',
-                                                            proxmox_realm: systemSettings.find(s => s.key === 'proxmox_realm')?.value || 'pam',
-                                                            proxmox_token_id: systemSettings.find(s => s.key === 'proxmox_token_id')?.value || '',
-                                                            proxmox_token_secret: systemSettings.find(s => s.key === 'proxmox_token_secret')?.value || '',
-                                                            proxmox_verify_ssl: systemSettings.find(s => s.key === 'proxmox_verify_ssl')?.value || 'false',
-                                                        };
-                                                        const res = await api.post('/infrastructure/proxmox/test', {
-                                                            host: settings.proxmox_host,
-                                                            port: parseInt(settings.proxmox_port),
-                                                            user: settings.proxmox_user,
-                                                            node: settings.proxmox_node,
-                                                            verify_ssl: settings.proxmox_verify_ssl === 'true'
-                                                        });
-                                                        if (res.data.success) {
-                                                            showToast(`Connected! ${res.data.message}`, 'success');
-                                                        } else {
-                                                            showToast(res.data.message || 'Connection failed', 'error');
-                                                        }
-                                                    } catch (e: any) {
-                                                        showToast(e.response?.data?.detail || 'Connection test failed', 'error');
-                                                    }
-                                                }}
+                                                onClick={handleTestProxmox}
+                                                disabled={proxmoxTesting}
                                             >
-                                                <Globe className="w-4 h-4" />
+                                                {proxmoxTesting ? (
+                                                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                                ) : (
+                                                    <Globe className="w-4 h-4" />
+                                                )}
                                                 Test Connection
                                             </button>
                                             <button 
                                                 className="btn-primary"
-                                                onClick={async () => {
-                                                    try {
-                                                        const settings: Record<string, string> = {};
-                                                        ['proxmox_host', 'proxmox_port', 'proxmox_node', 'proxmox_user', 'proxmox_realm', 'proxmox_token_id', 'proxmox_token_secret', 'proxmox_verify_ssl'].forEach(key => {
-                                                            const val = systemSettings.find(s => s.key === key)?.value;
-                                                            if (val !== undefined) settings[key] = val;
-                                                        });
-                                                        await api.post('/infrastructure/proxmox/save', { settings, category: 'proxmox' });
-                                                        showToast('Proxmox settings saved', 'success');
-                                                    } catch {
-                                                        showToast('Failed to save settings', 'error');
-                                                    }
-                                                }}
+                                                onClick={handleSaveProxmox}
+                                                disabled={proxmoxSaving || JSON.stringify(proxmoxForm) === JSON.stringify(proxmoxOriginal)}
                                             >
-                                                <Save className="w-4 h-4" />
+                                                {proxmoxSaving ? (
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <Save className="w-4 h-4" />
+                                                )}
                                                 Save Settings
                                             </button>
                                         </div>

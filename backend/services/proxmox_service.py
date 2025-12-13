@@ -12,7 +12,11 @@ class ProxmoxService:
         self.host = os.getenv("PROXMOX_HOST", "192.168.1.100")
         self.user = os.getenv("PROXMOX_USER", "root@pam")
         self.password = os.getenv("PROXMOX_PASSWORD", "password")
+        self.port = int(os.getenv("PROXMOX_PORT", "8006"))
+        self.token_id = os.getenv("PROXMOX_TOKEN_ID")
+        self.token_secret = os.getenv("PROXMOX_TOKEN_SECRET")
         self.node = os.getenv("PROXMOX_NODE", "pve")
+        self.verify_ssl = os.getenv("PROXMOX_VERIFY_SSL", "false").lower() == "true"
         self.mock_mode = os.getenv("PROXMOX_MOCK", "false").lower() == "true"
         self.proxmox = None
         
@@ -24,12 +28,39 @@ class ProxmoxService:
 
     def _connect(self):
         try:
-            self.proxmox = ProxmoxAPI(
-                self.host, user=self.user, password=self.password, verify_ssl=False, timeout=5
-            )
+            if self.token_id and self.token_secret:
+                self.proxmox = ProxmoxAPI(
+                    self.host, user=self.user, token_name=self.token_id, token_value=self.token_secret, 
+                    verify_ssl=self.verify_ssl, port=self.port, timeout=5
+                )
+            else:
+                self.proxmox = ProxmoxAPI(
+                    self.host, user=self.user, password=self.password, 
+                    verify_ssl=self.verify_ssl, port=self.port, timeout=5
+                )
         except Exception as e:
             print(f"Failed to connect to Proxmox: {e}")
             self.proxmox = None
+
+    def test_connection(self, host: str, user: str, password: str = None, token_id: str = None, token_secret: str = None, port: int = 8006, verify_ssl: bool = False):
+        """Test connection with provided credentials without saving them."""
+        try:
+            # Create a temporary connection
+            # Check if using token or password
+            if token_id and token_secret:
+                px = ProxmoxAPI(host, user=user, token_name=token_id, token_value=token_secret, verify_ssl=verify_ssl, port=port, timeout=5)
+            else:
+                px = ProxmoxAPI(host, user=user, password=password, verify_ssl=verify_ssl, port=port, timeout=5)
+            
+            # Try to fetch version to verify auth
+            version = px.version.get()
+            return {
+                "success": True, 
+                "message": f"Successfully connected to Proxmox {version['release']}",
+                "version": version['release']
+            }
+        except Exception as e:
+            return {"success": False, "message": f"Connection failed: {str(e)}"}
 
     def load_config(self, db: Session):
         try:
@@ -40,7 +71,12 @@ class ProxmoxService:
             
             self.host = conf.get("proxmox_host", self.host)
             self.node = conf.get("proxmox_node", self.node)
-            # Add user/pass if we decide to store them in DB later
+            self.user = conf.get("proxmox_user", self.user)
+            self.password = conf.get("proxmox_password", self.password)
+            self.port = int(conf.get("proxmox_port", 8006))
+            self.token_id = conf.get("proxmox_token_id")
+            self.token_secret = conf.get("proxmox_token_secret")
+            self.verify_ssl = conf.get("proxmox_verify_ssl", "false").lower() == "true"
             
             if not self.mock_mode:
                 self._connect()
