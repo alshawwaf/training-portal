@@ -12,3 +12,4 @@ msal
 proxmoxer
 requests
 python-dotenv
+pyvmomi

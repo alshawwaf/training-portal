@@ -185,3 +185,60 @@ WHERE users.email = ?
 2025-12-12 17:40:10,606 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
 2025-12-12 17:43:18,227 - se_portal - INFO - main.py:81 - Starting up application...
 2025-12-12 17:43:18,310 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 18:10:46,435 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 18:10:46,526 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 18:10:46,540 - se_portal - ERROR - main.py:151 - Failed to seed database or load services: (psycopg2.errors.UndefinedColumn) column templates.provider does not exist
+LINE 1: ...es_description, templates.icon AS templates_icon, templates....
+                                                             ^
+
+[SQL: SELECT templates.id AS templates_id, templates.name AS templates_name, templates.description AS templates_description, templates.icon AS templates_icon, templates.provider AS templates_provider, templates.vm_config AS templates_vm_config, templates.is_active AS templates_is_active, templates.created_at AS templates_created_at, templates.updated_at AS templates_updated_at 
+FROM templates 
+WHERE templates.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Base Environment', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-12-12 18:19:27,300 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 18:19:27,430 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 18:19:27,442 - se_portal - ERROR - main.py:187 - Failed to seed database or load services: (psycopg2.errors.UndefinedColumn) column templates.provider does not exist
+LINE 1: ...es_description, templates.icon AS templates_icon, templates....
+                                                             ^
+
+[SQL: SELECT templates.id AS templates_id, templates.name AS templates_name, templates.description AS templates_description, templates.icon AS templates_icon, templates.provider AS templates_provider, templates.vm_config AS templates_vm_config, templates.is_active AS templates_is_active, templates.created_at AS templates_created_at, templates.updated_at AS templates_updated_at 
+FROM templates 
+WHERE templates.name = %(name_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'name_1': 'Base Environment', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-12-12 18:22:13,178 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 18:22:13,212 - se_portal - INFO - main.py:87 - Seeding superadmin user...
+2025-12-12 18:22:13,765 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 18:29:08,013 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 18:29:08,118 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:16:05,976 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:16:14,226 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:16:27,300 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:16:39,978 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to smtp.example.com on port 587: [Errno -2] Name or service not known, check your credentials or email service configuration
+2025-12-12 20:16:53,433 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:16:55,635 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 203.0.113.111 on port 587: [Errno 111] Connect call failed ('203.0.113.111', 587), check your credentials or email service configuration
+2025-12-12 20:17:03,670 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:17:24,806 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 203.0.113.250 on port 587: [Errno 111] Connect call failed ('203.0.113.250', 587), check your credentials or email service configuration
+2025-12-12 20:19:11,675 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:19:13,823 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 10.1.2.111 on port 587: [Errno 111] Connect call failed ('10.1.2.111', 587), check your credentials or email service configuration
+2025-12-12 20:19:27,266 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-12 20:19:48,437 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 10.1.2.250 on port 587: [Errno 111] Connect call failed ('10.1.2.250', 587), check your credentials or email service configuration
+2025-12-12 21:24:14,689 - se_portal - INFO - main.py:81 - Starting up application...
+2025-12-12 21:24:14,910 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 00:35:43,419 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:35:43,575 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 00:47:26,035 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:47:26,095 - se_portal - INFO - main.py:88 - Seeding superadmin user...
+2025-12-13 00:47:26,633 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 00:57:52,025 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:57:52,196 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 00:58:31,336 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:58:31,428 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 01:26:38,495 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 01:26:38,639 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 01:50:52,996 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 10.1.2.250 on port 587: [Errno 111] Connect call failed ('10.1.2.250', 587), check your credentials or email service configuration
+2025-12-13 02:01:56,061 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 02:01:56,185 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.

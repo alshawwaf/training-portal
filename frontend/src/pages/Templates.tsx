@@ -3,19 +3,21 @@ import api from '../api';
 import { Plus, Search, Edit, Trash2, Layers, Save } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
+import { getProviderIcon } from '../components/ProviderIcons';
 
 interface TemplateModel {
     id: number;
     name: string;
     description: string | null;
     icon: string;
+    provider: string;
     vm_config: string | null;
     is_active: boolean;
     created_at: string | null;
     updated_at: string | null;
 }
 
-const iconOptions = ['🖥️', '🔒', '🌐', '🛡️', '⚙️', '📊', '🔧', '💻', '🖧', '📡'];
+const providerOptions = ['Proxmox', 'AWS', 'Azure', 'GCP', 'CloudShare', 'Skytap'];
 
 const Templates: React.FC = () => {
     const { showToast } = useToast();
@@ -34,7 +36,8 @@ const Templates: React.FC = () => {
     const [form, setForm] = useState({
         name: '',
         description: '',
-        icon: '🖥️',
+        icon: 'default', // Backward compatibility, not used in UI anymore
+        provider: 'Proxmox',
         vm_config: '',
         is_active: true,
     });
@@ -59,7 +62,8 @@ const Templates: React.FC = () => {
         setForm({
             name: '',
             description: '',
-            icon: '🖥️',
+            icon: 'default',
+            provider: 'Proxmox',
             vm_config: '',
             is_active: true,
         });
@@ -119,6 +123,7 @@ const Templates: React.FC = () => {
             name: tpl.name,
             description: tpl.description || '',
             icon: tpl.icon,
+            provider: tpl.provider || 'Proxmox',
             vm_config: tpl.vm_config || '',
             is_active: tpl.is_active,
         });
@@ -135,13 +140,24 @@ const Templates: React.FC = () => {
         (tpl.description && tpl.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
+    const getProviderBg = (provider: string) => {
+        switch(provider.toLowerCase()) {
+            case 'aws': return 'from-orange-500/20 to-yellow-500/20 text-orange-600 dark:text-orange-400';
+            case 'azure': return 'from-blue-500/20 to-sky-500/20 text-blue-600 dark:text-blue-400';
+            case 'gcp': return 'from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400';
+            case 'cloudshare': return 'from-purple-500/20 to-pink-500/20 text-purple-600 dark:text-purple-400';
+            case 'skytap': return 'from-cyan-500/20 to-teal-500/20 text-cyan-600 dark:text-cyan-400';
+            default: return 'from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400';
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-primary">Templates</h1>
-                    <p className="text-secondary mt-1">Manage environment templates for classes</p>
+                    <p className="text-secondary mt-1">Manage and configure environment templates</p>
                 </div>
                 <button onClick={() => { resetForm(); setCreateModalOpen(true); }} className="btn-primary">
                     <Plus className="w-5 h-5" />
@@ -190,40 +206,48 @@ const Templates: React.FC = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredTemplates.map(tpl => (
-                        <div key={tpl.id} className="card-elevated p-6 hover:border-theme transition-all group">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center text-2xl">
-                                    {tpl.icon}
+                    {filteredTemplates.map(tpl => {
+                        const ProviderIcon = getProviderIcon(tpl.provider);
+                        return (
+                            <div key={tpl.id} className="card-elevated p-6 hover:border-theme transition-all group">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getProviderBg(tpl.provider)} flex items-center justify-center`}>
+                                        <ProviderIcon className="w-8 h-8" />
+                                    </div>
+                                    <span className={`badge ${tpl.is_active ? 'badge-success' : 'badge-warning'}`}>
+                                        {tpl.is_active ? 'Active' : 'Inactive'}
+                                    </span>
                                 </div>
-                                <span className={`badge ${tpl.is_active ? 'badge-success' : 'badge-warning'}`}>
-                                    {tpl.is_active ? 'Active' : 'Inactive'}
-                                </span>
-                            </div>
-                            
-                            <h3 className="text-lg font-semibold text-primary mb-2">{tpl.name}</h3>
-                            <p className="text-sm text-secondary mb-4 line-clamp-2">
-                                {tpl.description || 'No description'}
-                            </p>
+                                
+                                <h3 className="text-lg font-semibold text-primary mb-2">{tpl.name}</h3>
+                                <div className="flex gap-2 mb-3">
+                                    <span className="text-xs font-medium px-2 py-1 rounded bg-secondary/20 text-secondary border border-theme">
+                                        {tpl.provider || 'Proxmox'}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-secondary mb-4 line-clamp-2">
+                                    {tpl.description || 'No description'}
+                                </p>
 
-                            <div className="flex items-center justify-end gap-1 pt-4 border-t border-theme">
-                                <button 
-                                    onClick={() => openEditModal(tpl)}
-                                    className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" 
-                                    title="Edit"
-                                >
-                                    <Edit className="w-4 h-4" />
-                                </button>
-                                <button 
-                                    onClick={() => openDeleteModal(tpl)}
-                                    className="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" 
-                                    title="Delete"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center justify-end gap-1 pt-4 border-t border-theme">
+                                    <button 
+                                        onClick={() => openEditModal(tpl)}
+                                        className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" 
+                                        title="Edit"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button 
+                                        onClick={() => openDeleteModal(tpl)}
+                                        className="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" 
+                                        title="Delete"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
@@ -256,38 +280,44 @@ const Templates: React.FC = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="input-label">Icon</label>
-                            <div className="flex flex-wrap gap-2">
-                                {iconOptions.map(icon => (
-                                    <button
-                                        key={icon}
-                                        type="button"
-                                        onClick={() => setForm({...form, icon})}
-                                        className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center transition-all ${
-                                            form.icon === icon
-                                                ? 'bg-blue-500/20 border-2 border-blue-500'
-                                                : 'bg-secondary/30 border border-theme hover:border-blue-500/50'
-                                        }`}
-                                    >
-                                        {icon}
-                                    </button>
-                                ))}
-                            </div>
+                    <div>
+                        <label className="input-label">Provider</label>
+                        <select
+                            className="input"
+                            value={form.provider}
+                            onChange={e => setForm({...form, provider: e.target.value})}
+                        >
+                            {providerOptions.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </select>
+                        <div className="mt-2 text-xs text-secondary flex items-center gap-2">
+                            <span className="font-medium">Selected Icon:</span>
+                            {/* Visual preview of auto-selected icon */}
+                            {(() => {
+                                const Icon = getProviderIcon(form.provider);
+                                return <Icon className="w-4 h-4 text-primary" />;
+                            })()}
                         </div>
+                    </div>
+
+                    {/* Icon picker removed - automatically assigned via provider */}
+                    
+                    <div className="grid grid-cols-1 gap-4">
                         <div>
                             <label className="input-label">Status</label>
-                            <div className="flex items-center gap-3 mt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setForm({...form, is_active: !form.is_active})}
-                                    className={`relative w-14 h-8 rounded-full p-1 transition-colors ${form.is_active ? 'bg-blue-600' : 'bg-secondary'}`}
-                                >
-                                    <div className={`w-6 h-6 rounded-full bg-white shadow-sm transition-transform ${form.is_active ? 'translate-x-6' : 'translate-x-0'}`} />
-                                </button>
-                                <span className="text-primary">{form.is_active ? 'Active' : 'Inactive'}</span>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setForm({...form, is_active: !form.is_active})}
+                                className="flex items-center gap-3 mt-2 group"
+                            >
+                                <div className={`relative w-12 h-6 rounded-full transition-colors ${form.is_active ? 'bg-blue-600' : 'bg-secondary'}`}>
+                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${form.is_active ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </div>
+                                <span className="text-secondary font-medium group-hover:text-primary transition-colors">
+                                    {form.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            </button>
                         </div>
                     </div>
 

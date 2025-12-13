@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Depends
 from db.database import engine, Base, SessionLocal
 from db.models import User, UserRole, SystemSetting, Template
-from routers import auth, classes, settings, preferences, email, templates
+from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure
 from services.proxmox_service import proxmox_service
 from services.email_service import email_service
+from services.vsphere_service import vsphere_service
 from sqlalchemy.orm import Session
 import logging
 import sys
@@ -107,17 +108,53 @@ async def startup_event():
             "smtp_password": "password",
             "smtp_from": os.getenv("SUPERADMIN_EMAIL", "admin@cpdemo.com"),
             "smtp_tls": "true",
-            "smtp_ssl": "false"
+            "smtp_ssl": "false",
+            # AWS Defaults
+            "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID", ""),
+            "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY", ""),
+            "aws_region": os.getenv("AWS_REGION", "us-east-1"),
+            # Azure Defaults
+            "azure_subscription_id": os.getenv("AZURE_SUBSCRIPTION_ID", ""),
+            "azure_tenant_id": os.getenv("AZURE_TENANT_ID", ""),
+            "azure_client_id": os.getenv("AZURE_CLIENT_ID", ""),
+            "azure_client_secret": os.getenv("AZURE_CLIENT_SECRET", ""),
+            # GCP Defaults
+            "gcp_project_id": os.getenv("GCP_PROJECT_ID", ""),
+            "gcp_service_account_json": os.getenv("GCP_SERVICE_ACCOUNT_JSON", "{}"),
+            # CloudShare Defaults
+            "cloudshare_api_id": os.getenv("CLOUDSHARE_API_ID", ""),
+            "cloudshare_api_key": os.getenv("CLOUDSHARE_API_KEY", ""),
+            # Skytap Defaults
+            "skytap_username": os.getenv("SKYTAP_USERNAME", ""),
+            "skytap_api_token": os.getenv("SKYTAP_API_TOKEN", "")
         }
         
         for key, val in defaults.items():
             setting = db.query(SystemSetting).filter(SystemSetting.key == key).first()
             if not setting:
-                is_secret = key in ["smtp_password"]
+                is_secret = "password" in key or "secret" in key or "token" in key or "key" in key
+                
+                if key.startswith("smtp"):
+                    category = "smtp"
+                elif key.startswith("aws"):
+                    category = "aws"
+                elif key.startswith("azure"):
+                    category = "azure"
+                elif key.startswith("gcp"):
+                    category = "gcp"
+                elif key.startswith("cloudshare"):
+                    category = "cloudshare"
+                elif key.startswith("skytap"):
+                    category = "skytap"
+                elif key.startswith("proxmox"):
+                    category = "proxmox"
+                else:
+                    category = "general"
+
                 new_setting = SystemSetting(
                     key=key, 
                     value=val, 
-                    category="smtp" if key.startswith("smtp") else "general",
+                    category=category,
                     description=key.replace("_", " ").title(),
                     is_secret=is_secret
                 )
@@ -131,15 +168,20 @@ async def startup_event():
         
         # Seed Default Templates
         default_templates = [
-            {"name": "Base Environment", "description": "Standard training setup with basic tools", "icon": "🖥️"},
-            {"name": "Advanced Security", "description": "Multi-VM security testing environment", "icon": "🔒"},
-            {"name": "Network Simulation", "description": "Complex network topology for advanced training", "icon": "🌐"},
+            {"name": "Base Environment", "description": "Standard training setup with basic tools", "icon": "🖥️", "provider": "Proxmox"},
+            {"name": "Advanced Security", "description": "Multi-VM security testing environment", "icon": "🔒", "provider": "AWS"},
+            {"name": "Network Simulation", "description": "Complex network topology for advanced training", "icon": "🌐", "provider": "Azure"},
         ]
         for tpl in default_templates:
             existing = db.query(Template).filter(Template.name == tpl["name"]).first()
             if not existing:
                 new_tpl = Template(**tpl)
                 db.add(new_tpl)
+            else:
+                 # Update provider for existing templates if missing
+                 if not existing.provider:
+                     existing.provider = tpl.get("provider", "Proxmox")
+                     db.add(existing)
         db.commit()
         
     except Exception as e:
@@ -153,6 +195,8 @@ app.include_router(settings.router)
 app.include_router(preferences.router)
 app.include_router(email.router)
 app.include_router(templates.router)
+app.include_router(dashboard.router)
+app.include_router(infrastructure.router)
 
 @app.get("/")
 def read_root():

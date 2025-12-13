@@ -40,6 +40,12 @@ services:
       - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-your-proxmox-password}
       - PROXMOX_NODE=${PROXMOX_NODE:-pve}
       - PROXMOX_MOCK=${PROXMOX_MOCK:-true}
+      - VSPHERE_HOST=${VSPHERE_HOST:-}
+      - VSPHERE_USER=${VSPHERE_USER:-administrator@vsphere.local}
+      - VSPHERE_PASSWORD=${VSPHERE_PASSWORD:-}
+      - VSPHERE_PORT=${VSPHERE_PORT:-443}
+      - VSPHERE_VERIFY_SSL=${VSPHERE_VERIFY_SSL:-false}
+      - VSPHERE_MOCK=${VSPHERE_MOCK:-true}
     depends_on:
       db:
         condition: service_healthy

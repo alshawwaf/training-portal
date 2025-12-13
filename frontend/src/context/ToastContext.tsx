@@ -23,6 +23,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const id = Date.now();
         setToasts(prev => [...prev, { id, message, type }]);
 
+        // Browser Notification
+        if (localStorage.getItem('browser_notifications') === 'true' && Notification.permission === 'granted') {
+            try {
+                // Don't show generic info toasts as system notifications to avoid spam, usually success/error is important
+                if (type !== 'info') {
+                    new Notification(type.charAt(0).toUpperCase() + type.slice(1), { 
+                        body: message,
+                        icon: '/vite.svg' // Optional icon
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to show notification", e);
+            }
+        }
+
         // Auto remove after 5 seconds
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));

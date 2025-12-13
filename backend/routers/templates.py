@@ -24,6 +24,7 @@ class TemplateCreate(BaseModel):
     name: str
     description: Optional[str] = None
     icon: Optional[str] = "🖥️"
+    provider: Optional[str] = "Proxmox"
     vm_config: Optional[str] = None
     is_active: Optional[bool] = True
 
@@ -32,6 +33,7 @@ class TemplateUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     icon: Optional[str] = None
+    provider: Optional[str] = None
     vm_config: Optional[str] = None
     is_active: Optional[bool] = None
 
@@ -41,6 +43,7 @@ class TemplateResponse(BaseModel):
     name: str
     description: Optional[str]
     icon: str
+    provider: Optional[str]
     vm_config: Optional[str]
     is_active: bool
     created_at: Optional[str]
@@ -65,6 +68,7 @@ def create_template(template: TemplateCreate, db: Session = Depends(get_db)):
         name=template.name,
         description=template.description,
         icon=template.icon,
+        provider=template.provider,
         vm_config=template.vm_config,
         is_active=template.is_active
     )
@@ -97,6 +101,8 @@ def update_template(template_id: int, update: TemplateUpdate, db: Session = Depe
         template.description = update.description
     if update.icon is not None:
         template.icon = update.icon
+    if update.provider is not None:
+        template.provider = update.provider
     if update.vm_config is not None:
         template.vm_config = update.vm_config
     if update.is_active is not None:

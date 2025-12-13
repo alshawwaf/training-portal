@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { useTheme } from '../context/ThemeContext';
 import api from '../api';
-import { User, Shield, Bell, Palette, ChevronRight, Check, Server, Lock, Mail, Send } from 'lucide-react';
+import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List } from 'lucide-react';
 import Modal from '../components/Modal';
+import SettingsSection from '../components/SettingsSection';
+import { AwsIcon, AzureIcon, GcpIcon, CloudShareIcon, SkytapIcon } from '../components/ProviderIcons';
 
 interface SystemSetting {
     key: string;
@@ -15,11 +16,13 @@ interface SystemSetting {
 }
 
 const Settings: React.FC = () => {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
     const { showToast } = useToast();
-    const { darkMode, toggleDarkMode } = useTheme();
+    const [activeTab, setActiveTab] = useState<'account' | 'cloud' | 'onprem' | 'system'>('account');
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [browserNotifications, setBrowserNotifications] = useState(false);
+    
+    const [viewDensity, setViewDensity] = useState<'comfortable' | 'compact'>('comfortable');
     
     // System Settings State
     const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
@@ -32,9 +35,75 @@ const Settings: React.FC = () => {
     const [pwdForm, setPwdForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
     const [pwdLoading, setPwdLoading] = useState(false);
 
-
-
     const [smtpModalOpen, setSmtpModalOpen] = useState(false);
+    
+    // vSphere Inventory State
+    const [vsphereInventory, setVsphereInventory] = useState<any>(null);
+    const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
+    const [syncingInventory, setSyncingInventory] = useState(false);
+    const [vsphereConnected, setVsphereConnected] = useState(false);
+    const [vsphereTesting, setVsphereTesting] = useState(false);
+    const [vsphereSaving, setVsphereSaving] = useState(false);
+
+    // Cloud Provider State
+    interface CloudProvider {
+        id: string;
+        name: string;
+        icon: any;
+        color: string; // Tailwind color name for default styling logic
+        customColor?: string; // Specific brand hex if needed
+        description: string;
+    }
+
+    const cloudProviders: CloudProvider[] = [
+        { id: 'aws', name: 'Amazon Web Services', icon: AwsIcon, color: 'orange', description: 'Configure AWS credentials for EC2 and other services.' },
+        { id: 'azure', name: 'Microsoft Azure', icon: AzureIcon, color: 'blue', description: 'Connect to Azure subscription for VM management.' },
+        { id: 'gcp', name: 'Google Cloud Platform', icon: GcpIcon, color: 'red', description: 'Manage Google Compute Engine resources.' },
+        { id: 'cloudshare', name: 'CloudShare', icon: CloudShareIcon, color: 'red', description: 'Integration with CloudShare environments.' },
+        { id: 'skytap', name: 'Skytap', icon: SkytapIcon, color: 'cyan', description: 'Manage Skytap virtual labs and environments.' },
+    ];
+
+    const [selectedProvider, setSelectedProvider] = useState<CloudProvider | null>(null);
+    const [providerForm, setProviderForm] = useState<Record<string, string>>({});
+    const [providerSaving, setProviderSaving] = useState(false);
+
+    const handleOpenProviderModal = (provider: CloudProvider) => {
+        setSelectedProvider(provider);
+        // Initialize form with current values
+        const form: Record<string, string> = {};
+        systemSettings
+            .filter(s => s.category === provider.id) // Simple filter for now
+            .forEach(s => {
+                form[s.key] = s.value;
+            });
+        setProviderForm(form);
+    };
+
+    const handleSaveProvider = async () => {
+        setProviderSaving(true);
+        try {
+            // Save each changed setting
+            const promises = Object.entries(providerForm).map(([key, value]) => {
+                // Only update if changed (basic check)
+                const current = systemSettings.find(s => s.key === key);
+                if (current && current.value !== value) {
+                    return api.put(`/settings/${key}`, { value });
+                }
+                return Promise.resolve();
+            });
+
+            await Promise.all(promises);
+            
+            // Refresh settings to ensure sync
+            await fetchSettings();
+            showToast('Provider settings saved successfully', 'success');
+            setSelectedProvider(null);
+        } catch {
+            showToast('Failed to save provider settings', 'error');
+        } finally {
+            setProviderSaving(false);
+        }
+    };
 
     useEffect(() => {
         if (user?.role === 'admin') {
@@ -56,6 +125,14 @@ const Settings: React.FC = () => {
         } finally {
             setLoadingSettings(false);
         }
+
+        // Check vSphere status
+        try {
+            const res = await api.get('/infrastructure/vsphere/status');
+            setVsphereConnected(res.data.connected);
+        } catch (e) {
+            setVsphereConnected(false);
+        }
     };
 
     const fetchPreferences = async () => {
@@ -63,6 +140,7 @@ const Settings: React.FC = () => {
             const res = await api.get('/preferences/');
             setEmailNotifications(res.data.email_notifications);
             setBrowserNotifications(res.data.browser_notifications);
+            localStorage.setItem('browser_notifications', res.data.browser_notifications ? 'true' : 'false');
         } catch (e) {
             console.error(e);
         }
@@ -77,11 +155,6 @@ const Settings: React.FC = () => {
             showToast('Failed to update setting', 'error');
             fetchSettings();
         }
-    };
-
-    const handleToggleDarkMode = (newValue: boolean) => {
-        toggleDarkMode();
-        showToast(`${newValue ? 'Dark' : 'Light'} mode enabled`, 'success');
     };
 
     const handleUpdatePreferences = async (email?: boolean, browser?: boolean) => {
@@ -140,14 +213,22 @@ const Settings: React.FC = () => {
         }
     };
 
-    const renderSettingInput = (setting: SystemSetting) => {
+    const renderSettingInput = (setting: SystemSetting, isBuffered = false) => {
         if (setting.key.endsWith('_tls') || setting.key.endsWith('_ssl')) {
-             const isChecked = setting.value === 'true';
+             const isChecked = isBuffered ? providerForm[setting.key] === 'true' : setting.value === 'true';
+             const handleToggle = (val: string) => {
+                 if (isBuffered) {
+                     setProviderForm(prev => ({ ...prev, [setting.key]: val }));
+                 } else {
+                     handleUpdateSetting(setting.key, val);
+                 }
+             };
+
              return (
                  <div className="flex items-center justify-between py-2">
                      <label className="text-secondary text-sm">{setting.description}</label>
                      <button 
-                        onClick={() => handleUpdateSetting(setting.key, isChecked ? 'false' : 'true')}
+                        onClick={() => handleToggle(isChecked ? 'false' : 'true')}
                         className={`relative w-12 h-6 rounded-full p-1 transition-colors ${isChecked ? 'bg-blue-600' : 'bg-gray-600'}`}
                     >
                         <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${isChecked ? 'translate-x-6' : 'translate-x-0'}`} />
@@ -157,193 +238,677 @@ const Settings: React.FC = () => {
         }
 
         return (
-            <div className="space-y-1">
+            <div className={`space-y-1 ${viewDensity === 'compact' ? 'py-1' : ''}`}>
                 <label className="input-label text-xs uppercase tracking-wider">{setting.description || setting.key}</label>
                 <input 
                     type={setting.is_secret ? "password" : "text"}
-                    className="input"
-                    defaultValue={setting.value}
+                    className={`input ${viewDensity === 'compact' ? 'py-1.5 text-sm' : ''}`}
+                    value={isBuffered ? (providerForm[setting.key] !== undefined ? providerForm[setting.key] : setting.value) : setting.value}
+                    onChange={(e) => {
+                        if (isBuffered) {
+                            setProviderForm(prev => ({ ...prev, [setting.key]: e.target.value }));
+                        }
+                    }}
                     onBlur={(e) => {
-                        if (e.target.value !== setting.value && e.target.value !== '********') {
+                        if (!isBuffered && e.target.value !== setting.value && e.target.value !== '********') {
                             handleUpdateSetting(setting.key, e.target.value);
                         }
                     }}
                     placeholder={setting.is_secret ? "••••••••" : ""}
+                    readOnly={!isBuffered && setting.is_secret} // Prevent accidental edits on main page for secrets without distinct save action? Actually existing logic allows blur save. Keeping consistent.
                 />
             </div>
         );
     };
 
-    const sections = [
-        {
-            title: 'Profile',
-            icon: User,
-            color: 'blue',
-            content: (
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                            {user?.name?.charAt(0) || 'U'}
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-semibold text-primary">
-                                {user?.name}
-                            </h3>
-                            <p className="text-secondary">{user?.email}</p>
-                            <span className="badge badge-info mt-2 inline-block capitalize">{user?.role}</span>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: 'System Configuration',
-            icon: Server,
-            color: 'indigo',
-            show: user?.role === 'admin',
-            content: (
-                <div className="space-y-4">
-                    {loadingSettings ? (
-                        <div className="animate-pulse space-y-3">
-                            <div className="h-10 rounded bg-secondary/20"></div>
-                            <div className="h-10 rounded bg-secondary/20"></div>
-                        </div>
-                    ) : systemSettings.length > 0 ? (
-                        <div className="space-y-4">
-                             {systemSettings.filter(s => s.category !== 'smtp').map(setting => (
-                                <div key={setting.key}>
-                                    {renderSettingInput(setting)}
-                                </div>
-                             ))}
-                             {systemSettings.filter(s => s.category !== 'smtp').length === 0 && (
-                                 <p className="text-secondary">No general settings available.</p>
-                             )}
-                        </div>
-                    ) : (
-                        <p className="text-secondary">No settings available.</p>
-                    )}
-                </div>
-            )
-        },
-        {
-            title: 'SMTP Configuration',
-            icon: Mail,
-            color: 'rose',
-            show: user?.role === 'admin',
-            content: (
-                <div className="space-y-4">
-                    <p className="text-secondary">Configure your outgoing email server settings.</p>
-                    <button 
-                        onClick={() => setSmtpModalOpen(true)}
-                        className="btn-secondary w-full justify-between group flex items-center"
-                    >
-                        <span className="flex items-center gap-2 text-primary">
-                            <Mail className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
-                            Configure SMTP Server
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
-                    </button>
-                </div>
-            )
-        },
-        {
-            title: 'Notifications',
-            icon: Bell,
-            color: 'amber',
-            content: (
-                <div className="space-y-4">
-                    <ToggleOption 
-                        title="Email Notifications"
-                        description="Receive email alerts for class updates"
-                        enabled={emailNotifications}
-                        onChange={(val) => {
-                            setEmailNotifications(val);
-                            handleUpdatePreferences(val, undefined);
-                        }}
-                    />
-                    <ToggleOption 
-                        title="Browser Notifications"
-                        description="Show desktop notifications"
-                        enabled={browserNotifications}
-                        onChange={(val) => {
-                            setBrowserNotifications(val);
-                            handleUpdatePreferences(undefined, val);
-                        }}
-                    />
-                </div>
-            )
-        },
-        {
-            title: 'Appearance',
-            icon: Palette,
-            color: 'purple',
-            content: (
-                <div className="space-y-4">
-                    <ToggleOption 
-                        title="Dark Mode"
-                        description="Use dark theme for the interface"
-                        enabled={darkMode}
-                        onChange={handleToggleDarkMode}
-                    />
-                    <p className="text-xs italic text-secondary">
-                        Theme preference is saved locally in your browser.
-                    </p>
-                </div>
-            )
-        },
-        {
-            title: 'Security',
-            icon: Shield,
-            color: 'emerald',
-            content: (
-                <div className="space-y-4">
-                    <button onClick={() => setPwdModalOpen(true)} className="btn-secondary w-full justify-between group flex items-center">
-                        <span className="flex items-center gap-2 text-primary">
-                             <Lock className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
-                             Change Password
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
-                    </button>
-                    <button className="btn-secondary w-full justify-between opacity-50 cursor-not-allowed flex items-center" title="Available in Enterprise Edition">
-                        <span className="text-primary">Two-Factor Authentication</span>
-                        <span className="text-xs px-2 py-1 rounded bg-secondary/30">
-                            Coming Soon
-                        </span>
-                    </button>
-                </div>
-            )
-        }
-    ];
+    const tabs = [
+        { id: 'account', label: 'My Account', icon: User },
+        { id: 'cloud', label: 'Cloud Providers', icon: Cloud },
+        { id: 'onprem', label: 'On-Premise', icon: Server },
+        { id: 'system', label: 'Configuration', icon: Shield },
+    ] as const;
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+            </div>
+        );
+    }
+
+    if (!user) {
+        // Redirect to login if not authenticated
+        window.location.href = '/login';
+        return null;
+    }
 
     return (
-        <div className="max-w-3xl mx-auto space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-primary">Settings</h1>
-                <p className="mt-1 text-secondary">
-                    Manage your account preferences and system configuration
-                </p>
-            </div>
-            
-            <div className="space-y-6">
-                {sections.filter(s => s.show !== false).map((section) => (
-                    <div key={section.title} className="card-elevated overflow-hidden">
-                        <div className={`flex items-center gap-3 p-5 border-b border-theme bg-${section.color}-500/5`}>
-                            <div className={`p-2 bg-${section.color}-500/10 rounded-lg`}>
-                                <section.icon className={`w-5 h-5 text-${section.color}-400`} />
-                            </div>
-                            <h2 className="text-lg font-semibold text-primary">
-                                {section.title}
-                            </h2>
-                        </div>
-                        <div className="p-5">
-                            {section.content}
-                        </div>
-                    </div>
-                ))}
+        <div className="w-full px-4">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-primary">Settings</h1>
+                    <p className="mt-1 text-secondary">
+                        Manage your account preferences and system configuration
+                    </p>
+                </div>
+                {/* View Density Toggle */}
+                <div className="flex gap-1 p-1 bg-secondary/30 rounded-lg border border-theme">
+                    <button 
+                        onClick={() => setViewDensity('comfortable')}
+                        className={`px-4 py-1.5 rounded-md text-sm transition-all flex items-center gap-2 ${
+                            viewDensity === 'comfortable' 
+                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm font-medium ring-1 ring-black/5' 
+                                : 'text-secondary hover:text-primary hover:bg-white/50 dark:hover:bg-gray-800/50'
+                        }`}
+                    >
+                        <svg className={`w-4 h-4 ${viewDensity === 'comfortable' ? 'text-blue-500' : 'text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        Comfortable
+                    </button>
+                    <button 
+                        onClick={() => setViewDensity('compact')}
+                        className={`px-4 py-1.5 rounded-md text-sm transition-all flex items-center gap-2 ${
+                            viewDensity === 'compact' 
+                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm font-medium ring-1 ring-black/5' 
+                                : 'text-secondary hover:text-primary hover:bg-white/50 dark:hover:bg-gray-800/50'
+                        }`}
+                    >
+                        <svg className={`w-4 h-4 ${viewDensity === 'compact' ? 'text-blue-500' : 'text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        Compact
+                    </button>
+                </div>
             </div>
 
+            <div className="flex flex-col lg:flex-row gap-8 relative items-start">
+                {/* Sticky Sidebar Navigation */}
+                <div className="w-full lg:w-64 flex-shrink-0 sticky top-24 z-10 self-start">
+                    <nav className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 p-1">
+                        {tabs.map(tab => {
+                             if (tab.id !== 'account' && user.role !== 'admin') return null;
+                            const Icon = tab.icon;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap text-left ${
+                                        activeTab === tab.id 
+                                            ? 'bg-blue-500/10 text-blue-600 font-medium shadow-sm ring-1 ring-blue-500/20' 
+                                            : 'text-secondary hover:bg-secondary hover:text-primary'
+                                    }`}
+                                >
+                                    <Icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-blue-500' : 'text-secondary/70'}`} />
+                                    <span>{tab.label}</span>
+                                    {activeTab === tab.id && (
+                                        <ChevronRight className="w-4 h-4 ml-auto text-blue-400" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex-1 space-y-6">
+                    {/* Account Tab */}
+                    {activeTab === 'account' && (
+                        <>
+                            <SettingsSection title="Profile" icon={User} color="blue" density={viewDensity}>
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                                            {user?.name?.charAt(0) || 'U'}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-primary">{user?.name}</h3>
+                                            <p className="text-secondary">{user?.email}</p>
+                                            <span className="badge badge-info mt-2 inline-block capitalize">{user?.role}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </SettingsSection>
+
+                            <SettingsSection title="Notifications" icon={Bell} color="amber" density={viewDensity}>
+                                <div className="space-y-4">
+                                    <ToggleOption 
+                                        title="Email Notifications"
+                                        description="Receive email alerts for class updates"
+                                        enabled={emailNotifications}
+                                        onChange={(val) => {
+                                            setEmailNotifications(val);
+                                            handleUpdatePreferences(val, undefined);
+                                        }}
+                                    />
+                                    <ToggleOption 
+                                        title="Browser Notifications"
+                                        description="Show desktop notifications"
+                                        enabled={browserNotifications}
+                                        onChange={async (val) => {
+                                            if (val) {
+                                                const permission = await Notification.requestPermission();
+                                                if (permission === 'granted') {
+                                                    setBrowserNotifications(true);
+                                                    handleUpdatePreferences(undefined, true);
+                                                    localStorage.setItem('browser_notifications', 'true');
+                                                    new Notification("Notifications Enabled", { body: "You will now receive desktop notifications." });
+                                                } else {
+                                                    setBrowserNotifications(false);
+                                                    showToast('Permission denied. Please enable notifications in your browser settings.', 'error');
+                                                    localStorage.setItem('browser_notifications', 'false');
+                                                }
+                                            } else {
+                                                setBrowserNotifications(false);
+                                                handleUpdatePreferences(undefined, false);
+                                                localStorage.setItem('browser_notifications', 'false');
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </SettingsSection>
+
+                            <SettingsSection title="Security" icon={Shield} color="emerald" density={viewDensity}>
+                                <div className="space-y-4">
+                                    <button onClick={() => setPwdModalOpen(true)} className="btn-secondary w-full justify-between group flex items-center">
+                                        <span className="flex items-center gap-2 text-primary">
+                                             <Lock className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
+                                             Change Password
+                                        </span>
+                                        <ChevronRight className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
+                                    </button>
+                                </div>
+                            </SettingsSection>
+                        </>
+                    )}
+
+                    {/* Cloud Providers Tab */}
+                    {activeTab === 'cloud' && user?.role === 'admin' && (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {cloudProviders.map(provider => (
+                                    <div 
+                                        key={provider.id}
+                                        onClick={() => handleOpenProviderModal(provider)}
+                                        className="card hover:border-blue-500/50 cursor-pointer group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
+                                    >
+                                        <div className={`absolute top-0 right-0 w-24 h-24 bg-${provider.color}-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`} />
+                                        
+                                        <div className="flex items-start justify-between mb-4 relative z-10">
+                                            <div className={`p-3 rounded-xl bg-${provider.color}-500/10 text-${provider.color}-500`}>
+                                                <provider.icon className="w-8 h-8" />
+                                            </div>
+                                            {systemSettings.some(s => s.category === provider.id && s.value && s.value !== 'false') && (
+                                                <div className="badge badge-success flex items-center gap-1">
+                                                    <Check className="w-3 h-3" />
+                                                    Configured
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <h3 className="text-xl font-bold text-primary mb-1">{provider.name}</h3>
+                                        <p className="text-sm text-secondary line-clamp-2">{provider.description}</p>
+                                        
+                                        <div className="mt-4 flex items-center text-blue-500 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                                            Manage Settings
+                                            <ChevronRight className="w-4 h-4 ml-1" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Provider Edit Modal */}
+                            <Modal 
+                                isOpen={!!selectedProvider} 
+                                onClose={() => setSelectedProvider(null)} 
+                                title={selectedProvider ? `Configure ${selectedProvider.name}` : 'Configure Provider'}
+                                maxWidth="lg"
+                            >
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-4 p-4 bg-secondary/20 rounded-xl border border-theme">
+                                        <div className={`p-3 rounded-lg bg-${selectedProvider?.color}-500/10`}>
+                                            {selectedProvider && <selectedProvider.icon className={`w-6 h-6 text-${selectedProvider.color}-500`} />}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-secondary">Make sure you have the necessary API keys and permissions enabled for this provider.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                                        {loadingSettings ? (
+                                            <div className="flex justify-center p-8">
+                                                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+                                            </div>
+                                        ) : (
+                                            systemSettings
+                                                .filter(s => s.category === selectedProvider?.id || (selectedProvider?.id === 'cloudshare' && (s.category === 'cloudshare' || s.category === 'skytap'))) // Handle legacy/grouped logic if needed, but ideally map strictly
+                                                .map(setting => (
+                                                    <div key={setting.key}>
+                                                        {renderSettingInput(setting, true)} 
+                                                    </div>
+                                                ))
+                                        )}
+                                        {selectedProvider && systemSettings.filter(s => s.category === selectedProvider.id).length === 0 && (
+                                            <p className="text-center text-secondary py-8">No specific settings found for this provider.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-end gap-3 pt-4 border-t border-theme">
+                                        <button 
+                                            onClick={() => setSelectedProvider(null)} 
+                                            className="btn-secondary"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            onClick={handleSaveProvider} 
+                                            disabled={providerSaving}
+                                            className="btn-primary"
+                                        >
+                                            {providerSaving ? (
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <Save className="w-4 h-4 ml-1" />
+                                                    Save Changes
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </Modal>
+                        </>
+                    )}
+
+                    {/* On-Premise Tab */}
+                    {activeTab === 'onprem' && user?.role === 'admin' && (
+                        <div className="space-y-8">
+                            {/* Proxmox VE Card */}
+                            <div className="card-elevated overflow-hidden">
+                                <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border-b border-theme px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
+                                            <Server className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-primary">Proxmox VE</h3>
+                                            <p className="text-xs text-secondary">Virtual Environment Management</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Host / IP Address</label>
+                                            <input type="text" className="input" placeholder="192.168.1.10" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_host')?.value || ''}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_host' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Port</label>
+                                            <input type="text" className="input" placeholder="8006" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_port')?.value || '8006'}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_port' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Target Node</label>
+                                            <input type="text" className="input" placeholder="pve" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_node')?.value || ''}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_node' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
+                                            <input type="text" className="input" placeholder="root@pam" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_user')?.value || ''}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_user' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Realm</label>
+                                            <input type="text" className="input" placeholder="pam" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_realm')?.value || 'pam'}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_realm' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token ID</label>
+                                            <input type="text" className="input" placeholder="user@pam!tokenid" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_token_id')?.value || ''}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_token_id' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5 lg:col-span-2">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token Secret</label>
+                                            <input type="password" className="input" placeholder="••••••••••••••••" 
+                                                value={systemSettings.find(s => s.key === 'proxmox_token_secret')?.value || ''}
+                                                onChange={(e) => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_token_secret' ? {...s, value: e.target.value} : s))}
+                                            />
+                                        </div>
+                                        <div className="flex items-end">
+                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${systemSettings.find(s => s.key === 'proxmox_verify_ssl')?.value === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                                    onClick={() => setSystemSettings(prev => prev.map(s => s.key === 'proxmox_verify_ssl' ? {...s, value: s.value === 'true' ? 'false' : 'true'} : s))}
+                                                >
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${systemSettings.find(s => s.key === 'proxmox_verify_ssl')?.value === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                </div>
+                                                <span className="text-sm text-secondary group-hover:text-primary transition-colors">Verify SSL</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-sm text-secondary">
+                                            <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                                            <span>Not connected</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button 
+                                                className="btn-secondary"
+                                                onClick={async () => {
+                                                    try {
+                                                        const settings = {
+                                                            proxmox_host: systemSettings.find(s => s.key === 'proxmox_host')?.value || '',
+                                                            proxmox_port: systemSettings.find(s => s.key === 'proxmox_port')?.value || '8006',
+                                                            proxmox_node: systemSettings.find(s => s.key === 'proxmox_node')?.value || '',
+                                                            proxmox_user: systemSettings.find(s => s.key === 'proxmox_user')?.value || '',
+                                                            proxmox_realm: systemSettings.find(s => s.key === 'proxmox_realm')?.value || 'pam',
+                                                            proxmox_token_id: systemSettings.find(s => s.key === 'proxmox_token_id')?.value || '',
+                                                            proxmox_token_secret: systemSettings.find(s => s.key === 'proxmox_token_secret')?.value || '',
+                                                            proxmox_verify_ssl: systemSettings.find(s => s.key === 'proxmox_verify_ssl')?.value || 'false',
+                                                        };
+                                                        const res = await api.post('/infrastructure/proxmox/test', {
+                                                            host: settings.proxmox_host,
+                                                            port: parseInt(settings.proxmox_port),
+                                                            user: settings.proxmox_user,
+                                                            node: settings.proxmox_node,
+                                                            verify_ssl: settings.proxmox_verify_ssl === 'true'
+                                                        });
+                                                        if (res.data.success) {
+                                                            showToast(`Connected! ${res.data.message}`, 'success');
+                                                        } else {
+                                                            showToast(res.data.message || 'Connection failed', 'error');
+                                                        }
+                                                    } catch (e: any) {
+                                                        showToast(e.response?.data?.detail || 'Connection test failed', 'error');
+                                                    }
+                                                }}
+                                            >
+                                                <Globe className="w-4 h-4" />
+                                                Test Connection
+                                            </button>
+                                            <button 
+                                                className="btn-primary"
+                                                onClick={async () => {
+                                                    try {
+                                                        const settings: Record<string, string> = {};
+                                                        ['proxmox_host', 'proxmox_port', 'proxmox_node', 'proxmox_user', 'proxmox_realm', 'proxmox_token_id', 'proxmox_token_secret', 'proxmox_verify_ssl'].forEach(key => {
+                                                            const val = systemSettings.find(s => s.key === key)?.value;
+                                                            if (val !== undefined) settings[key] = val;
+                                                        });
+                                                        await api.post('/infrastructure/proxmox/save', { settings, category: 'proxmox' });
+                                                        showToast('Proxmox settings saved', 'success');
+                                                    } catch {
+                                                        showToast('Failed to save settings', 'error');
+                                                    }
+                                                }}
+                                            >
+                                                <Save className="w-4 h-4" />
+                                                Save Settings
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* VMware vSphere Card */}
+                            <div className="card-elevated overflow-hidden">
+                                <div className="bg-gradient-to-r from-blue-500/10 to-sky-500/10 border-b border-theme px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-sky-600 flex items-center justify-center shadow-lg">
+                                            <Cloud className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-primary">VMware vSphere</h3>
+                                            <p className="text-xs text-secondary">vCenter & ESXi Management</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                        <div className="space-y-1.5 lg:col-span-2">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">vCenter / ESXi Host</label>
+                                            <input type="text" className="input" placeholder="vcenter.example.com" 
+                                                value={systemSettings.find(s => s.key === 'vsphere_host')?.value || ''}
+                                                onChange={(e) => {
+                                                    const exists = systemSettings.some(s => s.key === 'vsphere_host');
+                                                    if (exists) {
+                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_host' ? {...s, value: e.target.value} : s));
+                                                    } else {
+                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_host', value: e.target.value, category: 'vsphere', description: 'vSphere Host', is_secret: false }]);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Port</label>
+                                            <input type="text" className="input" placeholder="443" 
+                                                value={systemSettings.find(s => s.key === 'vsphere_port')?.value || '443'}
+                                                onChange={(e) => {
+                                                    const exists = systemSettings.some(s => s.key === 'vsphere_port');
+                                                    if (exists) {
+                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_port' ? {...s, value: e.target.value} : s));
+                                                    } else {
+                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_port', value: e.target.value, category: 'vsphere', description: 'vSphere Port', is_secret: false }]);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
+                                            <input type="text" className="input" placeholder="administrator@vsphere.local" 
+                                                value={systemSettings.find(s => s.key === 'vsphere_user')?.value || ''}
+                                                onChange={(e) => {
+                                                    const exists = systemSettings.some(s => s.key === 'vsphere_user');
+                                                    if (exists) {
+                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_user' ? {...s, value: e.target.value} : s));
+                                                    } else {
+                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_user', value: e.target.value, category: 'vsphere', description: 'vSphere User', is_secret: false }]);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Password</label>
+                                            <input type="password" className="input" placeholder="••••••••" 
+                                                value={systemSettings.find(s => s.key === 'vsphere_password')?.value || ''}
+                                                onChange={(e) => {
+                                                    const exists = systemSettings.some(s => s.key === 'vsphere_password');
+                                                    if (exists) {
+                                                        setSystemSettings(prev => prev.map(s => s.key === 'vsphere_password' ? {...s, value: e.target.value} : s));
+                                                    } else {
+                                                        setSystemSettings(prev => [...prev, { key: 'vsphere_password', value: e.target.value, category: 'vsphere', description: 'vSphere Password', is_secret: true }]);
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="flex items-end">
+                                            <label className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${systemSettings.find(s => s.key === 'vsphere_verify_ssl')?.value === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
+                                                    onClick={() => {
+                                                        const current = systemSettings.find(s => s.key === 'vsphere_verify_ssl');
+                                                        if (current) {
+                                                            setSystemSettings(prev => prev.map(s => s.key === 'vsphere_verify_ssl' ? {...s, value: s.value === 'true' ? 'false' : 'true'} : s));
+                                                        } else {
+                                                            setSystemSettings(prev => [...prev, { key: 'vsphere_verify_ssl', value: 'true', category: 'vsphere', description: 'Verify SSL', is_secret: false }]);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${systemSettings.find(s => s.key === 'vsphere_verify_ssl')?.value === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                                                </div>
+                                                <span className="text-sm text-secondary group-hover:text-primary transition-colors">Verify SSL</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-sm text-secondary">
+                                            <div className={`w-2 h-2 rounded-full ${vsphereConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                                            <span>{vsphereConnected ? 'Connected' : 'Not connected'}</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button 
+                                                className="btn-secondary"
+                                                disabled={syncingInventory}
+                                                onClick={async () => {
+                                                    setSyncingInventory(true);
+                                                    try {
+                                                        const res = await api.post('/infrastructure/vsphere/sync');
+                                                        if (res.data.success) {
+                                                            showToast(`Inventory synced!`, 'success');
+                                                            const invRes = await api.get('/infrastructure/vsphere/inventory');
+                                                            if (invRes.data.success) {
+                                                                setVsphereInventory(invRes.data.data);
+                                                            }
+                                                        } else {
+                                                            showToast(res.data.message || 'Sync failed', 'error');
+                                                        }
+                                                    } catch (e: any) {
+                                                        showToast(e.response?.data?.detail || 'Sync failed', 'error');
+                                                    } finally {
+                                                        setSyncingInventory(false);
+                                                    }
+                                                }}
+                                            >
+                                                <RefreshCw className={`w-4 h-4 ${syncingInventory ? 'animate-spin' : ''}`} />
+                                                Sync
+                                            </button>
+                                            <button 
+                                                className="btn-secondary"
+                                                onClick={async () => {
+                                                    setInventoryModalOpen(true);
+                                                    if (!vsphereInventory) {
+                                                        try {
+                                                            const res = await api.get('/infrastructure/vsphere/inventory');
+                                                            if (res.data.success) {
+                                                                setVsphereInventory(res.data.data);
+                                                            }
+                                                        } catch (e) {
+                                                            // ignore
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                <List className="w-4 h-4" />
+                                                View Inventory
+                                            </button>
+                                            <button 
+                                                className="btn-secondary"
+                                                onClick={async () => {
+                                                    try {
+                                                        const host = systemSettings.find(s => s.key === 'vsphere_host')?.value || '';
+                                                        const port = parseInt(systemSettings.find(s => s.key === 'vsphere_port')?.value || '443');
+                                                        const user = systemSettings.find(s => s.key === 'vsphere_user')?.value || '';
+                                                        const password = systemSettings.find(s => s.key === 'vsphere_password')?.value || '';
+                                                        const verify_ssl = systemSettings.find(s => s.key === 'vsphere_verify_ssl')?.value === 'true';
+                                                        
+                                                        if (!host || !user || !password) {
+                                                            showToast('Host, user, and password are required', 'warning');
+                                                            return;
+                                                        }
+                                                        
+                                                        setVsphereTesting(true);
+                                                        const res = await api.post('/infrastructure/vsphere/test', { host, port, user, password, verify_ssl });
+                                                        if (res.data.success) {
+                                                            showToast(`✓ vSphere Connection Successful\n${res.data.message || 'Connected to ' + host}`, 'success');
+                                                        } else {
+                                                            showToast(`✗ vSphere Connection Failed\n${res.data.message || 'Unable to connect'}`, 'error');
+                                                        }
+                                                    } catch (e: any) {
+                                                        showToast(`✗ vSphere Connection Failed\n${e.response?.data?.detail || 'Connection test failed'}`, 'error');
+                                                    } finally {
+                                                        setVsphereTesting(false);
+                                                    }
+                                                }}
+                                            >
+                                                {vsphereTesting ? (
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <Globe className="w-4 h-4" />
+                                                )}
+                                                {vsphereTesting ? 'Testing...' : 'Test Connection'}
+                                            </button>
+                                            <button 
+                                                className="btn-primary"
+                                                onClick={async () => {
+                                                    try {
+                                                        setVsphereSaving(true);
+                                                        const settings: Record<string, string> = {};
+                                                        ['vsphere_host', 'vsphere_port', 'vsphere_user', 'vsphere_password', 'vsphere_verify_ssl'].forEach(key => {
+                                                            const val = systemSettings.find(s => s.key === key)?.value;
+                                                            if (val !== undefined) settings[key] = val;
+                                                        });
+                                                        await api.post('/infrastructure/vsphere/save', { settings, category: 'vsphere' });
+                                                        
+                                                        // Refresh connection status after save
+                                                        try {
+                                                            const statusRes = await api.get('/infrastructure/vsphere/status');
+                                                            setVsphereConnected(statusRes.data.connected);
+                                                        } catch (e) {
+                                                            setVsphereConnected(false);
+                                                        }
+                                                        
+                                                        showToast('✓ vSphere Settings Saved Successfully\nCredentials have been stored securely', 'success');
+                                                    } catch (e: any) {
+                                                        showToast(`✗ Failed to Save vSphere Settings\n${e.response?.data?.detail || 'Please try again'}`, 'error');
+                                                    } finally {
+                                                        setVsphereSaving(false);
+                                                    }
+                                                }}
+                                            >
+                                                {vsphereSaving ? (
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <Save className="w-4 h-4" />
+                                                )}
+                                                {vsphereSaving ? 'Saving...' : 'Save Settings'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* System Tab */}
+                    {activeTab === 'system' && user?.role === 'admin' && (
+                        <div className="space-y-6">
+                            <SettingsSection title="Email (SMTP)" icon={Mail} color="purple" density={viewDensity}>
+                                <div className="space-y-4">
+                                    {systemSettings.filter(s => s.category === 'smtp').map(s => (
+                                        <div key={s.key}>{renderSettingInput(s)}</div>
+                                    ))}
+                                    <div className="pt-4 flex justify-end">
+                                        <button 
+                                            onClick={() => setSmtpModalOpen(true)}
+                                            className="btn-secondary"
+                                        >
+                                            <Send className="w-4 h-4 mr-2" />
+                                            Test SMTP Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </SettingsSection>
+
+
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Modals remain unchanged ... */}
             {/* SMTP Modal */}
-            <Modal isOpen={smtpModalOpen} onClose={() => setSmtpModalOpen(false)} title="SMTP Configuration">
+            <Modal isOpen={smtpModalOpen} onClose={() => setSmtpModalOpen(false)} title="Test SMTP Configuration">
                 <div className="space-y-4">
                     {loadingSettings ? (
                         <div className="animate-pulse space-y-3">
@@ -351,16 +916,6 @@ const Settings: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 gap-4">
-                                {systemSettings.filter(s => s.category === 'smtp').map(setting => (
-                                    <div key={setting.key}>
-                                        {renderSettingInput(setting)}
-                                    </div>
-                                ))}
-                            </div>
-                            
-
-                            
                             <div className="pt-4 border-t border-theme space-y-3">
                                 <div>
                                     <label className="input-label">Test Recipient</label>
@@ -436,6 +991,88 @@ const Settings: React.FC = () => {
                         </button>
                     </div>
                 </form>
+            </Modal>
+
+            {/* vSphere Inventory Modal */}
+            <Modal isOpen={inventoryModalOpen} onClose={() => setInventoryModalOpen(false)} title="vSphere Inventory" maxWidth="3xl">
+                <div className="space-y-4">
+                    {!vsphereInventory ? (
+                        <div className="p-8 text-center text-secondary border-2 border-dashed border-theme rounded-xl">
+                            <Cloud className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                            <p>No inventory loaded.</p>
+                            <p className="text-xs mt-1">Click "Sync" to fetch data from vSphere.</p>
+                        </div>
+                    ) : (
+                        <div className="h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="mb-4 text-xs text-secondary flex items-center gap-2">
+                                <Check className="w-3 h-3 text-green-500" />
+                                Last Synced: {new Date(vsphereInventory.last_sync).toLocaleString()}
+                            </div>
+                            
+                            {/* Templates/VMs Section */}
+                            <div className="mb-6">
+                                <h3 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2 sticky top-0 bg-base-100 py-1 z-10">
+                                    <Server className="w-4 h-4" />
+                                    Templates & VMs ({vsphereInventory.vms?.length || 0})
+                                </h3>
+                                <div className="bg-base-200 rounded-lg border border-theme overflow-hidden">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-base-300 text-xs uppercase text-secondary font-medium">
+                                            <tr>
+                                                <th className="px-4 py-2">Name</th>
+                                                <th className="px-4 py-2">Type</th>
+                                                <th className="px-4 py-2">OS</th>
+                                                <th className="px-4 py-2 text-right">Specs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-theme">
+                                            {vsphereInventory.vms?.map((vm: any, i: number) => (
+                                                <tr key={i} className="hover:bg-base-300/50 transition-colors">
+                                                    <td className="px-4 py-2 font-medium">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${vm.power_state?.toString().toLowerCase().includes('on') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                                                            {vm.name}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-2">
+                                                        {vm.is_template ? (
+                                                            <span className="badge badge-primary text-[10px]">Template</span>
+                                                        ) : (
+                                                            <span className="badge badge-neutral text-[10px]">VM</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-secondary text-xs">{vm.guest_os}</td>
+                                                    <td className="px-4 py-2 text-secondary text-xs text-right">
+                                                        {vm.cpu} vCPU, {Math.round(vm.memory_mb / 1024)} GB
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Networks Section */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2 sticky top-0 bg-base-100 py-1 z-10">
+                                    <Globe className="w-4 h-4" />
+                                    Networks ({vsphereInventory.networks?.length || 0})
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    {vsphereInventory.networks?.map((net: any, i: number) => (
+                                        <div key={i} className="bg-base-200 p-2.5 rounded border border-theme flex justify-between items-center hover:border-primary/50 transition-colors">
+                                            <span className="font-medium text-xs truncate" title={net.name}>{net.name}</span>
+                                            <span className="text-[10px] text-secondary bg-base-300 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{net.type}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <div className="flex justify-end pt-4 border-t border-theme">
+                        <button className="btn-secondary" onClick={() => setInventoryModalOpen(false)}>Close</button>
+                    </div>
+                </div>
             </Modal>
         </div>
     );

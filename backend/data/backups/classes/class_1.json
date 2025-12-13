@@ -1,18 +1,18 @@
 {
   "class": {
     "id": 1,
-    "name": "sbt",
+    "name": "SBT-R82-MS-UK",
     "instructor_id": 1,
     "blueprint_id": "1",
-    "max_users": 40,
+    "max_users": 21,
     "passcode": "class123",
-    "start_date": "2025-12-12T02:37:00",
-    "end_date": "2026-01-09T02:37:00",
-    "status": "completed",
-    "description": "test sbt",
-    "created_at": "2025-12-12T02:37:50.860098",
-    "updated_at": "2025-12-12T08:52:36.965902"
+    "start_date": "2025-12-12T21:03:00",
+    "end_date": "2025-12-25T21:03:00",
+    "status": "upcoming",
+    "description": "SBT R82",
+    "created_at": "2025-12-12T21:03:49.700514",
+    "updated_at": "2025-12-13T01:40:34.200474"
   },
-  "backup_timestamp": "2025-12-12T08:52:36.975940",
+  "backup_timestamp": "2025-12-13T01:40:34.226160",
   "version": 1
 }

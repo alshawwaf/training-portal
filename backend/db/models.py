@@ -94,6 +94,7 @@ class Template(Base):
     name = Column(String, index=True)
     description = Column(Text, nullable=True)
     icon = Column(String, default="🖥️")
+    provider = Column(String, default="Proxmox")
     vm_config = Column(Text, nullable=True)  # JSON string for VM configuration
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -105,6 +106,7 @@ class Template(Base):
             "name": self.name,
             "description": self.description,
             "icon": self.icon,
+            "provider": self.provider,
             "vm_config": self.vm_config,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,

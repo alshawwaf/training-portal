@@ -12,21 +12,22 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 
 ---
 
-## ✨ Features
+## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Class Management** | Create, configure, and manage training classes with customizable blueprints |
-| **Virtual Environments** | Automated provisioning of Proxmox VM environments for each student |
+| **Class Management** | Create, configure, and manage training classes with customizable parameters |
+| **Templates Management** | Define multi-provider environments (Proxmox, AWS, Azure, etc.) for labs |
+| **Virtual Environments** | Automated provisioning of environments for each student |
 | **Environment Control** | Start, stop, revert, and access VMs with one click |
-| **Modern Dark UI** | Beautiful, responsive interface with gradient accents and animations |
+| **Modern Dark UI** | Premium interface with sidebar navigation and theme toggle (Dark/Light) |
 | **Dual Authentication** | Azure AD SSO or local Superadmin login |
 | **Real-time Notifications** | Toast notifications for all user actions |
 | **Docker Ready** | Full Docker Compose setup for easy deployment |
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -61,7 +62,7 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -109,7 +110,7 @@ Access the portal at **http://localhost:9999**
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 ### Local Superadmin Login (Default)
 
@@ -131,17 +132,18 @@ AZURE_TENANT_ID=your-tenant-id
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 SE Training Portal/
 ├── backend/
 │   ├── db/                    # Database models & config
 │   │   ├── database.py        # SQLAlchemy setup
-│   │   └── models.py          # User, Class models
+│   │   └── models.py          # User, Class, Template models
 │   ├── routers/               # API endpoints
 │   │   ├── auth.py            # Authentication routes
-│   │   └── classes.py         # Class management routes
+│   │   ├── classes.py         # Class management routes
+│   │   └── templates.py       # Template management routes
 │   ├── services/
 │   │   └── proxmox_service.py # Proxmox VE integration
 │   ├── main.py                # FastAPI application
@@ -153,13 +155,11 @@ SE Training Portal/
 │   │   │   ├── Layout.tsx     # Main app layout
 │   │   │   └── Modal.tsx      # Modal dialog
 │   │   ├── context/           # React Context providers
-│   │   │   ├── AuthContext.tsx
-│   │   │   └── ToastContext.tsx
 │   │   ├── pages/             # Application pages
 │   │   │   ├── Login.tsx
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── Classes.tsx
-│   │   │   ├── CreateClass.tsx
+│   │   │   ├── Templates.tsx
 │   │   │   └── Settings.tsx
 │   │   ├── api.ts             # Axios configuration
 │   │   ├── App.tsx            # Router & providers
@@ -176,7 +176,7 @@ SE Training Portal/
 
 ---
 
-## 🌐 API Endpoints
+## API Endpoints
 
 ### Authentication
 
@@ -195,6 +195,16 @@ SE Training Portal/
 | `GET` | `/classes/{id}` | Get class details |
 | `DELETE` | `/classes/{id}` | Delete a class |
 
+### Templates
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/templates/` | List all templates |
+| `POST` | `/templates/` | Create new template |
+| `GET` | `/templates/{id}` | Get template details |
+| `PUT` | `/templates/{id}` | Update template |
+| `DELETE` | `/templates/{id}` | Delete template |
+
 ### Health
 
 | Method | Endpoint | Description |
@@ -204,7 +214,7 @@ SE Training Portal/
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 Create a `.env` file in the project root:
 
@@ -237,7 +247,7 @@ PROXMOX_MOCK=true  # Set to false for real Proxmox
 
 ---
 
-## 🐳 Docker Services
+## Docker Services
 
 | Service | Port | Description |
 |---------|------|-------------|
@@ -253,14 +263,14 @@ docker-compose --profile tools up --build
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 - [Developer Guide](docs/DEVELOPER_GUIDE.md) - Detailed development instructions
 - [API Documentation](http://localhost:8000/docs) - Interactive Swagger UI (when running)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -270,6 +280,6 @@ docker-compose --profile tools up --build
 
 ---
 
-## 📄 License
+## License
 
 This project is proprietary software. All rights reserved.

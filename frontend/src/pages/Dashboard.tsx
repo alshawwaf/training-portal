@@ -23,6 +23,11 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [classes, setClasses] = useState<ClassModel[]>([]);
+  const [dashboardStats, setDashboardStats] = useState({
+      active_environments: 0,
+      total_students: 0,
+      upcoming_classes: 0
+  });
   
   // Modal states
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -41,8 +46,18 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const fetchStats = async () => {
+      try {
+          const res = await api.get('/dashboard/stats');
+          setDashboardStats(res.data);
+      } catch (err) {
+          console.error("Failed to fetch dashboard stats", err);
+      }
+  };
+
   useEffect(() => {
     fetchClasses();
+    fetchStats();
     // eslint-disable-next-line
   }, []);
 
@@ -113,7 +128,7 @@ const Dashboard: React.FC = () => {
   const stats = [
     { 
       label: 'Active Environments', 
-      value: '12', 
+      value: dashboardStats.active_environments.toString(), 
       icon: Monitor, 
       color: 'purple',
       gradient: 'from-purple-600 to-pink-600',
@@ -121,7 +136,7 @@ const Dashboard: React.FC = () => {
     },
     { 
       label: 'Total Students', 
-      value: '45', 
+      value: dashboardStats.total_students.toString(), 
       icon: Users, 
       color: 'emerald',
       gradient: 'from-emerald-600 to-teal-600',
@@ -129,7 +144,7 @@ const Dashboard: React.FC = () => {
     },
     { 
       label: 'Upcoming Classes', 
-      value: classes.length.toString(), 
+      value: dashboardStats.upcoming_classes.toString(), 
       icon: Clock, 
       color: 'blue',
       gradient: 'from-blue-600 to-cyan-600',

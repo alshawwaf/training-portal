@@ -287,6 +287,18 @@ class Class(Base):
     start_date: datetime
     end_date: datetime
     instructor_id: int  # FK to User
+
+**Template**
+```python
+class Template(Base):
+    id: int
+    name: str
+    description: str
+    icon: str
+    provider: str     # Proxmox | AWS | Azure | ...
+    vm_config: str    # JSON configuration
+    is_active: bool
+```
 ```
 
 ### Database URL
