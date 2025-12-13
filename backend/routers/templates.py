@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
-from db.models import Template
+from db.models import Template, TemplateVM
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import logging
 
 logger = logging.getLogger("se_portal")
@@ -20,13 +20,31 @@ def get_db():
 
 
 # Pydantic Schemas
+class TemplateVMCreate(BaseModel):
+    vm_name: str
+    vm_moid: str
+    guest_os: Optional[str] = None
+    cpu: Optional[int] = 1
+    memory_mb: Optional[int] = 1024
+    is_template: Optional[bool] = False
+    is_primary: Optional[bool] = False
+    access_protocol: Optional[str] = "rdp"
+    access_port: Optional[int] = None
+
+
+class TemplateVMUpdate(BaseModel):
+    is_primary: Optional[bool] = None
+    access_protocol: Optional[str] = None
+    access_port: Optional[int] = None
+
+
 class TemplateCreate(BaseModel):
     name: str
     description: Optional[str] = None
     icon: Optional[str] = "🖥️"
-    provider: Optional[str] = "Proxmox"
-    vm_config: Optional[str] = None
+    provider: Optional[str] = "vSphere"
     is_active: Optional[bool] = True
+    vms: Optional[List[TemplateVMCreate]] = []
 
 
 class TemplateUpdate(BaseModel):
@@ -34,54 +52,55 @@ class TemplateUpdate(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
     provider: Optional[str] = None
-    vm_config: Optional[str] = None
     is_active: Optional[bool] = None
-
-
-class TemplateResponse(BaseModel):
-    id: int
-    name: str
-    description: Optional[str]
-    icon: str
-    provider: Optional[str]
-    vm_config: Optional[str]
-    is_active: bool
-    created_at: Optional[str]
-    updated_at: Optional[str]
-
-    class Config:
-        from_attributes = True
 
 
 # Routes
 @router.get("/")
 def list_templates(db: Session = Depends(get_db)):
-    """List all templates"""
+    """List all templates with their VMs"""
     templates = db.query(Template).order_by(Template.name).all()
     return [t.to_dict() for t in templates]
 
 
 @router.post("/")
 def create_template(template: TemplateCreate, db: Session = Depends(get_db)):
-    """Create a new template"""
+    """Create a new template with optional VMs"""
     new_template = Template(
         name=template.name,
         description=template.description,
         icon=template.icon,
         provider=template.provider,
-        vm_config=template.vm_config,
         is_active=template.is_active
     )
     db.add(new_template)
+    db.flush()  # Get the ID before adding VMs
+    
+    # Add VMs if provided
+    for vm_data in template.vms:
+        vm = TemplateVM(
+            template_id=new_template.id,
+            vm_name=vm_data.vm_name,
+            vm_moid=vm_data.vm_moid,
+            guest_os=vm_data.guest_os,
+            cpu=vm_data.cpu,
+            memory_mb=vm_data.memory_mb,
+            is_template=vm_data.is_template,
+            is_primary=vm_data.is_primary,
+            access_protocol=vm_data.access_protocol,
+            access_port=vm_data.access_port
+        )
+        db.add(vm)
+    
     db.commit()
     db.refresh(new_template)
-    logger.info(f"Created template: {new_template.name}")
+    logger.info(f"Created template: {new_template.name} with {len(template.vms)} VMs")
     return new_template.to_dict()
 
 
 @router.get("/{template_id}")
 def get_template(template_id: int, db: Session = Depends(get_db)):
-    """Get a single template by ID"""
+    """Get a single template by ID with all its VMs"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
@@ -103,8 +122,6 @@ def update_template(template_id: int, update: TemplateUpdate, db: Session = Depe
         template.icon = update.icon
     if update.provider is not None:
         template.provider = update.provider
-    if update.vm_config is not None:
-        template.vm_config = update.vm_config
     if update.is_active is not None:
         template.is_active = update.is_active
     
@@ -116,7 +133,7 @@ def update_template(template_id: int, update: TemplateUpdate, db: Session = Depe
 
 @router.delete("/{template_id}")
 def delete_template(template_id: int, db: Session = Depends(get_db)):
-    """Delete a template"""
+    """Delete a template and all its VMs"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
@@ -125,3 +142,93 @@ def delete_template(template_id: int, db: Session = Depends(get_db)):
     db.commit()
     logger.info(f"Deleted template: {template.name}")
     return {"message": "Template deleted successfully"}
+
+
+# VM Management Endpoints
+@router.post("/{template_id}/vms")
+def add_vm_to_template(template_id: int, vm: TemplateVMCreate, db: Session = Depends(get_db)):
+    """Add a VM from vSphere inventory to a template"""
+    template = db.query(Template).filter(Template.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    # Check if VM already exists in this template
+    existing = db.query(TemplateVM).filter(
+        TemplateVM.template_id == template_id,
+        TemplateVM.vm_moid == vm.vm_moid
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="VM already added to this template")
+    
+    new_vm = TemplateVM(
+        template_id=template_id,
+        vm_name=vm.vm_name,
+        vm_moid=vm.vm_moid,
+        guest_os=vm.guest_os,
+        cpu=vm.cpu,
+        memory_mb=vm.memory_mb,
+        is_template=vm.is_template,
+        is_primary=vm.is_primary,
+        access_protocol=vm.access_protocol,
+        access_port=vm.access_port
+    )
+    db.add(new_vm)
+    db.commit()
+    db.refresh(new_vm)
+    logger.info(f"Added VM {vm.vm_name} to template {template.name}")
+    return new_vm.to_dict()
+
+
+@router.put("/{template_id}/vms/{vm_id}")
+def update_template_vm(template_id: int, vm_id: int, update: TemplateVMUpdate, db: Session = Depends(get_db)):
+    """Update a VM's settings in a template"""
+    vm = db.query(TemplateVM).filter(
+        TemplateVM.id == vm_id,
+        TemplateVM.template_id == template_id
+    ).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found in template")
+    
+    if update.is_primary is not None:
+        # If setting as primary, unset other primaries
+        if update.is_primary:
+            db.query(TemplateVM).filter(
+                TemplateVM.template_id == template_id,
+                TemplateVM.id != vm_id
+            ).update({"is_primary": False})
+        vm.is_primary = update.is_primary
+    if update.access_protocol is not None:
+        vm.access_protocol = update.access_protocol
+    if update.access_port is not None:
+        vm.access_port = update.access_port
+    
+    db.commit()
+    db.refresh(vm)
+    return vm.to_dict()
+
+
+@router.delete("/{template_id}/vms/{vm_id}")
+def remove_vm_from_template(template_id: int, vm_id: int, db: Session = Depends(get_db)):
+    """Remove a VM from a template"""
+    vm = db.query(TemplateVM).filter(
+        TemplateVM.id == vm_id,
+        TemplateVM.template_id == template_id
+    ).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found in template")
+    
+    vm_name = vm.vm_name
+    db.delete(vm)
+    db.commit()
+    logger.info(f"Removed VM {vm_name} from template {template_id}")
+    return {"message": f"VM {vm_name} removed from template"}
+
+
+@router.get("/{template_id}/vms")
+def list_template_vms(template_id: int, db: Session = Depends(get_db)):
+    """List all VMs in a template"""
+    template = db.query(Template).filter(Template.id == template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    return [vm.to_dict() for vm in template.vms]

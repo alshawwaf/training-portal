@@ -1,5 +1,5 @@
 {
-  "last_sync": "2025-12-13T02:10:18.123727",
+  "last_sync": "2025-12-13T00:57:08.787039",
   "datacenters": [
     {
       "name": "vCenter-Datacenter",
@@ -112,6 +112,7 @@
   "vms": [
     {
       "name": "pfSense",
+      "moid": "vm-2015",
       "power_state": "poweredOff",
       "guest_os": "FreeBSD 12 or later versions (64-bit)",
       "cpu": 2,
@@ -120,6 +121,7 @@
     },
     {
       "name": "windows_sase_client",
+      "moid": "vm-1011",
       "power_state": "suspended",
       "guest_os": "Microsoft Windows 10 (64-bit)",
       "cpu": 4,
@@ -128,6 +130,7 @@
     },
     {
       "name": "Windows Server-SBT-R82",
+      "moid": "vm-261",
       "power_state": "poweredOn",
       "guest_os": "Microsoft Windows Server 2008 R2 (64-bit)",
       "cpu": 4,
@@ -136,6 +139,7 @@
     },
     {
       "name": "windows_harmony_ep",
+      "moid": "vm-4013",
       "power_state": "suspended",
       "guest_os": "Microsoft Windows 10 (64-bit)",
       "cpu": 4,
@@ -144,6 +148,7 @@
     },
     {
       "name": "GW-SBT-R82",
+      "moid": "vm-263",
       "power_state": "poweredOn",
       "guest_os": "Other (32-bit)",
       "cpu": 8,
@@ -152,6 +157,7 @@
     },
     {
       "name": "Spark",
+      "moid": "vm-2012",
       "power_state": "poweredOff",
       "guest_os": "Other 4.x or later Linux (64-bit)",
       "cpu": 4,
@@ -160,6 +166,7 @@
     },
     {
       "name": "client-r8210",
+      "moid": "vm-2004",
       "power_state": "poweredOff",
       "guest_os": "Microsoft Windows 10 (64-bit)",
       "cpu": 4,
@@ -168,6 +175,7 @@
     },
     {
       "name": "R82-ansible",
+      "moid": "vm-274",
       "power_state": "poweredOff",
       "guest_os": "Other (32-bit)",
       "cpu": 4,
@@ -176,6 +184,7 @@
     },
     {
       "name": "Windows Client-SBT-R82",
+      "moid": "vm-266",
       "power_state": "poweredOn",
       "guest_os": "Microsoft Windows 10 (64-bit)",
       "cpu": 4,
@@ -184,6 +193,7 @@
     },
     {
       "name": "Jump Server-SBT-R82",
+      "moid": "vm-264",
       "power_state": "poweredOn",
       "guest_os": "Microsoft Windows 10 (64-bit)",
       "cpu": 16,
@@ -192,6 +202,7 @@
     },
     {
       "name": "SMS-SBT-R82",
+      "moid": "vm-265",
       "power_state": "poweredOn",
       "guest_os": "Other (32-bit)",
       "cpu": 4,
@@ -200,6 +211,7 @@
     },
     {
       "name": "Android-harmony-mobile",
+      "moid": "vm-4015",
       "power_state": "suspended",
       "guest_os": "Other 3.x Linux (64-bit)",
       "cpu": 2,
@@ -208,6 +220,7 @@
     },
     {
       "name": "ubuntu-25",
+      "moid": "vm-2001",
       "power_state": "poweredOn",
       "guest_os": "Ubuntu Linux (64-bit)",
       "cpu": 32,
@@ -216,6 +229,7 @@
     },
     {
       "name": "Kali Linux-SBT-R82",
+      "moid": "vm-262",
       "power_state": "poweredOn",
       "guest_os": "Debian GNU/Linux 10 (64-bit)",
       "cpu": 4,
@@ -224,6 +238,7 @@
     },
     {
       "name": "VMware vCenter Server 8.0.3",
+      "moid": "vm-232",
       "power_state": "poweredOn",
       "guest_os": "Other 3.x or later Linux (64-bit)",
       "cpu": 12,

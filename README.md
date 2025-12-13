@@ -37,7 +37,7 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐  │
 │  │   Frontend   │───▶│   Backend    │───▶│    Proxmox VE    │  │
 │  │  React/Vite  │    │   FastAPI    │    │   Virtualization │  │
-│  │  Port: 9999  │    │  Port: 8000  │    │                  │  │
+│  │  Port: 8989  │    │  Port: 8000  │    │                  │  │
 │  └──────────────┘    └──────────────┘    └──────────────────┘  │
 │                             │                                    │
 │                             ▼                                    │
@@ -251,7 +251,7 @@ PROXMOX_MOCK=true  # Set to false for real Proxmox
 
 | Service | Port | Description |
 |---------|------|-------------|
-| `frontend` | 9999 | React application |
+| `frontend` | 8989 | React application |
 | `backend` | 8000 | FastAPI server |
 | `db` | 5432 | PostgreSQL database |
 | `pgadmin` | 5050 | Database management (optional) |

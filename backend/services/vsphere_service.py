@@ -21,6 +21,10 @@ except ImportError:
 from sqlalchemy.orm import Session
 from db.models import SystemSetting
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
+
+# ... existing code ...
 
 class VSphereService:
     def __init__(self):
@@ -31,6 +35,11 @@ class VSphereService:
         self.verify_ssl = os.getenv("VSPHERE_VERIFY_SSL", "false").lower() == "true"
         self.mock_mode = os.getenv("VSPHERE_MOCK", "true").lower() == "true" or not PYVMOMI_AVAILABLE
         self.connection = None
+        
+        # Scheduler
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.start()
+        self.sync_job_id = "vsphere_sync_inventory"
 
         if self.mock_mode:
             print("vSphere Service running in MOCK MODE.")
@@ -51,9 +60,36 @@ class VSphereService:
             self.password = conf.get("vsphere_password", self.password)
             self.port = int(conf.get("vsphere_port", str(self.port)))
             self.verify_ssl = conf.get("vsphere_verify_ssl", "false").lower() == "true"
+            
+            # Sync Scheduler Configuration
+            sync_mode = conf.get("vsphere_sync_mode", "manual") # manual, scheduled
+            sync_interval = int(conf.get("vsphere_sync_interval", "60")) # minutes
+            
+            self.configure_scheduler(sync_mode, sync_interval)
 
         except Exception as e:
             print(f"Failed to load vSphere config: {e}")
+
+    def configure_scheduler(self, mode: str, interval_minutes: int):
+        """Configure the sync scheduler job."""
+        try:
+            # Remove existing job if present
+            if self.scheduler.get_job(self.sync_job_id):
+                self.scheduler.remove_job(self.sync_job_id)
+            
+            if mode == "scheduled" and interval_minutes > 0:
+                print(f"Scheduling vSphere sync every {interval_minutes} minutes.")
+                self.scheduler.add_job(
+                    self.sync_inventory,
+                    trigger=IntervalTrigger(minutes=interval_minutes),
+                    id=self.sync_job_id,
+                    replace_existing=True
+                )
+            else:
+                print("vSphere sync set to MANUAL mode.")
+                
+        except Exception as e:
+            print(f"Error configuring scheduler: {e}")
 
     def connect(self, host: str = None, user: str = None, password: str = None, 
                 port: int = None, verify_ssl: bool = None) -> Dict[str, Any]:
@@ -184,9 +220,9 @@ class VSphereService:
         """Get list of VMs."""
         if self.mock_mode:
             return [
-                {"name": "mock-vm-1", "power_state": "poweredOn", "guest_os": "Ubuntu 22.04", "cpu": 4, "memory_mb": 8192},
-                {"name": "mock-vm-2", "power_state": "poweredOff", "guest_os": "Windows Server 2022", "cpu": 2, "memory_mb": 4096},
-                {"name": "mock-template", "power_state": "poweredOff", "guest_os": "CentOS 8", "cpu": 2, "memory_mb": 2048, "is_template": True}
+                {"name": "mock-vm-1", "moid": "vm-1001", "power_state": "poweredOn", "guest_os": "Ubuntu 22.04", "cpu": 4, "memory_mb": 8192, "is_template": False},
+                {"name": "mock-vm-2", "moid": "vm-1002", "power_state": "poweredOff", "guest_os": "Windows Server 2022", "cpu": 2, "memory_mb": 4096, "is_template": False},
+                {"name": "mock-template", "moid": "vm-1003", "power_state": "poweredOff", "guest_os": "CentOS 8", "cpu": 2, "memory_mb": 2048, "is_template": True}
             ]
 
         if not self.connection:
@@ -201,6 +237,7 @@ class VSphereService:
             for vm in container.view:
                 vms.append({
                     "name": vm.name,
+                    "moid": vm._moId,
                     "power_state": str(vm.runtime.powerState),
                     "guest_os": vm.config.guestFullName if vm.config else "Unknown",
                     "cpu": vm.config.hardware.numCPU if vm.config else 0,

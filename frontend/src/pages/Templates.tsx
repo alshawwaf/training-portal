@@ -452,7 +452,11 @@ const Templates: React.FC = () => {
                             <select
                                 className="input"
                                 value={form.provider}
-                                onChange={e => setForm({...form, provider: e.target.value})}
+                                onChange={e => {
+                                    setForm({...form, provider: e.target.value});
+                                    setSelectedVMs([]);
+                                    setInventory(null);
+                                }}
                             >
                                 {providerOptions.map(opt => (
                                     <option key={opt} value={opt}>{opt}</option>
@@ -488,24 +492,40 @@ const Templates: React.FC = () => {
                     </div>
 
                     {/* VM Selection Section */}
-                    <div className="border-t border-theme pt-5">
+                    <div className="border-t border-theme pt-5 animate-in fade-in slide-in-from-top-2">
                         <div className="flex items-center justify-between mb-3">
                             <label className="input-label mb-0">Virtual Machines</label>
-                            <button 
-                                type="button"
-                                onClick={openVMSelector}
-                                className="btn-secondary text-sm py-1.5"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Select VMs
-                            </button>
+                            
+                            <div className="relative group">
+                                <button 
+                                    type="button"
+                                    onClick={openVMSelector}
+                                    disabled={form.provider !== 'vSphere'}
+                                    className={`btn-secondary text-sm py-1.5 ${form.provider !== 'vSphere' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Select VMs
+                                </button>
+                                
+                                {form.provider !== 'vSphere' && (
+                                    <div className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none">
+                                        No objects have been synced. Please configure credentials and sync objects in Settings for {form.provider}.
+                                        <div className="absolute top-full right-4 -mt-1 border-4 border-transparent border-t-gray-900" />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {selectedVMs.length === 0 ? (
-                            <div className="p-6 border-2 border-dashed border-theme rounded-lg text-center">
+                            <div className={`p-6 border-2 border-dashed border-theme rounded-lg text-center ${form.provider !== 'vSphere' ? 'opacity-50' : ''}`}>
                                 <Server className="w-8 h-8 mx-auto mb-2 text-secondary/50" />
                                 <p className="text-sm text-secondary">No VMs selected</p>
-                                <p className="text-xs text-secondary/70 mt-1">Click "Select VMs" to add from vSphere inventory</p>
+                                <p className="text-xs text-secondary/70 mt-1">
+                                    {form.provider === 'vSphere' 
+                                        ? 'Click "Select VMs" to add from vSphere inventory' 
+                                        : `Connect to ${form.provider} to select VMs`
+                                    }
+                                </p>
                             </div>
                         ) : (
                             <div className="space-y-2 max-h-[200px] overflow-y-auto">

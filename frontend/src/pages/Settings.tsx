@@ -682,9 +682,7 @@ const Settings: React.FC = () => {
                                                     {showProxmoxSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                 </button>
                                             </div>
-                                            {proxmoxOriginal['proxmox_password'] === '********' && proxmoxForm['proxmox_password'] === '********' && (
-                                                <p className="text-xs text-amber-500 mt-1">Password is masked. Enter a new value to update.</p>
-                                            )}
+
                                         </div>
                                         
                                         <div className="space-y-1.5">
@@ -806,10 +804,39 @@ const Settings: React.FC = () => {
                                                     {showVspherePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                                 </button>
                                             </div>
-                                            {vsphereOriginal['vsphere_password'] === '********' && vsphereForm['vsphere_password'] === '********' && (
-                                                <p className="text-xs text-amber-500 mt-1">Password is masked. Enter a new value to update.</p>
-                                            )}
+
                                         </div>
+
+                                        {/* Sync Mode Configuration */}
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Sync Mode</label>
+                                            <select 
+                                                className="input w-full"
+                                                value={vsphereForm['vsphere_sync_mode'] || 'manual'}
+                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_sync_mode: e.target.value}))}
+                                            >
+                                                <option value="manual">Manual Only</option>
+                                                <option value="scheduled">Scheduled</option>
+                                            </select>
+                                        </div>
+
+                                        {vsphereForm['vsphere_sync_mode'] === 'scheduled' && (
+                                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
+                                                <label className="text-xs font-medium text-secondary uppercase tracking-wider">Sync Interval</label>
+                                                <select 
+                                                    className="input w-full"
+                                                    value={vsphereForm['vsphere_sync_interval'] || '60'}
+                                                    onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_sync_interval: e.target.value}))}
+                                                >
+                                                    <option value="15">Every 15 Minutes</option>
+                                                    <option value="60">Every 1 Hour</option>
+                                                    <option value="360">Every 6 Hours</option>
+                                                    <option value="720">Every 12 Hours</option>
+                                                    <option value="1440">Every 24 Hours</option>
+                                                </select>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-end">
                                             <label className="flex items-center gap-3 cursor-pointer group">
                                                 <div className={`relative w-11 h-6 rounded-full transition-colors ${vsphereForm['vsphere_verify_ssl'] === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
@@ -821,11 +848,19 @@ const Settings: React.FC = () => {
                                             </label>
                                         </div>
                                     </div>
-
+                                    
                                     <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-sm text-secondary">
-                                            <div className={`w-2 h-2 rounded-full ${vsphereConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                                            <span>{vsphereConnected ? 'Connected' : 'Not connected'}</span>
+                                        <div className="flex items-center gap-4 text-sm text-secondary">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-2 h-2 rounded-full ${vsphereConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                                                <span>{vsphereConnected ? 'Connected' : 'Not connected'}</span>
+                                            </div>
+                                            {vsphereForm['vsphere_sync_mode'] === 'scheduled' && (
+                                                <div className="flex items-center gap-1.5 text-xs bg-theme-hover px-2 py-1 rounded-md">
+                                                    <RefreshCw className="w-3 h-3" />
+                                                    <span>Auto-sync: {vsphereForm['vsphere_sync_interval'] ? `${parseInt(vsphereForm['vsphere_sync_interval']) / 60 < 1 ? `${vsphereForm['vsphere_sync_interval']}m` : `${parseInt(vsphereForm['vsphere_sync_interval']) / 60}h`}` : '1h'}</span>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex gap-3">
                                             <button 

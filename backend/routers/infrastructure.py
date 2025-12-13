@@ -45,14 +45,21 @@ class SaveSettingsRequest(BaseModel):
 async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Depends(get_db)):
     """Test Proxmox connection with provided credentials."""
     try:
-        # For now, we'll use the existing proxmox_service
-        # In production, you'd test with the provided credentials
-        result = {
-            "success": True,
-            "message": f"Connection to {request.host}:{request.port} successful (mock)",
-            "node": request.node,
-            "version": "8.0.4 (Mock)"
-        }
+        password = request.password
+        # Handle masked or empty password by falling back to stored password
+        if not password or password == "********":
+            password = proxmox_service.password
+            # If using token, we might not need password, but let's assume password auth for now primarily
+            
+        result = proxmox_service.test_connection(
+            host=request.host,
+            user=request.user,
+            password=password,
+            token_id=request.token_id,
+            token_secret=request.token_secret,
+            port=request.port,
+            verify_ssl=request.verify_ssl
+        )
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

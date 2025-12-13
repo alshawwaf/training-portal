@@ -13,3 +13,4 @@ proxmoxer
 requests
 python-dotenv
 pyvmomi
+apscheduler

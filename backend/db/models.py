@@ -94,11 +94,13 @@ class Template(Base):
     name = Column(String, index=True)
     description = Column(Text, nullable=True)
     icon = Column(String, default="🖥️")
-    provider = Column(String, default="Proxmox")
-    vm_config = Column(Text, nullable=True)  # JSON string for VM configuration
+    provider = Column(String, default="vSphere")  # vSphere, Proxmox
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    
+    # Relationships
+    vms = relationship("TemplateVM", back_populates="template", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -107,9 +109,43 @@ class Template(Base):
             "description": self.description,
             "icon": self.icon,
             "provider": self.provider,
-            "vm_config": self.vm_config,
             "is_active": self.is_active,
+            "vms": [vm.to_dict() for vm in self.vms] if self.vms else [],
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
+
+class TemplateVM(Base):
+    """VMs selected from vSphere inventory for a template"""
+    __tablename__ = "template_vms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    template_id = Column(Integer, ForeignKey("templates.id", ondelete="CASCADE"))
+    vm_name = Column(String)            # Name from vSphere inventory
+    vm_moid = Column(String)            # vSphere Managed Object ID
+    guest_os = Column(String, nullable=True)
+    cpu = Column(Integer, default=1)
+    memory_mb = Column(Integer, default=1024)
+    is_template = Column(Boolean, default=False)  # Is it a vSphere template or regular VM
+    is_primary = Column(Boolean, default=False)   # Primary VM for student access
+    access_protocol = Column(String, default="rdp")  # rdp, ssh, https, vnc
+    access_port = Column(Integer, nullable=True)   # Port for access (3389, 22, 443, etc.)
+    
+    # Relationship
+    template = relationship("Template", back_populates="vms")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "template_id": self.template_id,
+            "vm_name": self.vm_name,
+            "vm_moid": self.vm_moid,
+            "guest_os": self.guest_os,
+            "cpu": self.cpu,
+            "memory_mb": self.memory_mb,
+            "is_template": self.is_template,
+            "is_primary": self.is_primary,
+            "access_protocol": self.access_protocol,
+            "access_port": self.access_port,
+        }

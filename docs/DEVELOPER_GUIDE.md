@@ -77,7 +77,7 @@ User Browser
      │
      ▼
 ┌─────────────────┐
-│    Frontend     │  Port 9999
+│    Frontend     │  Port 8989
 │   (Vite/React)  │
 └────────┬────────┘
          │ /api/* & /auth/* proxied
@@ -170,7 +170,7 @@ npm install
 npm run dev
 ```
 
-App available at: http://localhost:9999
+App available at: http://localhost:8989
 
 ### Design System
 

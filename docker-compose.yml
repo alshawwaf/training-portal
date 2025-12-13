@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # PostgreSQL Database
   db:
@@ -34,7 +32,7 @@ services:
       - AZURE_TENANT_ID=${AZURE_TENANT_ID:-your-tenant-id-here}
       - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-admin@cpdemo.com}
       - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-Cpwins!1}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:9999}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8989}
       - PROXMOX_HOST=${PROXMOX_HOST:-192.168.1.100}
       - PROXMOX_USER=${PROXMOX_USER:-root@pam}
       - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-your-proxmox-password}
@@ -58,7 +56,7 @@ services:
     container_name: se_portal_frontend
     restart: always
     ports:
-      - "9999:9999"
+      - "8989:8989"
     environment:
       - VITE_API_URL=http://backend:8000
     depends_on:

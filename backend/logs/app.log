@@ -242,3 +242,33 @@ WHERE templates.name = %(name_1)s
 2025-12-13 01:50:52,996 - se_portal.email_service - ERROR - email_service.py:81 - Failed to send email: Exception raised Error connecting to 10.1.2.250 on port 587: [Errno 111] Connect call failed ('10.1.2.250', 587), check your credentials or email service configuration
 2025-12-13 02:01:56,061 - se_portal - INFO - main.py:82 - Starting up application...
 2025-12-13 02:01:56,185 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 02:22:29,953 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 02:22:30,057 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 03:06:29,934 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 03:06:30,084 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 03:23:53,805 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 03:23:53,901 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 03:30:57,676 - se_portal - INFO - templates.py:97 - Created template: sbt-small with 2 VMs
+2025-12-13 03:42:47,435 - se_portal - INFO - templates.py:143 - Deleted template: Advanced Security
+2025-12-13 03:42:50,537 - se_portal - INFO - templates.py:143 - Deleted template: Network Simulation
+2025-12-13 03:42:54,312 - se_portal - INFO - templates.py:143 - Deleted template: Base Environment
+2025-12-13 03:42:57,645 - se_portal - INFO - templates.py:143 - Deleted template: sbt-small
+2025-12-13 03:44:12,120 - se_portal - INFO - templates.py:97 - Created template: sbt-1-vm-vmware with 1 VMs
+2025-12-13 04:12:41,591 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 04:12:41,704 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 04:16:55,532 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 04:16:55,658 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 04:59:41,656 - se_portal - INFO - templates.py:97 - Created template: vsphere-phsense with 1 VMs
+2025-12-13 04:59:54,445 - se_portal - INFO - templates.py:143 - Deleted template: sbt-1-vm-vmware
+2025-12-13 05:02:50,440 - se_portal - INFO - templates.py:130 - Updated template: Base Environment
+2025-12-13 05:02:50,568 - se_portal - INFO - templates.py:178 - Added VM SMS-SBT-R82 to template Base Environment
+2025-12-13 05:02:50,617 - se_portal - INFO - templates.py:178 - Added VM GW-SBT-R82 to template Base Environment
+2025-12-13 05:03:01,256 - se_portal - INFO - templates.py:143 - Deleted template: Network Simulation
+2025-12-13 05:03:04,778 - se_portal - INFO - templates.py:143 - Deleted template: Advanced Security
+2025-12-13 05:03:08,202 - se_portal - INFO - templates.py:143 - Deleted template: Base Environment
+2025-12-13 00:23:47,539 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:23:47,752 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 00:30:24,618 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:30:24,832 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-13 00:31:44,137 - se_portal - INFO - main.py:82 - Starting up application...
+2025-12-13 00:31:44,340 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
