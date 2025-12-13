@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
-from db.models import Class, ClassStatus
+from db.models import Class, ClassStatus, ClassEnvironment, EnvironmentVM, Template
+from services.vsphere_service import vsphere_service
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
@@ -21,7 +22,8 @@ VALID_STATUSES = [s.value for s in ClassStatus]
 # Pydantic Schemas
 class ClassCreate(BaseModel):
     name: str
-    blueprint_id: str
+    blueprint_id: Optional[str] = None # Legacy Proxmox
+    template_id: Optional[int] = None # vSphere Template ID
     max_users: int
     passcode: str
     start_date: datetime
@@ -32,6 +34,7 @@ class ClassCreate(BaseModel):
 class ClassUpdate(BaseModel):
     name: Optional[str] = None
     blueprint_id: Optional[str] = None
+    template_id: Optional[int] = None
     max_users: Optional[int] = None
     passcode: Optional[str] = None
     start_date: Optional[datetime] = None
@@ -42,7 +45,8 @@ class ClassUpdate(BaseModel):
 class ClassRead(BaseModel):
     id: int
     name: str
-    blueprint_id: str
+    blueprint_id: Optional[str] = None
+    template_id: Optional[int] = None
     max_users: int
     passcode: str
     start_date: datetime
@@ -87,6 +91,7 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
     db_class = Class(
         name=cls.name,
         blueprint_id=cls.blueprint_id,
+        template_id=cls.template_id,
         max_users=cls.max_users,
         passcode=cls.passcode,
         start_date=cls.start_date,
@@ -201,3 +206,139 @@ def export_backup(db: Session = Depends(get_db)):
         "exported_at": datetime.utcnow().isoformat(),
         "total_count": len(classes)
     }
+
+# PROVISION CLASS
+@router.post("/{class_id}/provision")
+def provision_class(class_id: int, db: Session = Depends(get_db)):
+    """Provision environments for the class based on selected template"""
+    db_class = db.query(Class).filter(Class.id == class_id).first()
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found")
+
+    if not db_class.template_id:
+        raise HTTPException(status_code=400, detail="Class does not have a vSphere template assigned")
+
+    # Check if already provisioned
+    existing_envs = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).count()
+    if existing_envs > 0:
+        raise HTTPException(status_code=400, detail="Class environments already provisioned")
+
+    # Get Template details
+    template = db.query(Template).filter(Template.id == db_class.template_id).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Assigned template not found")
+
+    if not template.vms:
+         raise HTTPException(status_code=400, detail="Template has no VMs to provision")
+
+    provisioned_count = 0
+    errors = []
+
+    try:
+        # Create environments for max_users
+        for i in range(1, db_class.max_users + 1):
+            env_name = f"Student {i}"
+            
+            # Create Environment Record
+            env = ClassEnvironment(
+                class_id=class_id,
+                name=env_name
+            )
+            db.add(env)
+            db.flush() # Get ID
+
+            # Provision VMs for this environment
+            for tmpl_vm in template.vms:
+                new_vm_name = f"{db_class.name}-{env_name}-{tmpl_vm.vm_name}".replace(" ", "_")
+                
+                # Call vSphere Service to clone/provision
+                result = vsphere_service.provision_vm(
+                    vm_moid=tmpl_vm.vm_moid,
+                    new_name=new_vm_name
+                )
+                
+                if result["success"]:
+                    # Create Environment VM Record
+                    env_vm = EnvironmentVM(
+                        env_id=env.id,
+                        vm_name=result.get("vm_name", new_vm_name),
+                        vm_moid=result.get("vm_moid", "unknown"),
+                        ip_address=result.get("ip_address"),
+                        access_url=None 
+                    )
+                    db.add(env_vm)
+                else:
+                    errors.append(f"Failed to provision {new_vm_name}: {result['message']}")
+            
+            provisioned_count += 1
+            
+        db.commit()
+        
+        return {
+            "success": True, 
+            "message": f"Provisioned {provisioned_count} environments",
+            "errors": errors
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+# LIST ENVIRONMENTS
+@router.get("/{class_id}/environments")
+def get_class_environments(class_id: int, db: Session = Depends(get_db)):
+    """Get all environments for a class including VM details and power state"""
+    db_class = db.query(Class).filter(Class.id == class_id).first()
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found")
+
+    envs = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
+    
+    result = []
+    for env in envs:
+        vms = db.query(EnvironmentVM).filter(EnvironmentVM.env_id == env.id).all()
+        vm_list = []
+        for vm in vms:
+            # Fetch latest state from vSphere (mock or real)
+            state_info = vsphere_service.get_vm_power_state(vm.vm_moid)
+            vm_list.append({
+                "id": vm.id,
+                "name": vm.vm_name,
+                "moid": vm.vm_moid,
+                "ip_address": vm.ip_address,
+                "power_state": state_info.get("state", "unknown"),
+                "access_url": vm.access_url
+            })
+            
+        result.append({
+            "id": env.id,
+            "name": env.name,
+            "user_id": env.user_id,
+            "created_at": env.created_at,
+            "vms": vm_list
+        })
+        
+    return result
+
+class VMPowerAction(BaseModel):
+    action: str # start, stop, restart, reset
+
+# CONTROL VM POWER
+@router.post("/environments/{class_id}/vms/{vm_id}/power")
+def control_vm_power(class_id: int, vm_id: int, body: VMPowerAction, db: Session = Depends(get_db)):
+    """Control power state of a specific VM in an environment"""
+    vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found")
+        
+    # Verify VM belongs to an environment of the class (security check)
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == vm.env_id).first()
+    if not env or env.class_id != class_id:
+        raise HTTPException(status_code=403, detail="VM does not belong to this class")
+
+    result = vsphere_service.control_vm_power(vm.vm_moid, body.action)
+    
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result["message"])
+        
+    return result

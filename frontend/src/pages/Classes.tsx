@@ -9,6 +9,7 @@ interface ClassModel {
     id: number;
     name: string;
     blueprint_id: string;
+    template_id?: number;
     max_users: number;
     passcode: string;
     start_date: string;
@@ -18,6 +19,23 @@ interface ClassModel {
     description?: string;
     created_at?: string;
     updated_at?: string;
+}
+
+interface EnvironmentVM {
+    id: number;
+    name: string;
+    moid: string;
+    ip_address?: string;
+    power_state: string; // poweredOn, poweredOff, suspended
+    access_url?: string;
+}
+
+interface ClassEnvironment {
+    id: number;
+    name: string;
+    user_id?: number;
+    created_at: string;
+    vms: EnvironmentVM[];
 }
 
 const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
@@ -42,6 +60,8 @@ const Classes: React.FC = () => {
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
+    const [environments, setEnvironments] = useState<ClassEnvironment[]>([]);
+    const [loadingEnvs, setLoadingEnvs] = useState(false);
     const [editForm, setEditForm] = useState<Partial<ClassModel>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,7 +71,8 @@ const Classes: React.FC = () => {
     // Create form state
     const [createForm, setCreateForm] = useState({
         name: '',
-        blueprint_id: '1',
+        blueprint_id: '',
+        template_id: '',
         max_users: 10,
         passcode: 'class123',
         start_date: new Date().toISOString().slice(0, 16),
@@ -96,7 +117,13 @@ const Classes: React.FC = () => {
         }
         setIsSubmitting(true);
         try {
-            await api.post('/classes/', createForm);
+            // Map string template_id to integer for backend
+            const payload = {
+                ...createForm,
+                template_id: createForm.template_id ? parseInt(createForm.template_id) : undefined,
+                blueprint_id: undefined // explicit undefined to rely on template_id
+            };
+            await api.post('/classes/', payload);
             showToast('Class created successfully', 'success');
             setCreateModalOpen(false);
             resetCreateForm();
@@ -111,7 +138,8 @@ const Classes: React.FC = () => {
     const resetCreateForm = () => {
         setCreateForm({
             name: '',
-            blueprint_id: '1',
+            blueprint_id: '',
+            template_id: '',
             max_users: 10,
             passcode: 'class123',
             start_date: new Date().toISOString().slice(0, 16),
@@ -138,13 +166,38 @@ const Classes: React.FC = () => {
         if (!selectedClass) return;
         setIsSubmitting(true);
         try {
-            await api.put(`/classes/${selectedClass.id}`, editForm);
+            // Map template_id same as create
+            const payload = {
+                ...editForm,
+                template_id: editForm.template_id ? Number(editForm.template_id) : undefined
+            };
+            await api.put(`/classes/${selectedClass.id}`, payload);
             showToast('Class updated successfully', 'success');
             setEditModalOpen(false);
             setSelectedClass(null);
             fetchClasses();
         } catch {
             showToast('Failed to update class', 'error');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleProvision = async (classId: number) => {
+        if (!confirm("Are you sure you want to provision environments for this class? This may take a while.")) return;
+        setIsSubmitting(true);
+        try {
+            const res = await api.post(`/classes/${classId}/provision`);
+            if (res.data.success) {
+                showToast(`Provisioning started: ${res.data.message}`, 'success');
+                setViewModalOpen(false);
+                fetchClasses();
+            } else {
+                showToast(`Provisioning completed with issues: ${res.data.errors?.join(', ')}`, 'warning');
+            }
+        } catch (e: any) {
+             const msg = e.response?.data?.detail || 'Provisioning failed';
+             showToast(msg, 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -158,6 +211,33 @@ const Classes: React.FC = () => {
     const openViewModal = (cls: ClassModel) => {
         setSelectedClass(cls);
         setViewModalOpen(true);
+        fetchEnvironments(cls.id);
+    };
+
+    const fetchEnvironments = async (classId: number) => {
+        setLoadingEnvs(true);
+        try {
+            const res = await api.get(`/classes/${classId}/environments`);
+            setEnvironments(res.data);
+        } catch (e) {
+            console.error("Failed to fetch environments", e);
+            showToast("Failed to load environments", "error");
+        } finally {
+            setLoadingEnvs(false);
+        }
+    };
+
+    const handlePowerControl = async (envId: number, vmId: number, action: string) => {
+        try {
+            const res = await api.post(`/environments/${envId}/vms/${vmId}/power`, { action });
+            if (res.data.success) {
+                showToast(`VM ${action} command sent`, 'success');
+                // Refresh environments to get new state
+                if (selectedClass) fetchEnvironments(selectedClass.id);
+            }
+        } catch (e: any) {
+            showToast(`Power action failed: ${e.response?.data?.detail || e.message}`, 'error');
+        }
     };
 
     const openEditModal = (cls: ClassModel) => {
@@ -165,6 +245,7 @@ const Classes: React.FC = () => {
         setEditForm({
             name: cls.name,
             blueprint_id: cls.blueprint_id,
+            template_id: cls.template_id ? cls.template_id : undefined,
             max_users: cls.max_users,
             passcode: cls.passcode,
             start_date: cls.start_date.slice(0, 16),
@@ -457,8 +538,8 @@ const Classes: React.FC = () => {
                             <div className="relative flex-1">
                                 <select
                                     className="input appearance-none pr-10"
-                                    value={createForm.blueprint_id}
-                                    onChange={e => setCreateForm({...createForm, blueprint_id: e.target.value})}
+                                    value={createForm.template_id}
+                                    onChange={e => setCreateForm({...createForm, template_id: e.target.value})}
                                 >
                                     <option value="">Select a template...</option>
                                     {templates.map((tpl) => (
@@ -566,6 +647,71 @@ const Classes: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Environments List */}
+                        <div className="pt-4 border-t border-theme">
+                             <h4 className="text-lg font-semibold text-primary mb-3">Student Environments</h4>
+                             {loadingEnvs ? (
+                                 <div className="text-center py-4">
+                                     <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto" />
+                                     <p className="text-secondary text-sm mt-2">Loading environments...</p>
+                                 </div>
+                             ) : environments.length === 0 ? (
+                                 <p className="text-secondary text-center py-4 italic">No environments provisioned yet.</p>
+                             ) : (
+                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                                     {environments.map(env => (
+                                         <div key={env.id} className="bg-secondary/50 rounded-lg p-3 border border-theme">
+                                             <div className="flex items-center justify-between mb-2">
+                                                 <span className="font-medium text-primary">{env.name}</span>
+                                                 <span className="text-xs text-secondary bg-background px-2 py-0.5 rounded-full border border-theme">
+                                                     {env.vms.length} VMs
+                                                 </span>
+                                             </div>
+                                             <div className="space-y-2">
+                                                 {env.vms.map(vm => (
+                                                     <div key={vm.id} className="flex items-center justify-between text-sm bg-background/50 p-2 rounded">
+                                                         <div className="flex items-center gap-2">
+                                                             <div className={`w-2 h-2 rounded-full ${vm.power_state === 'poweredOn' ? 'bg-green-500' : 'bg-red-500'}`} />
+                                                             <span className="text-primary">{vm.name}</span>
+                                                         </div>
+                                                         <div className="flex items-center gap-2">
+                                                             <span className="text-xs font-mono text-secondary mr-2">
+                                                                 {vm.ip_address || 'No IP'}
+                                                             </span>
+                                                             {vm.power_state === 'poweredOn' ? (
+                                                                 <button 
+                                                                     onClick={() => handlePowerControl(env.id, vm.id, 'stop')}
+                                                                     className="p-1 text-red-400 hover:bg-red-500/10 rounded"
+                                                                     title="Stop VM"
+                                                                 >
+                                                                     <div className="w-3 h-3 bg-current rounded-sm" /> 
+                                                                 </button>
+                                                             ) : (
+                                                                 <button 
+                                                                     onClick={() => handlePowerControl(env.id, vm.id, 'start')}
+                                                                     className="p-1 text-green-400 hover:bg-green-500/10 rounded"
+                                                                     title="Start VM"
+                                                                 >
+                                                                     <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[6px] border-l-current border-b-[3px] border-b-transparent ml-0.5" />
+                                                                 </button>
+                                                             )}
+                                                             <button 
+                                                                 onClick={() => handlePowerControl(env.id, vm.id, 'reset')}
+                                                                 className="p-1 text-amber-400 hover:bg-amber-500/10 rounded"
+                                                                 title="Reset VM"
+                                                             >
+                                                                 <div className="w-3 h-3 border border-current rounded-full" />
+                                                             </button>
+                                                         </div>
+                                                     </div>
+                                                 ))}
+                                             </div>
+                                         </div>
+                                     ))}
+                                 </div>
+                             )}
+                        </div>
+
                         <div className="flex justify-end gap-3 pt-4">
                             <button onClick={() => setViewModalOpen(false)} className="btn-secondary">
                                 Close
@@ -576,6 +722,14 @@ const Classes: React.FC = () => {
                             >
                                 <Edit className="w-4 h-4" />
                                 Edit
+                            </button>
+                            <button
+                                onClick={() => handleProvision(selectedClass.id)}
+                                className="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2"
+                                disabled={isSubmitting}
+                            >
+                                <Server className="w-4 h-4" />
+                                Provision
                             </button>
                         </div>
                     </div>
@@ -628,12 +782,12 @@ const Classes: React.FC = () => {
                                 <div className="relative flex-1">
                                     <select 
                                         className="input appearance-none pr-10"
-                                        value={editForm.blueprint_id || ''}
-                                        onChange={e => setEditForm({...editForm, blueprint_id: e.target.value})}
+                                        value={editForm.template_id || ''}
+                                        onChange={e => setEditForm({...editForm, template_id: Number(e.target.value)})}
                                     >
                                         <option value="">Select a template...</option>
                                         {templates.map((tpl) => (
-                                            <option key={tpl.id} value={String(tpl.id)}>
+                                            <option key={tpl.id} value={tpl.id}>
                                                 {tpl.name} ({tpl.provider}) {tpl.description ? `- ${tpl.description}` : ''}
                                             </option>
                                         ))}

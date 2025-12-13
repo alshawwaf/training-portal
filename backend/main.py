@@ -164,6 +164,8 @@ async def startup_event():
 
         # Initialize Services
         proxmox_service.load_config(db)
+        vsphere_service.load_config(db)
+        vsphere_service.connect()
         await email_service.load_config(db)
         
         # Seed Default Templates

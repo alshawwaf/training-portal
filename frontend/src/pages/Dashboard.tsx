@@ -19,6 +19,23 @@ interface ClassModel {
     description?: string;
 }
 
+interface EnvironmentVM {
+    id: number;
+    name: string;
+    moid: string;
+    ip_address?: string;
+    power_state: string;
+    access_url?: string;
+}
+
+interface MyEnvironment {
+    id: number;
+    name: string;
+    class_name: string;
+    class_id: number;
+    vms: EnvironmentVM[];
+}
+
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -36,6 +53,10 @@ const Dashboard: React.FC = () => {
   const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
   const [editForm, setEditForm] = useState<Partial<ClassModel>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // My Environments state
+  const [myEnvironments, setMyEnvironments] = useState<MyEnvironment[]>([]);
+  const [loadingMyEnvs, setLoadingMyEnvs] = useState(false);
 
   const fetchClasses = async () => {
     try {
@@ -55,11 +76,56 @@ const Dashboard: React.FC = () => {
       }
   };
 
+  const fetchMyEnvironments = async () => {
+      setLoadingMyEnvs(true);
+      try {
+          // Fetch environments for each class the user has access to
+          const envPromises = classes.map(async (cls) => {
+              try {
+                  const res = await api.get(`/classes/${cls.id}/environments`);
+                  return res.data.map((env: any) => ({
+                      ...env,
+                      class_name: cls.name,
+                      class_id: cls.id
+                  }));
+              } catch {
+                  return [];
+              }
+          });
+          const allEnvs = await Promise.all(envPromises);
+          setMyEnvironments(allEnvs.flat());
+      } catch (err) {
+          console.error("Failed to fetch my environments", err);
+      } finally {
+          setLoadingMyEnvs(false);
+      }
+  };
+
+  const handleMyEnvPowerControl = async (envId: number, vmId: number, action: string) => {
+      try {
+          const res = await api.post(`/environments/${envId}/vms/${vmId}/power`, { action });
+          if (res.data.success) {
+              showToast(`VM ${action} command sent`, 'success');
+              fetchMyEnvironments();
+          }
+      } catch (e: any) {
+          showToast(`Power action failed: ${e.response?.data?.detail || e.message}`, 'error');
+      }
+  };
+
   useEffect(() => {
     fetchClasses();
     fetchStats();
     // eslint-disable-next-line
   }, []);
+
+  // Fetch environments after classes are loaded
+  useEffect(() => {
+      if (classes.length > 0) {
+          fetchMyEnvironments();
+      }
+      // eslint-disable-next-line
+  }, [classes]);
 
   const handleDelete = async () => {
     if (!selectedClass) return;
@@ -286,6 +352,88 @@ const Dashboard: React.FC = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        {/* My Environments Section */}
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-primary">My Lab Environments</h2>
+                <span className="text-sm text-secondary">
+                    {myEnvironments.reduce((acc, env) => acc + env.vms.length, 0)} VMs across {myEnvironments.length} environments
+                </span>
+            </div>
+            
+            <div className="card-elevated p-6">
+                {loadingMyEnvs ? (
+                    <div className="flex items-center justify-center py-8">
+                        <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                        <span className="ml-3 text-secondary">Loading environments...</span>
+                    </div>
+                ) : myEnvironments.length === 0 ? (
+                    <div className="text-center py-8">
+                        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+                            <Monitor className="w-8 h-8 text-secondary" />
+                        </div>
+                        <p className="text-secondary">No lab environments provisioned yet.</p>
+                        <p className="text-sm text-secondary mt-1">Environments will appear here when classes are provisioned.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {myEnvironments.map(env => (
+                            <div key={env.id} className="bg-secondary/50 rounded-xl p-4 border border-theme hover:border-blue-500/30 transition-colors">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h4 className="font-semibold text-primary">{env.name}</h4>
+                                        <p className="text-xs text-secondary">{env.class_name}</p>
+                                    </div>
+                                    <span className="text-xs text-secondary bg-background px-2 py-1 rounded-full border border-theme">
+                                        {env.vms.length} VMs
+                                    </span>
+                                </div>
+                                <div className="space-y-2">
+                                    {env.vms.map(vm => (
+                                        <div key={vm.id} className="flex items-center justify-between bg-background/50 p-2 rounded-lg">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-2 h-2 rounded-full ${vm.power_state === 'poweredOn' ? 'bg-green-500' : 'bg-red-500'}`} />
+                                                <span className="text-sm text-primary truncate max-w-[120px]" title={vm.name}>{vm.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-xs font-mono text-secondary mr-1">
+                                                    {vm.ip_address || 'No IP'}
+                                                </span>
+                                                {vm.power_state === 'poweredOn' ? (
+                                                    <button 
+                                                        onClick={() => handleMyEnvPowerControl(env.id, vm.id, 'stop')}
+                                                        className="p-1 text-red-400 hover:bg-red-500/10 rounded"
+                                                        title="Stop VM"
+                                                    >
+                                                        <div className="w-3 h-3 bg-current rounded-sm" />
+                                                    </button>
+                                                ) : (
+                                                    <button 
+                                                        onClick={() => handleMyEnvPowerControl(env.id, vm.id, 'start')}
+                                                        className="p-1 text-green-400 hover:bg-green-500/10 rounded"
+                                                        title="Start VM"
+                                                    >
+                                                        <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[6px] border-l-current border-b-[3px] border-b-transparent ml-0.5" />
+                                                    </button>
+                                                )}
+                                                <button 
+                                                    onClick={() => handleMyEnvPowerControl(env.id, vm.id, 'reset')}
+                                                    className="p-1 text-amber-400 hover:bg-amber-500/10 rounded"
+                                                    title="Reset VM"
+                                                >
+                                                    <div className="w-3 h-3 border border-current rounded-full" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
 

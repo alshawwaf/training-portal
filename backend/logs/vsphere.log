@@ -1,0 +1,160 @@
+2025-12-13 03:07:32,244 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 03:07:35,349 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 03:08:18,062 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 03:08:21,157 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 08:08:47,215 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 08:08:52,398 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVim/connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVim/connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVim/connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 08:09:53,543 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 08:09:53,712 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 08:11:25,450 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=Final_Provision_Test-Student_1-pfSense
+2025-12-13 08:11:25,495 - INFO - Found template VM: pfSense
+2025-12-13 08:11:25,555 - INFO - Creating/finding folder: pfSense_Labs in datacenter alshawwaf
+2025-12-13 08:11:25,623 - INFO - Cloning pfSense to Final_Provision_Test-Student_1-pfSense in folder pfSense_Labs...
+2025-12-13 08:11:26,669 - ERROR - Clone task failed: A specified parameter was not correct: spec.location.pool
+2025-12-13 03:13:08,972 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 03:13:09,059 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 08:13:32,785 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 08:13:32,937 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 08:14:38,415 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=Clone_Test_with_Pool-Student_1-pfSense
+2025-12-13 08:14:38,469 - INFO - Found template VM: pfSense
+2025-12-13 08:14:38,515 - INFO - Using datacenter compute resource pool: Resources
+2025-12-13 08:14:38,560 - INFO - Creating/finding folder: pfSense_Labs in datacenter alshawwaf
+2025-12-13 08:14:38,585 - INFO - Cloning pfSense to Clone_Test_with_Pool-Student_1-pfSense in folder pfSense_Labs...
+2025-12-13 08:14:49,772 - INFO - VM provisioned successfully: Clone_Test_with_Pool-Student_1-pfSense, MOID: vm-5022, IP: None

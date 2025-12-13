@@ -57,7 +57,8 @@ class Class(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     instructor_id = Column(Integer, ForeignKey("users.id"))
-    blueprint_id = Column(String) # Proxmox Template ID
+    blueprint_id = Column(String) # Proxmox Template ID (Legacy)
+    template_id = Column(Integer, ForeignKey("templates.id"), nullable=True) # vSphere Template
     max_users = Column(Integer, default=10)
     passcode = Column(String)
     start_date = Column(DateTime, default=datetime.datetime.utcnow)
@@ -68,6 +69,8 @@ class Class(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
     instructor = relationship("User", back_populates="classes")
+    template = relationship("Template")
+    environments = relationship("ClassEnvironment", back_populates="class_", cascade="all, delete-orphan")
 
     def to_dict(self):
         """Convert class to dictionary for JSON backup"""
@@ -76,6 +79,7 @@ class Class(Base):
             "name": self.name,
             "instructor_id": self.instructor_id,
             "blueprint_id": self.blueprint_id,
+            "template_id": self.template_id,
             "max_users": self.max_users,
             "passcode": self.passcode,
             "start_date": self.start_date.isoformat() if self.start_date else None,
@@ -149,3 +153,33 @@ class TemplateVM(Base):
             "access_protocol": self.access_protocol,
             "access_port": self.access_port,
         }
+
+
+class ClassEnvironment(Base):
+    """Represents a single student's environment for a class"""
+    __tablename__ = "class_environments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # User who claimed environment
+    name = Column(String) # e.g., "Student 1"
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    # Relationships
+    class_ = relationship("Class", back_populates="environments")
+    user = relationship("User")
+    vms = relationship("EnvironmentVM", back_populates="environment", cascade="all, delete-orphan")
+
+
+class EnvironmentVM(Base):
+    """Represents a specific provisioned VM"""
+    __tablename__ = "environment_vms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    env_id = Column(Integer, ForeignKey("class_environments.id", ondelete="CASCADE"))
+    vm_name = Column(String) # Name in vSphere
+    vm_moid = Column(String) # MOID in vSphere
+    ip_address = Column(String, nullable=True)
+    access_url = Column(String, nullable=True) # Guacamole link etc.
+    
+    environment = relationship("ClassEnvironment", back_populates="vms")
