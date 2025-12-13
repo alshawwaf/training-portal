@@ -10,6 +10,12 @@ import CreateClass from './pages/CreateClass';
 import EditClass from './pages/EditClass';
 import Settings from './pages/Settings';
 import Templates from './pages/Templates';
+// Monitoring pages (admin only)
+import AllClasses from './pages/monitoring/AllClasses';
+import AllEnvironments from './pages/monitoring/AllEnvironments';
+// User workspace pages
+import MyClasses from './pages/MyClasses';
+import MyEnvironments from './pages/MyEnvironments';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -27,6 +33,35 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  return <Layout>{children}</Layout>;
+};
+
+// Admin-only route - checks for admin role
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check for admin role (supports 'admin', 'super_admin', or 'administrator')
+  const isAdmin = user.role === 'admin' || user.role === 'super_admin' || user.role === 'administrator';
+  
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
   }
 
   return <Layout>{children}</Layout>;
@@ -67,6 +102,28 @@ const App: React.FC = () => {
             <Route path="/templates" element={
               <ProtectedRoute>
                 <Templates />
+              </ProtectedRoute>
+            } />
+            {/* Monitoring Routes (Admin Only) */}
+            <Route path="/monitoring/classes" element={
+              <AdminRoute>
+                <AllClasses />
+              </AdminRoute>
+            } />
+            <Route path="/monitoring/environments" element={
+              <AdminRoute>
+                <AllEnvironments />
+              </AdminRoute>
+            } />
+            {/* User Workspace Routes */}
+            <Route path="/my/classes" element={
+              <ProtectedRoute>
+                <MyClasses />
+              </ProtectedRoute>
+            } />
+            <Route path="/my/environments" element={
+              <ProtectedRoute>
+                <MyEnvironments />
               </ProtectedRoute>
             } />
           </Routes>
