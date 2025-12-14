@@ -5,6 +5,7 @@ import { Users, Monitor, Clock, ArrowUpRight, Sparkles, Eye, Edit, Trash2, Save 
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
+import { getProviderIcon } from '../components/ProviderIcons';
 
 interface ClassModel {
     id: number;
@@ -17,6 +18,12 @@ interface ClassModel {
     instructor_id: number;
     status?: string;
     description?: string;
+    template?: {
+        id: number;
+        name: string;
+        icon: string;
+        provider: string;
+    };
 }
 
 interface EnvironmentVM {
@@ -58,19 +65,29 @@ const Dashboard: React.FC = () => {
   const [myEnvironments, setMyEnvironments] = useState<MyEnvironment[]>([]);
   const [loadingMyEnvs, setLoadingMyEnvs] = useState(false);
 
+
+
   const fetchClasses = async () => {
     try {
         const res = await api.get('/classes/');
-        setClasses(res.data);
+        // Ensure we always set an array
+        setClasses(Array.isArray(res.data) ? res.data : []);
     } catch {
         console.error("Failed to fetch classes");
+        setClasses([]);
     }
   };
 
   const fetchStats = async () => {
       try {
-          const res = await api.get('/dashboard/stats');
-          setDashboardStats(res.data);
+          const res = await api.get('/dashboard/stats?vendor=vsphere');
+          // Ensure we have valid stats object with defaults
+          const stats = res.data || {};
+          setDashboardStats({
+              active_environments: stats.active_environments ?? 0,
+              total_students: stats.total_students ?? 0,
+              upcoming_classes: stats.upcoming_classes ?? 0
+          });
       } catch (err) {
           console.error("Failed to fetch dashboard stats", err);
       }
@@ -80,10 +97,12 @@ const Dashboard: React.FC = () => {
       setLoadingMyEnvs(true);
       try {
           // Fetch environments for each class the user has access to
-          const envPromises = classes.map(async (cls) => {
+          const classesToFetch = Array.isArray(classes) ? classes : [];
+          const envPromises = classesToFetch.map(async (cls) => {
               try {
                   const res = await api.get(`/classes/${cls.id}/environments`);
-                  return res.data.map((env: any) => ({
+                  const envData = Array.isArray(res.data) ? res.data : [];
+                  return envData.map((env: any) => ({
                       ...env,
                       class_name: cls.name,
                       class_id: cls.id
@@ -194,7 +213,7 @@ const Dashboard: React.FC = () => {
   const stats = [
     { 
       label: 'Active Environments', 
-      value: dashboardStats.active_environments.toString(), 
+      value: String(dashboardStats?.active_environments ?? 0), 
       icon: Monitor, 
       color: 'purple',
       gradient: 'from-purple-600 to-pink-600',
@@ -202,7 +221,7 @@ const Dashboard: React.FC = () => {
     },
     { 
       label: 'Total Students', 
-      value: dashboardStats.total_students.toString(), 
+      value: String(dashboardStats?.total_students ?? 0), 
       icon: Users, 
       color: 'emerald',
       gradient: 'from-emerald-600 to-teal-600',
@@ -210,7 +229,7 @@ const Dashboard: React.FC = () => {
     },
     { 
       label: 'Upcoming Classes', 
-      value: dashboardStats.upcoming_classes.toString(), 
+      value: String(dashboardStats?.upcoming_classes ?? 0), 
       icon: Clock, 
       color: 'blue',
       gradient: 'from-blue-600 to-cyan-600',
@@ -221,19 +240,15 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-8">
         {/* Header */}
-        <header className="flex items-start justify-between">
-            <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
-                    <span className="badge badge-info flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
-                        Live
-                    </span>
-                </div>
-                <p className="text-secondary">Welcome back, <span className="text-primary font-medium">{user?.name}</span>. Here's what's happening.</p>
+        <header>
+            <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
+                <span className="badge badge-info flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Live
+                </span>
             </div>
-            
-            {/* Button Removed */}
+            <p className="text-secondary">Welcome back, <span className="text-primary font-medium">{user?.name}</span>. Here's what's happening.</p>
         </header>
 
         {/* Stats Grid */}
@@ -280,7 +295,7 @@ const Dashboard: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y border-theme">
-                        {classes.length === 0 ? (
+                        {(!classes || classes.length === 0) ? (
                             <tr>
                                 <td colSpan={5} className="p-12 text-center">
                                     <div className="flex flex-col items-center gap-3">
@@ -299,9 +314,18 @@ const Dashboard: React.FC = () => {
                                 <tr key={cls.id} className="hover:bg-secondary/30 transition-colors group">
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                                                {cls.name.charAt(0)}
-                                            </div>
+                                            {cls.template?.provider ? (() => {
+                                                const ProviderIcon = getProviderIcon(cls.template.provider);
+                                                return (
+                                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 border border-theme flex items-center justify-center p-2">
+                                                        <ProviderIcon className="w-full h-full" />
+                                                    </div>
+                                                );
+                                            })() : (
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                                                    {cls.name.charAt(0)}
+                                                </div>
+                                            )}
                                             <span 
                                                 className="text-primary font-medium group-hover:text-blue-500 transition-colors cursor-pointer"
                                                 onClick={() => openViewModal(cls)}
@@ -442,12 +466,28 @@ const Dashboard: React.FC = () => {
             {selectedClass && (
                 <div className="space-y-4">
                     <div className="flex items-center gap-4 pb-4 border-b border-theme">
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-2xl">
-                            {selectedClass.name.charAt(0)}
-                        </div>
+                        {selectedClass.template?.provider ? (() => {
+                            const ProviderIcon = getProviderIcon(selectedClass.template.provider);
+                            return (
+                                <div className="w-16 h-16 rounded-xl bg-secondary/50 border border-theme flex items-center justify-center p-3">
+                                    <ProviderIcon className="w-full h-full" />
+                                </div>
+                            );
+                        })() : (
+                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-2xl">
+                                {selectedClass.name.charAt(0)}
+                            </div>
+                        )}
                         <div>
                             <h3 className="text-xl font-bold text-primary">{selectedClass.name}</h3>
-                            <p className="text-secondary">Template {selectedClass.blueprint_id}</p>
+                            <p className="text-secondary">
+                                {selectedClass.template?.name || `Template ${selectedClass.blueprint_id}`}
+                                {selectedClass.template?.provider && (
+                                    <span className="ml-2 text-xs bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded">
+                                        {selectedClass.template.provider}
+                                    </span>
+                                )}
+                            </p>
                         </div>
                     </div>
                     

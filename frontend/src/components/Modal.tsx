@@ -8,9 +8,11 @@ interface ModalProps {
     title: string;
     children: React.ReactNode;
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+    icon?: React.ReactNode;
+    headerActions?: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'md' }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'md', icon, headerActions }) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Close on escape key
@@ -58,21 +60,27 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
             <div 
                 ref={modalRef}
                 className={clsx(
-                    "bg-elevated rounded-xl border border-theme shadow-2xl w-full transform transition-all scale-100",
+                    "bg-elevated rounded-xl border border-theme shadow-2xl w-full transform transition-all scale-100 max-h-[90vh] flex flex-col",
                     maxWidthClasses[maxWidth]
                 )}
             >
-                <div className="flex items-center justify-between p-6 border-b border-theme">
-                    <h2 className="text-xl font-semibold text-primary">{title}</h2>
-                    <button 
-                        onClick={onClose}
-                        className="text-secondary hover:text-primary transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                <div className="flex items-center justify-between p-6 border-b border-theme flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        {icon && <div className="p-2 bg-theme-hover rounded-lg">{icon}</div>}
+                        <h2 className="text-xl font-semibold text-primary">{title}</h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {headerActions}
+                        <button 
+                            onClick={onClose}
+                            className="text-secondary hover:text-primary transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
                 
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto">
                     {children}
                 </div>
             </div>

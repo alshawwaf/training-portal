@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 1,
+    "name": "ff",
+    "instructor_id": 1,
+    "blueprint_id": "1",
+    "template_id": 1,
+    "max_users": 1,
+    "passcode": "class123",
+    "start_date": "2025-12-14T16:41:31.630000",
+    "end_date": "2025-12-21T16:41:31.630000",
+    "status": "active",
+    "description": "",
+    "created_at": "2025-12-14T06:41:50.464474",
+    "updated_at": "2025-12-14T07:06:52.362147"
+  },
+  "archived_at": "2025-12-14T07:14:50.738380",
+  "reason": "deleted"
+}

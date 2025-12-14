@@ -4,6 +4,7 @@
     "name": "sbt-1-student-class",
     "instructor_id": 1,
     "blueprint_id": "5",
+    "template_id": null,
     "max_users": 1,
     "passcode": "class123",
     "start_date": "2025-12-13T03:49:00",
@@ -13,6 +14,6 @@
     "created_at": "2025-12-13T03:50:49.810027",
     "updated_at": "2025-12-13T03:50:49.810032"
   },
-  "backup_timestamp": "2025-12-13T03:50:49.842340",
-  "version": 1
+  "archived_at": "2025-12-14T08:33:04.275582",
+  "reason": "deleted"
 }

@@ -25,7 +25,7 @@ venv/
 .venv/
 
 # Environment Variables
-.env
+# .env
 
 # Javascript/Node
 node_modules/

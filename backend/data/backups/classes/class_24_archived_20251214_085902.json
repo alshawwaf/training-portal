@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 24,
+    "name": "FinalVerify",
+    "instructor_id": 1,
+    "blueprint_id": null,
+    "template_id": 9,
+    "max_users": 1,
+    "passcode": "99999",
+    "start_date": "2025-01-01T09:00:00",
+    "end_date": "2025-01-01T17:00:00",
+    "status": "active",
+    "description": null,
+    "created_at": "2025-12-14T08:48:06.247270",
+    "updated_at": "2025-12-14T08:48:06.247275"
+  },
+  "archived_at": "2025-12-14T08:59:02.837244",
+  "reason": "deleted"
+}

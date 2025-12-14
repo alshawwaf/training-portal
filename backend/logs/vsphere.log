@@ -162,3 +162,1677 @@ pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
 2025-12-13 18:43:32,354 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
 2025-12-13 19:16:37,357 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
 2025-12-13 19:16:37,446 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 20:10:52,803 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 20:10:57,943 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 20:11:26,335 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 20:11:29,443 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 20:13:04,282 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 20:13:09,374 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 20:13:24,241 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 20:13:29,327 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 164, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 20:13:40,321 - ERROR - provision_vm called but not connected to vSphere
+2025-12-14 01:59:12,777 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:59:12,972 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 22:52:18,697 - INFO - Attempting to connect to vSphere: 203.0.113.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 22:52:23,788 - ERROR - Failed to connect to vSphere 203.0.113.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 169, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 22:52:58,335 - INFO - Attempting to connect to vSphere: 203.0.113.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 22:53:03,398 - ERROR - Failed to connect to vSphere 203.0.113.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 169, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 22:53:15,952 - INFO - Attempting to connect to vSphere: 203.0.113.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 22:53:21,014 - ERROR - Failed to connect to vSphere 203.0.113.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 169, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 22:58:35,504 - INFO - Attempting to connect to vSphere: 203.0.113.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 22:58:38,596 - ERROR - Failed to connect to vSphere 203.0.113.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 169, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 23:03:54,155 - INFO - Attempting to connect to vSphere: 203.0.113.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:03:59,221 - ERROR - Failed to connect to vSphere 203.0.113.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 169, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 23:04:12,765 - INFO - Attempting to connect to vSphere: 203.0.113.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:04:17,834 - ERROR - Failed to connect to vSphere 203.0.113.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 169, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-13 23:12:35,932 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:12:36,022 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:14:42,067 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:14:42,154 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:15:31,531 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:15:31,619 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:19:38,429 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:19:38,517 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:20:18,748 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:20:18,833 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:21:12,688 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:21:12,775 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:22:33,552 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:22:33,640 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:23:55,588 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:23:55,681 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:50:07,235 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:50:07,317 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:50:36,855 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:50:36,946 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:51:52,002 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:51:52,087 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:52:22,051 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-13 23:52:22,141 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-13 23:52:43,373 - DEBUG - RootFolder: Datacenters
+2025-12-13 23:52:43,373 - DEBUG - Datacenters found: 2
+2025-12-13 23:52:46,373 - DEBUG - RootFolder: Datacenters
+2025-12-13 23:52:46,373 - DEBUG - Datacenters found: 2
+2025-12-13 23:53:05,793 - DEBUG - RootFolder: Datacenters
+2025-12-13 23:53:05,794 - DEBUG - Datacenters found: 2
+2025-12-13 23:53:08,665 - DEBUG - RootFolder: Datacenters
+2025-12-13 23:53:08,665 - DEBUG - Datacenters found: 2
+2025-12-14 00:01:43,712 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ghghgh-Student_1-pfSense
+2025-12-14 00:01:43,732 - INFO - Found template VM: pfSense
+2025-12-14 00:01:43,753 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:01:43,810 - INFO - Target folder ensured: SE_Training_Portal/ghghgh/Student 1
+2025-12-14 00:01:43,815 - INFO - Cloning pfSense to ghghgh-Student_1-pfSense in folder Student 1...
+2025-12-14 00:01:54,894 - INFO - VM provisioned successfully: ghghgh-Student_1-pfSense, MOID: vm-5028, IP: None
+2025-12-14 00:01:54,897 - INFO - Creating initial snapshot for ghghgh-Student_1-pfSense
+2025-12-14 00:01:55,923 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ghghgh-Student_2-pfSense
+2025-12-14 00:01:55,943 - INFO - Found template VM: pfSense
+2025-12-14 00:01:55,962 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:01:55,989 - INFO - Target folder ensured: SE_Training_Portal/ghghgh/Student 2
+2025-12-14 00:01:55,995 - INFO - Cloning pfSense to ghghgh-Student_2-pfSense in folder Student 2...
+2025-12-14 00:02:02,043 - INFO - VM provisioned successfully: ghghgh-Student_2-pfSense, MOID: vm-5031, IP: None
+2025-12-14 00:02:02,049 - INFO - Creating initial snapshot for ghghgh-Student_2-pfSense
+2025-12-14 00:05:40,974 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:05:41,061 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:05:44,894 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:05:44,979 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:06:12,855 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:06:12,855 - DEBUG - Datacenters found: 2
+2025-12-14 00:06:15,677 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:06:15,677 - DEBUG - Datacenters found: 2
+2025-12-14 00:06:59,838 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:06:59,839 - DEBUG - Datacenters found: 2
+2025-12-14 00:07:02,293 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:07:02,294 - DEBUG - Datacenters found: 2
+2025-12-14 00:07:52,233 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:07:52,234 - DEBUG - Datacenters found: 2
+2025-12-14 00:07:54,958 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:07:54,958 - DEBUG - Datacenters found: 2
+2025-12-14 00:09:10,079 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:09:10,158 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:13:49,859 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:13:49,940 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:14:50,101 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:14:50,187 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:16:43,837 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:16:43,920 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:18:54,717 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:18:54,803 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:19:40,925 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:19:41,006 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 05:23:42,684 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 05:23:42,855 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:27:42,548 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:27:42,637 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:29:01,324 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:29:01,324 - DEBUG - Datacenters found: 2
+2025-12-14 00:29:04,227 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:29:04,227 - DEBUG - Datacenters found: 2
+2025-12-14 00:29:27,808 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:29:27,808 - DEBUG - Datacenters found: 2
+2025-12-14 00:29:30,628 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:29:30,628 - DEBUG - Datacenters found: 2
+2025-12-14 00:30:37,234 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:30:37,319 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:31:49,841 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:31:49,841 - DEBUG - Datacenters found: 2
+2025-12-14 00:31:52,364 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:31:52,364 - DEBUG - Datacenters found: 2
+2025-12-14 00:35:09,193 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:35:09,193 - DEBUG - Datacenters found: 2
+2025-12-14 00:35:11,921 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:35:11,921 - DEBUG - Datacenters found: 2
+2025-12-14 00:38:10,853 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:38:10,853 - DEBUG - Datacenters found: 2
+2025-12-14 00:38:13,327 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:38:13,327 - DEBUG - Datacenters found: 2
+2025-12-14 00:38:25,316 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:38:25,316 - DEBUG - Datacenters found: 2
+2025-12-14 00:38:28,197 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:38:28,197 - DEBUG - Datacenters found: 2
+2025-12-14 00:38:55,272 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:38:55,273 - DEBUG - Datacenters found: 2
+2025-12-14 00:38:58,090 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:38:58,090 - DEBUG - Datacenters found: 2
+2025-12-14 00:40:36,685 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:40:36,685 - DEBUG - Datacenters found: 2
+2025-12-14 00:40:39,496 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:40:39,498 - DEBUG - Datacenters found: 2
+2025-12-14 00:41:04,839 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:41:04,928 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:41:19,094 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:41:19,180 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:43:58,908 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:43:58,909 - DEBUG - Datacenters found: 2
+2025-12-14 00:44:01,539 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:44:01,540 - DEBUG - Datacenters found: 2
+2025-12-14 00:51:23,175 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:51:23,264 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:53:46,835 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=SBT-Student_1-pfSense
+2025-12-14 00:53:46,856 - INFO - Found template VM: pfSense
+2025-12-14 00:53:46,875 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:53:46,927 - INFO - Target folder ensured: SE_Training_Portal/SBT/Student 1
+2025-12-14 00:53:46,932 - INFO - Cloning pfSense to SBT-Student_1-pfSense in folder Student 1...
+2025-12-14 00:53:53,996 - INFO - VM provisioned successfully: SBT-Student_1-pfSense, MOID: vm-5035, IP: None
+2025-12-14 00:53:53,999 - INFO - Creating initial snapshot for SBT-Student_1-pfSense
+2025-12-14 00:53:55,019 - INFO - Starting VM provisioning: template_moid=vm-2012, new_name=SBT-Student_1-Spark
+2025-12-14 00:53:55,044 - INFO - Found template VM: Spark
+2025-12-14 00:53:55,063 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:53:55,084 - INFO - Target folder ensured: SE_Training_Portal/SBT/Student 1
+2025-12-14 00:53:55,089 - INFO - Cloning Spark to SBT-Student_1-Spark in folder Student 1...
+2025-12-14 00:54:46,101 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:54:46,102 - DEBUG - Datacenters found: 2
+2025-12-14 00:54:49,046 - DEBUG - RootFolder: Datacenters
+2025-12-14 00:54:49,046 - DEBUG - Datacenters found: 2
+2025-12-14 00:54:51,395 - ERROR - Clone task failed: Could not complete network copy for file /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/Spark/Spark_1-000002.vmdk
+2025-12-14 00:54:51,399 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=SBT-Student_2-pfSense
+2025-12-14 00:54:51,419 - INFO - Found template VM: pfSense
+2025-12-14 00:54:51,437 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:54:51,466 - INFO - Target folder ensured: SE_Training_Portal/SBT/Student 2
+2025-12-14 00:54:51,471 - INFO - Cloning pfSense to SBT-Student_2-pfSense in folder Student 2...
+2025-12-14 00:54:57,520 - INFO - VM provisioned successfully: SBT-Student_2-pfSense, MOID: vm-5039, IP: None
+2025-12-14 00:54:57,524 - INFO - Creating initial snapshot for SBT-Student_2-pfSense
+2025-12-14 00:54:58,544 - INFO - Starting VM provisioning: template_moid=vm-2012, new_name=SBT-Student_2-Spark
+2025-12-14 00:54:58,574 - INFO - Found template VM: Spark
+2025-12-14 00:54:58,589 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:54:58,609 - INFO - Target folder ensured: SE_Training_Portal/SBT/Student 2
+2025-12-14 00:54:58,613 - INFO - Cloning Spark to SBT-Student_2-Spark in folder Student 2...
+2025-12-14 00:55:51,880 - ERROR - Clone task failed: Could not complete network copy for file /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/Spark/Spark_1-000002.vmdk
+2025-12-14 00:55:51,882 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=SBT-Student_3-pfSense
+2025-12-14 00:55:51,902 - INFO - Found template VM: pfSense
+2025-12-14 00:55:51,920 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:55:51,949 - INFO - Target folder ensured: SE_Training_Portal/SBT/Student 3
+2025-12-14 00:55:51,954 - INFO - Cloning pfSense to SBT-Student_3-pfSense in folder Student 3...
+2025-12-14 00:56:03,024 - INFO - VM provisioned successfully: SBT-Student_3-pfSense, MOID: vm-5043, IP: None
+2025-12-14 00:56:03,027 - INFO - Creating initial snapshot for SBT-Student_3-pfSense
+2025-12-14 00:56:04,046 - INFO - Starting VM provisioning: template_moid=vm-2012, new_name=SBT-Student_3-Spark
+2025-12-14 00:56:04,078 - INFO - Found template VM: Spark
+2025-12-14 00:56:04,098 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 00:56:04,118 - INFO - Target folder ensured: SE_Training_Portal/SBT/Student 3
+2025-12-14 00:56:04,122 - INFO - Cloning Spark to SBT-Student_3-Spark in folder Student 3...
+2025-12-14 00:56:58,405 - ERROR - Clone task failed: Could not complete network copy for file /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/Spark/Spark_1-000002.vmdk
+2025-12-14 00:59:34,502 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:59:34,592 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 00:59:48,447 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 00:59:48,534 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:05:42,996 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:05:42,996 - DEBUG - Datacenters found: 2
+2025-12-14 01:05:45,766 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:05:45,767 - DEBUG - Datacenters found: 2
+2025-12-14 01:10:13,268 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:10:13,357 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:11:07,329 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:11:07,417 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:11:11,182 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:11:11,272 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:12:37,482 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:12:37,573 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:15:44,846 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:15:44,846 - DEBUG - Datacenters found: 2
+2025-12-14 01:15:47,525 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:15:47,525 - DEBUG - Datacenters found: 2
+2025-12-14 01:16:16,741 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:16:16,741 - DEBUG - Datacenters found: 2
+2025-12-14 01:16:19,050 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:16:19,050 - DEBUG - Datacenters found: 2
+2025-12-14 01:16:49,641 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:16:49,641 - DEBUG - Datacenters found: 2
+2025-12-14 01:16:51,911 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:16:51,911 - DEBUG - Datacenters found: 2
+2025-12-14 01:27:33,718 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 01:27:33,719 - INFO - Using Real vSphere Connection.
+2025-12-14 01:27:33,720 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:27:33,806 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:27:51,037 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 01:27:51,038 - INFO - Using Real vSphere Connection.
+2025-12-14 01:27:51,039 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:27:51,124 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:28:01,963 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 01:28:05,145 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 01:28:05,146 - INFO - Using Real vSphere Connection.
+2025-12-14 01:28:05,146 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:28:05,230 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:28:08,037 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 01:28:13,099 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 01:28:18,957 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 01:28:18,958 - INFO - Using Real vSphere Connection.
+2025-12-14 01:28:18,959 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 01:28:18,959 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 01:28:19,048 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 01:40:47,204 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:40:47,204 - DEBUG - Datacenters found: 2
+2025-12-14 01:40:49,630 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:40:49,630 - DEBUG - Datacenters found: 2
+2025-12-14 01:48:56,115 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:48:56,116 - DEBUG - Datacenters found: 2
+2025-12-14 01:48:58,533 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:48:58,533 - DEBUG - Datacenters found: 2
+2025-12-14 01:49:29,714 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:49:29,714 - DEBUG - Datacenters found: 2
+2025-12-14 01:53:19,141 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:53:19,142 - DEBUG - Datacenters found: 2
+2025-12-14 01:53:21,467 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:53:21,467 - DEBUG - Datacenters found: 2
+2025-12-14 01:53:30,244 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:53:30,245 - DEBUG - Datacenters found: 2
+2025-12-14 01:53:32,636 - DEBUG - RootFolder: Datacenters
+2025-12-14 01:53:32,636 - DEBUG - Datacenters found: 2
+2025-12-14 02:07:31,624 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ff-Student_1-pfSense
+2025-12-14 02:07:31,648 - INFO - Found template VM: pfSense
+2025-12-14 02:07:31,668 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 02:07:31,724 - INFO - Target folder ensured: SE_Training_Portal/ff/Student 1
+2025-12-14 02:07:31,731 - INFO - Cloning pfSense to ff-Student_1-pfSense in folder Student 1...
+2025-12-14 02:07:42,824 - INFO - VM provisioned successfully: ff-Student_1-pfSense, MOID: vm-5048, IP: None
+2025-12-14 02:07:42,828 - INFO - Creating initial snapshot for ff-Student_1-pfSense
+2025-12-14 02:18:51,604 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 02:18:52,684 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 02:19:03,632 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 02:19:03,632 - INFO - Using Real vSphere Connection.
+2025-12-14 02:19:03,633 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 02:19:03,633 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 02:19:03,723 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 03:03:25,872 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_1-pfSense
+2025-12-14 03:03:25,898 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:25,911 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_2-pfSense
+2025-12-14 03:03:25,923 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:25,931 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_3-pfSense
+2025-12-14 03:03:25,943 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:25,951 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_4-pfSense
+2025-12-14 03:03:25,962 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:25,969 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_5-pfSense
+2025-12-14 03:03:25,980 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:25,990 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_6-pfSense
+2025-12-14 03:03:26,002 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:26,012 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_7-pfSense
+2025-12-14 03:03:26,025 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:26,033 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_8-pfSense
+2025-12-14 03:03:26,046 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:26,054 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_9-pfSense
+2025-12-14 03:03:26,066 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:03:26,074 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ProvisionTest2-Student_10-pfSense
+2025-12-14 03:03:26,085 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:26:32,861 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=VsphereVerify-Student_1-pfSense
+2025-12-14 03:26:32,882 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 417, in provision_vm
+    template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 676, in _get_obj
+    container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:31:10,276 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 08:32:11,997 - ERROR - Error getting datacenters: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 212, in get_datacenters
+    """Get list of datacenters."""
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 08:32:12,090 - ERROR - Error getting clusters: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 243, in get_clusters
+    container = content.viewManager.CreateContainerView(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 08:32:12,148 - ERROR - Error getting VMs: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 273, in get_vms
+    "moid": vm._moId,
+        ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 08:32:12,202 - ERROR - Error getting datacenters: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 212, in get_datacenters
+    """Get list of datacenters."""
+                    ^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 08:32:12,228 - ERROR - Error getting clusters: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 243, in get_clusters
+    container = content.viewManager.CreateContainerView(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 08:32:12,265 - ERROR - Error getting VMs: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 273, in get_vms
+    "moid": vm._moId,
+        ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:33:58,001 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 03:34:08,930 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 03:34:08,931 - INFO - Using Real vSphere Connection.
+2025-12-14 03:34:08,931 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 03:34:08,932 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 03:34:09,018 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 08:39:15,066 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=VsphereProvisionTest-Student_1-pfSense
+2025-12-14 08:39:15,119 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 446, in provision_vm
+    vsphere_logger.warning(f"Could not find resource pool: {pool_err}")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/services/vsphere_service.py", line 726, in _get_obj
+    vsphere_service = VSphereService()
+                        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:41:23,381 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 03:41:23,626 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 03:41:34,272 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 03:41:34,273 - INFO - Using Real vSphere Connection.
+2025-12-14 03:41:34,274 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 03:41:34,274 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 03:41:34,363 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 08:48:06,341 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=FinalVerify-Student_1-pfSense
+2025-12-14 08:48:06,401 - ERROR - Exception during VM provisioning: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+Traceback (most recent call last):
+  File "/app/services/vsphere_service.py", line 446, in provision_vm
+    vsphere_logger.warning(f"Could not find resource pool: {pool_err}")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/services/vsphere_service.py", line 726, in _get_obj
+    """Wait for a vSphere task to finish."""
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/pyVmomi/SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'The session is not authenticated.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) [],
+   object = 'vim.view.ViewManager:ViewManager',
+   privilegeId = '',
+   missingPrivileges = (vim.fault.NoPermission.EntityPrivileges) []
+}
+2025-12-14 03:49:44,200 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 03:49:55,074 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 03:49:55,075 - INFO - Using Real vSphere Connection.
+2025-12-14 03:49:55,077 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 03:49:55,077 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 03:49:55,173 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 03:52:27,127 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 03:52:38,056 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 03:52:38,057 - INFO - Using Real vSphere Connection.
+2025-12-14 03:52:38,058 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 03:52:38,058 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 03:52:38,147 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 03:54:33,289 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=Port8001Verify-Student_1-pfSense
+2025-12-14 03:54:33,313 - INFO - Found template VM: pfSense
+2025-12-14 03:54:33,333 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 03:54:33,393 - INFO - Target folder ensured: SE_Training_Portal/Port8001Verify/Student 1
+2025-12-14 03:54:33,398 - INFO - Cloning pfSense to Port8001Verify-Student_1-pfSense in folder Student 1...
+2025-12-14 03:54:40,463 - INFO - VM provisioned successfully: Port8001Verify-Student_1-pfSense, MOID: vm-5052, IP: None
+2025-12-14 03:54:40,466 - INFO - Creating initial snapshot for Port8001Verify-Student_1-pfSense
+2025-12-14 08:58:03,597 - INFO - vSphere Service configured (Host: 203.0.113.10)
+2025-12-14 08:58:15,591 - INFO - vSphere Config Loaded from DB - Host: 192.168.10.10
+2025-12-14 08:58:15,593 - INFO - Using Real vSphere Connection.
+2025-12-14 08:58:15,594 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 08:58:15,596 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 08:58:15,755 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 09:01:06,251 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=class1234-Student_1-pfSense
+2025-12-14 09:01:06,348 - INFO - Found template VM: pfSense
+2025-12-14 09:01:06,406 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 09:01:06,495 - INFO - Target folder ensured: SE_Training_Portal/class1234/Student 1
+2025-12-14 09:01:06,508 - INFO - Cloning pfSense to class1234-Student_1-pfSense in folder Student 1...
+2025-12-14 09:01:16,707 - INFO - VM provisioned successfully: class1234-Student_1-pfSense, MOID: vm-5056, IP: None
+2025-12-14 09:01:16,718 - INFO - Creating initial snapshot for class1234-Student_1-pfSense
+2025-12-14 09:08:40,170 - INFO - Destroying VM class1234-Student_1-pfSense...
+2025-12-14 04:11:14,106 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 04:11:25,249 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 04:11:25,250 - INFO - Using Real vSphere Connection.
+2025-12-14 04:11:25,250 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 04:11:25,251 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 04:11:25,338 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 04:11:26,441 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=DelTest-Student_1-pfSense
+2025-12-14 04:11:26,464 - INFO - Found template VM: pfSense
+2025-12-14 04:11:26,483 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 04:11:26,537 - INFO - Target folder ensured: SE_Training_Portal/DelTest/Student 1
+2025-12-14 04:11:26,544 - INFO - Cloning pfSense to DelTest-Student_1-pfSense in folder Student 1...
+2025-12-14 04:11:33,610 - INFO - VM provisioned successfully: DelTest-Student_1-pfSense, MOID: vm-5060, IP: None
+2025-12-14 04:11:33,613 - INFO - Creating initial snapshot for DelTest-Student_1-pfSense
+2025-12-14 04:12:05,013 - INFO - Powering off VM DelTest-Student_1-pfSense before deletion...
+2025-12-14 04:12:06,033 - INFO - Destroying VM DelTest-Student_1-pfSense...
+2025-12-14 09:12:54,968 - INFO - vSphere Service configured (Host: 203.0.113.10)
+2025-12-14 09:13:06,634 - INFO - vSphere Config Loaded from DB - Host: 192.168.10.10
+2025-12-14 09:13:06,636 - INFO - Using Real vSphere Connection.
+2025-12-14 09:13:06,637 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 09:13:06,639 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 09:13:06,797 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 09:15:08,380 - DEBUG - RootFolder: Datacenters
+2025-12-14 09:15:08,382 - DEBUG - Datacenters found: 2
+2025-12-14 09:15:12,540 - DEBUG - RootFolder: Datacenters
+2025-12-14 09:15:12,541 - DEBUG - Datacenters found: 2
+2025-12-14 04:15:33,591 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 04:15:44,599 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 04:15:44,599 - INFO - Using Real vSphere Connection.
+2025-12-14 04:15:44,600 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 04:15:44,601 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 04:15:48,701 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 181, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-14 04:16:04,683 - ERROR - provision_vm called but not connected to vSphere
+2025-12-14 04:16:45,130 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 04:16:55,947 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 04:16:55,948 - INFO - Using Real vSphere Connection.
+2025-12-14 04:16:55,952 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 04:16:55,957 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 04:17:00,061 - ERROR - Failed to connect to vSphere 192.168.10.10: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+Traceback (most recent call last):
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\services\vsphere_service.py", line 181, in connect
+    self.connection = SmartConnect(
+                      ~~~~~~~~~~~~^
+        host=h,
+        ^^^^^^^
+    ...<3 lines>...
+        sslContext=context
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 989, in SmartConnect
+    return Connect(host=host,
+                   port=portNumber,
+    ...<20 lines>...
+                   b64token=b64token,
+                   mechanism=mechanism)
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 316, in Connect
+    si, stub = __Login(host,
+               ~~~~~~~^^^^^^
+                       port,
+                       ^^^^^
+    ...<17 lines>...
+                       customHeaders=customHeaders,
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                       sessionId=sessionId)
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVim\connect.py", line 536, in __Login
+    content.sessionManager.Login(user, pwd, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 601, in <lambda>
+    self.f(*(self.args + (obj,) + args), **kwargs)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\VmomiSupport.py", line 376, in _InvokeMethod
+    return self._stub.InvokeMethod(self, info, args)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\admin\Desktop\SE Training Portal\backend\.venv\Lib\site-packages\pyVmomi\SoapAdapter.py", line 1518, in InvokeMethod
+    raise obj  # pylint: disable-msg=E0702
+    ^^^^^^^^^
+pyVmomi.VmomiSupport.vim.fault.InvalidLogin: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-14 09:17:02,606 - DEBUG - RootFolder: Datacenters
+2025-12-14 09:17:02,609 - DEBUG - Datacenters found: 2
+2025-12-14 09:17:06,234 - DEBUG - RootFolder: Datacenters
+2025-12-14 09:17:06,236 - DEBUG - Datacenters found: 2
+2025-12-14 04:17:33,278 - ERROR - provision_vm called but not connected to vSphere
+2025-12-14 04:18:24,925 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 04:18:35,772 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 04:18:35,772 - INFO - Using Real vSphere Connection.
+2025-12-14 04:18:35,773 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 04:18:35,773 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 04:18:35,859 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 04:18:36,228 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=Space_Test-Student_1-pfSense
+2025-12-14 04:18:36,250 - INFO - Found template VM: pfSense
+2025-12-14 04:18:36,270 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 04:18:36,330 - INFO - Target folder ensured: SE_Training_Portal/Space Test/Student 1
+2025-12-14 04:18:36,335 - INFO - Cloning pfSense to Space_Test-Student_1-pfSense in folder Student 1...
+2025-12-14 04:18:43,399 - INFO - VM provisioned successfully: Space_Test-Student_1-pfSense, MOID: vm-5064, IP: None
+2025-12-14 04:18:43,402 - INFO - Creating initial snapshot for Space_Test-Student_1-pfSense
+2025-12-14 04:20:22,392 - INFO - Powering off VM Space_Test-Student_1-pfSense before deletion...
+2025-12-14 04:20:23,411 - INFO - Destroying VM Space_Test-Student_1-pfSense...
+2025-12-14 04:22:51,236 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 04:23:02,254 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 04:23:02,254 - INFO - Using Real vSphere Connection.
+2025-12-14 04:23:02,255 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 04:23:02,256 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 04:23:02,339 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 04:23:32,540 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-14 04:23:43,470 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-14 04:23:43,470 - INFO - Using Real vSphere Connection.
+2025-12-14 04:23:43,471 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 04:23:43,471 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 04:23:43,555 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-14 04:24:07,465 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=Space_Test_2-Student_1-pfSense
+2025-12-14 04:24:07,485 - INFO - Found template VM: pfSense
+2025-12-14 04:24:07,505 - INFO - Using datacenter compute resource pool: Resources
+2025-12-14 04:24:07,559 - INFO - Target folder ensured: SE_Training_Portal/Space Test 2/Student 1
+2025-12-14 04:24:07,565 - INFO - Cloning pfSense to Space_Test_2-Student_1-pfSense in folder Student 1...
+2025-12-14 04:24:15,635 - INFO - VM provisioned successfully: Space_Test_2-Student_1-pfSense, MOID: vm-5068, IP: None
+2025-12-14 04:24:15,638 - INFO - Creating initial snapshot for Space_Test_2-Student_1-pfSense
+2025-12-14 04:24:52,348 - INFO - Powering off VM Space_Test_2-Student_1-pfSense before deletion...
+2025-12-14 04:24:53,371 - INFO - Destroying VM Space_Test_2-Student_1-pfSense...
+2025-12-14 04:24:54,427 - INFO - Deleting folder: Space Test 2
+2025-12-14 09:25:54,321 - INFO - vSphere Service configured (Host: 203.0.113.10)
+2025-12-14 09:26:05,779 - INFO - vSphere Config Loaded from DB - Host: 192.168.10.10
+2025-12-14 09:26:05,781 - INFO - Using Real vSphere Connection.
+2025-12-14 09:26:05,783 - INFO - vSphere sync set to MANUAL mode.
+2025-12-14 09:26:05,784 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-14 09:26:05,967 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515

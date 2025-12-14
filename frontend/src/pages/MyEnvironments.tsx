@@ -36,12 +36,13 @@ const MyEnvironments: React.FC = () => {
         setLoading(true);
         try {
             const classRes = await api.get('/classes/');
-            const classes = classRes.data;
+            const classes = Array.isArray(classRes.data) ? classRes.data : [];
 
             const envPromises = classes.map(async (cls: any) => {
                 try {
                     const res = await api.get(`/classes/${cls.id}/environments`);
-                    return res.data
+                    const envData = Array.isArray(res.data) ? res.data : [];
+                    return envData
                         .filter((env: any) => !env.user_id || env.user_id === user?.id)
                         .map((env: any) => ({
                             ...env,
@@ -57,6 +58,7 @@ const MyEnvironments: React.FC = () => {
             setEnvironments(allEnvs.flat());
         } catch (err) {
             showToast('Failed to fetch environments', 'error');
+            setEnvironments([]);
         } finally {
             setLoading(false);
         }

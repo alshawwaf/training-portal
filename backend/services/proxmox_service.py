@@ -1,3 +1,4 @@
+import logging
 from proxmoxer import ProxmoxAPI
 import os
 import requests
@@ -6,6 +7,8 @@ from db.models import SystemSetting
 
 # Disable SSL warnings for self-signed certs (common in Proxmox)
 requests.packages.urllib3.disable_warnings()
+
+logger = logging.getLogger(__name__)
 
 class ProxmoxService:
     def __init__(self):
@@ -17,14 +20,10 @@ class ProxmoxService:
         self.token_secret = os.getenv("PROXMOX_TOKEN_SECRET")
         self.node = os.getenv("PROXMOX_NODE", "pve")
         self.verify_ssl = os.getenv("PROXMOX_VERIFY_SSL", "false").lower() == "true"
-        self.mock_mode = os.getenv("PROXMOX_MOCK", "false").lower() == "true"
         self.proxmox = None
         
         # Initial connection if env vars provided
-        if not self.mock_mode:
-            self._connect()
-        else:
-            print("Proxmox Service running in MOCK MODE.")
+        self._connect()
 
     def _connect(self):
         try:
@@ -39,7 +38,7 @@ class ProxmoxService:
                     verify_ssl=self.verify_ssl, port=self.port, timeout=5
                 )
         except Exception as e:
-            print(f"Failed to connect to Proxmox: {e}")
+            logger.error(f"Failed to connect to Proxmox: {e}")
             self.proxmox = None
 
     def test_connection(self, host: str, user: str, password: str = None, token_id: str = None, token_secret: str = None, port: int = 8006, verify_ssl: bool = False):
@@ -78,32 +77,23 @@ class ProxmoxService:
             self.token_secret = conf.get("proxmox_token_secret")
             self.verify_ssl = conf.get("proxmox_verify_ssl", "false").lower() == "true"
             
-            if not self.mock_mode:
-                self._connect()
+            self.verify_ssl = conf.get("proxmox_verify_ssl", "false").lower() == "true"
+            
+            self._connect()
                 
         except Exception as e:
-            print(f"Failed to load Proxmox config: {e}")
+            logger.error(f"Failed to load Proxmox config: {e}")
 
     def get_nodes(self):
-        if self.mock_mode:
-            return [{'node': 'mock-node-1', 'status': 'online', 'cpu': 0.1, 'maxcpu': 16, 'mem': 1024, 'maxmem': 32768}]
         if not self.proxmox: return []
         return self.proxmox.nodes.get()
 
     def get_vms(self):
-        if self.mock_mode:
-            return [
-                {'vmid': 100, 'name': 'mock-class-vm-1', 'status': 'running', 'cpus': 2, 'mem': 4096},
-                {'vmid': 101, 'name': 'mock-class-vm-2', 'status': 'stopped', 'cpus': 2, 'mem': 4096},
-                {'vmid': 200, 'name': 'template-base', 'status': 'stopped', 'template': 1},
-            ]
+
         if not self.proxmox: return []
         return self.proxmox.nodes(self.node).qemu.get()
     
     def vm_action(self, vmid: int, action: str):
-        if self.mock_mode:
-            return {"status": "success", "message": f"Mock executed {action} on VM {vmid}"}
-        
         if not self.proxmox: return {"status": "error", "message": "Proxmox not connected"}
         
         try:
@@ -118,9 +108,6 @@ class ProxmoxService:
             return {"status": "error", "message": str(e)}
 
     def revert_vm(self, vmid: int, snapname: str):
-        if self.mock_mode:
-            return {"status": "success", "message": f"Mock reverted VM {vmid} to snapshot {snapname}"}
-
         if not self.proxmox: return {"status": "error", "message": "Proxmox not connected"}
         try:
             resp = self.proxmox.nodes(self.node).qemu(vmid).snapshot(snapname).rollback.post()
@@ -129,9 +116,6 @@ class ProxmoxService:
             return {"status": "error", "message": str(e)}
 
     def clone_vm(self, vmid: int, newid: int, newname: str):
-        if self.mock_mode:
-            return {"status": "success", "message": f"Mock cloned VM {vmid} to {newid} ({newname})"}
-
         if not self.proxmox: return {"status": "error", "message": "Proxmox not connected"}
         try:
             resp = self.proxmox.nodes(self.node).qemu(vmid).clone.post(newid=newid, name=newname, full=1)

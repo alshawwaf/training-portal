@@ -1,7 +1,7 @@
 {
   "class": {
-    "id": 15,
-    "name": "Clone Test with Pool",
+    "id": 8,
+    "name": "Folder Test 3",
     "instructor_id": 1,
     "blueprint_id": null,
     "template_id": 9,
@@ -11,9 +11,9 @@
     "end_date": "2025-12-30T00:00:00",
     "status": "draft",
     "description": null,
-    "created_at": "2025-12-13T08:14:02.443254",
-    "updated_at": "2025-12-13T08:14:02.443258"
+    "created_at": "2025-12-13T07:21:33.797383",
+    "updated_at": "2025-12-13T07:21:33.797390"
   },
-  "backup_timestamp": "2025-12-13T08:14:02.487313",
-  "version": 1
+  "archived_at": "2025-12-14T08:32:29.239636",
+  "reason": "deleted"
 }

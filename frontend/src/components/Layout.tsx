@@ -50,7 +50,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-primary flex">
-      <aside className="w-72 bg-elevated/50 backdrop-blur-xl border-r border-theme flex flex-col fixed h-full">
+      <aside className="w-72 bg-elevated/50 backdrop-blur-xl border-r border-theme flex flex-col fixed h-full z-40">
         <div className="p-4 border-b border-theme">
             <div className="flex items-center justify-between">
                 <Link to="/" className="flex items-center group">
@@ -107,8 +107,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </aside>
 
-      <main className="flex-1 ml-72 overflow-auto bg-primary">
-        <div className="p-8 max-w-7xl mx-auto animate-fade-in">
+      <main className="flex-1 ml-72 overflow-auto bg-primary z-10">
+        <div className="p-8 max-w-7xl mx-auto">
             {children}
         </div>
       </main>

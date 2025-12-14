@@ -5,7 +5,7 @@ import api from '../api';
 import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List, Eye, EyeOff } from 'lucide-react';
 import Modal from '../components/Modal';
 import SettingsSection from '../components/SettingsSection';
-import { AwsIcon, AzureIcon, GcpIcon, CloudShareIcon, SkytapIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
+import { AwsIcon, AzureIcon, GcpIcon, CloudShareIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
 
 interface SystemSetting {
     key: string;
@@ -73,7 +73,6 @@ const Settings: React.FC = () => {
         { id: 'azure', name: 'Microsoft Azure', icon: AzureIcon, color: 'blue', description: 'Connect to Azure subscription for VM management.' },
         { id: 'gcp', name: 'Google Cloud Platform', icon: GcpIcon, color: 'red', description: 'Manage Google Compute Engine resources.' },
         { id: 'cloudshare', name: 'CloudShare', icon: CloudShareIcon, color: 'red', description: 'Integration with CloudShare environments.' },
-        { id: 'skytap', name: 'Skytap', icon: SkytapIcon, color: 'cyan', description: 'Manage Skytap virtual labs and environments.' },
     ];
 
     const [selectedProvider, setSelectedProvider] = useState<CloudProvider | null>(null);
@@ -194,13 +193,14 @@ const Settings: React.FC = () => {
         setLoadingSettings(true);
         try {
             const res = await api.get('/settings/');
-            setSystemSettings(res.data);
+            const data = Array.isArray(res.data) ? res.data : [];
+            setSystemSettings(data);
             
             // Initialize vSphere form from settings
             const vsphereSettings: Record<string, string> = {};
             const proxmoxSettings: Record<string, string> = {};
             
-            res.data.forEach((s: SystemSetting) => {
+            data.forEach((s: SystemSetting) => {
                 if (s.key.startsWith('vsphere_')) {
                     vsphereSettings[s.key] = s.value;
                 }
@@ -579,7 +579,7 @@ const Settings: React.FC = () => {
                                             </div>
                                         ) : (
                                             systemSettings
-                                                .filter(s => s.category === selectedProvider?.id || (selectedProvider?.id === 'cloudshare' && (s.category === 'cloudshare' || s.category === 'skytap'))) // Handle legacy/grouped logic if needed, but ideally map strictly
+                                                .filter(s => s.category === selectedProvider?.id)
                                                 .map(setting => (
                                                     <div key={setting.key}>
                                                         {renderSettingInput(setting, true)} 

@@ -40,7 +40,7 @@ interface InventoryVM {
     power_state: string;
 }
 
-const providerOptions = ['vSphere', 'Proxmox', 'AWS', 'Azure', 'GCP', 'CloudShare', 'Skytap'];
+const providerOptions = ['vSphere', 'Proxmox', 'AWS', 'Azure', 'GCP', 'CloudShare'];
 
 const Templates: React.FC = () => {
     const { showToast } = useToast();
@@ -77,10 +77,11 @@ const Templates: React.FC = () => {
     const fetchTemplates = async () => {
         try {
             const res = await api.get('/templates/');
-            setTemplates(res.data);
+            setTemplates(Array.isArray(res.data) ? res.data : []);
         } catch (e) {
             console.error("Failed to fetch templates", e);
             showToast('Failed to load templates', 'error');
+            setTemplates([]);
         } finally {
             setIsLoading(false);
         }
@@ -288,7 +289,7 @@ const Templates: React.FC = () => {
         setSelectedVMs(selectedVMs.filter(v => v.vm_moid !== moid));
     };
 
-    const filteredTemplates = templates.filter(tpl =>
+    const filteredTemplates = (Array.isArray(templates) ? templates : []).filter(tpl =>
         tpl.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (tpl.description && tpl.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
@@ -304,7 +305,6 @@ const Templates: React.FC = () => {
             case 'azure': return 'from-blue-500/20 to-sky-500/20 text-blue-600 dark:text-blue-400';
             case 'gcp': return 'from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400';
             case 'cloudshare': return 'from-purple-500/20 to-pink-500/20 text-purple-600 dark:text-purple-400';
-            case 'skytap': return 'from-cyan-500/20 to-teal-500/20 text-cyan-600 dark:text-cyan-400';
             default: return 'from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400';
         }
     };

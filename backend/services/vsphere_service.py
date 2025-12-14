@@ -16,7 +16,7 @@ try:
     PYVMOMI_AVAILABLE = True
 except ImportError:
     PYVMOMI_AVAILABLE = False
-    print("pyvmomi not installed. vSphere service will run in mock mode.")
+    vsphere_logger.warning("pyvmomi not installed. vSphere service cannot function correctly.")
 
 from sqlalchemy.orm import Session
 from db.models import SystemSetting
@@ -55,7 +55,7 @@ class VSphereService:
         self.password = os.getenv("VSPHERE_PASSWORD", "")
         self.port = int(os.getenv("VSPHERE_PORT", "443"))
         self.verify_ssl = os.getenv("VSPHERE_VERIFY_SSL", "false").lower() == "true"
-        self.mock_mode = os.getenv("VSPHERE_MOCK", "true").lower() == "true" or not PYVMOMI_AVAILABLE
+        
         self.connection = None
         
         # Scheduler
@@ -63,8 +63,13 @@ class VSphereService:
         self.scheduler.start()
         self.sync_job_id = "vsphere_sync_inventory"
 
-        if self.mock_mode:
-            print("vSphere Service running in MOCK MODE.")
+        if not PYVMOMI_AVAILABLE:
+            vsphere_logger.warning("pyvmomi not installed. vSphere integration will fail.")
+        else:
+             if self.host:
+                 vsphere_logger.info(f"vSphere Service configured (Host: {self.host})")
+             else:
+                 vsphere_logger.info("vSphere Service waiting for configuration.")
 
     def load_config(self, db: Session):
         """Load vSphere configuration from database settings."""
@@ -72,31 +77,53 @@ class VSphereService:
             settings = db.query(SystemSetting).filter(
                 SystemSetting.category == "vsphere"
             ).all()
-            if not settings:
-                return
-
-            conf = {s.key: s.value for s in settings}
-
-            self.host = conf.get("vsphere_host", self.host)
-            self.user = conf.get("vsphere_user", self.user)
-            self.password = conf.get("vsphere_password", self.password)
-            self.port = int(conf.get("vsphere_port", str(self.port)))
-            self.verify_ssl = conf.get("vsphere_verify_ssl", "false").lower() == "true"
             
-            print(f"DEBUG: vSphere Config Loaded from DB - Host: {self.host}, User: {self.user}, SSL: {self.verify_ssl}, Port: {self.port}")
-            # Ensure mock mode is OFF if pyvmomi is available
-            if PYVMOMI_AVAILABLE:
-                 self.mock_mode = False
-                 print("DEBUG: Force disabling MOCK mode because config loaded and pyVmomi available.")
+            # If settings exist, load them. Else rely on Env Vars.
+            if settings:
+                conf = {s.key: s.value for s in settings}
 
-            # Sync Scheduler Configuration
-            sync_mode = conf.get("vsphere_sync_mode", "manual") # manual, scheduled
-            sync_interval = int(conf.get("vsphere_sync_interval", "60")) # minutes
+                self.host = conf.get("vsphere_host", self.host)
+                self.user = conf.get("vsphere_user", self.user)
+                self.password = conf.get("vsphere_password", self.password)
+                self.port = int(conf.get("vsphere_port", str(self.port)))
+                self.verify_ssl = conf.get("vsphere_verify_ssl", "false").lower() == "true"
+                
+                vsphere_logger.info(f"vSphere Config Loaded from DB - Host: {self.host}")
+            else:
+                vsphere_logger.info("No vSphere settings in DB, using Environment Variables.")
+
+            # Re-evaluate Mock Mode based on final config
+            if PYVMOMI_AVAILABLE:
+                 # Check explicit Env Var override again
+                 env_mock = os.getenv("VSPHERE_MOCK", "").lower()
+                 if env_mock == "true":
+                     self.mock_mode = True
+                 elif env_mock == "false":
+                     self.mock_mode = False
+                 else:
+                     # No explicit override, decide based on Host presence
+                     self.mock_mode = not bool(self.host)
+                 
+                 if not self.mock_mode:
+                     vsphere_logger.info("Using Real vSphere Connection.")
+                 else:
+                     vsphere_logger.warning("Mock mode detected (unexpected for production).")
+            else:
+                 self.mock_mode = True
+
+            # Sync Scheduler Configuration (Defaults if not in DB)
+            sync_mode = "manual"
+            sync_interval = 60
+            
+            if settings:
+                 conf = {s.key: s.value for s in settings}
+                 sync_mode = conf.get("vsphere_sync_mode", "manual")
+                 sync_interval = int(conf.get("vsphere_sync_interval", "60"))
             
             self.configure_scheduler(sync_mode, sync_interval)
 
         except Exception as e:
-            print(f"Failed to load vSphere config: {e}")
+            vsphere_logger.error(f"Failed to load vSphere config: {e}")
 
     def configure_scheduler(self, mode: str, interval_minutes: int):
         """Configure the sync scheduler job."""
@@ -106,7 +133,7 @@ class VSphereService:
                 self.scheduler.remove_job(self.sync_job_id)
             
             if mode == "scheduled" and interval_minutes > 0:
-                print(f"Scheduling vSphere sync every {interval_minutes} minutes.")
+                vsphere_logger.info(f"Scheduling vSphere sync every {interval_minutes} minutes.")
                 self.scheduler.add_job(
                     self.sync_inventory,
                     trigger=IntervalTrigger(minutes=interval_minutes),
@@ -114,10 +141,10 @@ class VSphereService:
                     replace_existing=True
                 )
             else:
-                print("vSphere sync set to MANUAL mode.")
+                vsphere_logger.info("vSphere sync set to MANUAL mode.")
                 
         except Exception as e:
-            print(f"Error configuring scheduler: {e}")
+            vsphere_logger.error(f"Error configuring scheduler: {e}")
 
     def connect(self, host: str = None, user: str = None, password: str = None, 
                 port: int = None, verify_ssl: bool = None) -> Dict[str, Any]:
@@ -130,16 +157,6 @@ class VSphereService:
         p = password or self.password
         pt = port or self.port
         vs = verify_ssl if verify_ssl is not None else self.verify_ssl
-
-        if self.mock_mode:
-            if not h:
-                return {"success": False, "message": "Host is required"}
-            return {
-                "success": True,
-                "message": f"Mock connection to {h} successful",
-                "version": "7.0.3 (Mock)",
-                "api_type": "VirtualCenter (Mock)"
-            }
 
         if not h or not u or not p:
             return {"success": False, "message": "Host, user, and password are required"}
@@ -193,12 +210,6 @@ class VSphereService:
 
     def get_datacenters(self) -> List[Dict[str, Any]]:
         """Get list of datacenters."""
-        if self.mock_mode:
-            return [
-                {"name": "DC-Mock-1", "status": "green"},
-                {"name": "DC-Mock-2", "status": "green"}
-            ]
-
         if not self.connection:
             return []
 
@@ -208,7 +219,10 @@ class VSphereService:
                 content.rootFolder, [vim.Datacenter], True
             )
             datacenters = []
-            for dc in container.view:
+            view_list = list(container.view)
+            vsphere_logger.debug(f"RootFolder: {content.rootFolder.name}")
+            vsphere_logger.debug(f"Datacenters found: {len(view_list)}")
+            for dc in view_list:
                 datacenters.append({
                     "name": dc.name,
                     "status": str(dc.overallStatus)
@@ -216,17 +230,11 @@ class VSphereService:
             container.Destroy()
             return datacenters
         except Exception as e:
-            print(f"Error getting datacenters: {e}")
+            vsphere_logger.error(f"Error getting datacenters: {e}", exc_info=True)
             return []
 
     def get_clusters(self) -> List[Dict[str, Any]]:
         """Get list of clusters."""
-        if self.mock_mode:
-            return [
-                {"name": "Cluster-Mock-1", "hosts": 3, "vms": 25},
-                {"name": "Cluster-Mock-2", "hosts": 2, "vms": 15}
-            ]
-
         if not self.connection:
             return []
 
@@ -245,18 +253,11 @@ class VSphereService:
             container.Destroy()
             return clusters
         except Exception as e:
-            print(f"Error getting clusters: {e}")
+            vsphere_logger.error(f"Error getting clusters: {e}", exc_info=True)
             return []
 
     def get_vms(self) -> List[Dict[str, Any]]:
         """Get list of VMs."""
-        if self.mock_mode:
-            return [
-                {"name": "mock-vm-1", "moid": "vm-1001", "power_state": "poweredOn", "guest_os": "Ubuntu 22.04", "cpu": 4, "memory_mb": 8192, "is_template": False},
-                {"name": "mock-vm-2", "moid": "vm-1002", "power_state": "poweredOff", "guest_os": "Windows Server 2022", "cpu": 2, "memory_mb": 4096, "is_template": False},
-                {"name": "mock-template", "moid": "vm-1003", "power_state": "poweredOff", "guest_os": "CentOS 8", "cpu": 2, "memory_mb": 2048, "is_template": True}
-            ]
-
         if not self.connection:
             return []
 
@@ -279,17 +280,11 @@ class VSphereService:
             container.Destroy()
             return vms
         except Exception as e:
-            print(f"Error getting VMs: {e}")
+            vsphere_logger.error(f"Error getting VMs: {e}", exc_info=True)
             return []
 
     def get_networks(self) -> List[Dict[str, Any]]:
         """Get list of networks."""
-        if self.mock_mode:
-            return [
-                {"name": "VM Network", "type": "Network"},
-                {"name": "DPortGroup-1", "type": "DistributedVirtualPortgroup"}
-            ]
-
         if not self.connection:
             return []
 
@@ -307,17 +302,11 @@ class VSphereService:
             container.Destroy()
             return networks
         except Exception as e:
-            print(f"Error getting networks: {e}")
+            vsphere_logger.error(f"Error getting networks: {e}")
             return []
 
     def get_hosts(self) -> List[Dict[str, Any]]:
         """Get list of ESXi hosts."""
-        if self.mock_mode:
-            return [
-                {"name": "esxi-mock-1.local", "state": "connected", "cpu_usage": 45, "memory_usage": 62},
-                {"name": "esxi-mock-2.local", "state": "connected", "cpu_usage": 32, "memory_usage": 48}
-            ]
-
         if not self.connection:
             return []
 
@@ -336,7 +325,7 @@ class VSphereService:
             container.Destroy()
             return hosts
         except Exception as e:
-            print(f"Error getting hosts: {e}")
+            vsphere_logger.error(f"Error getting hosts: {e}")
             return []
 
 
@@ -344,7 +333,7 @@ class VSphereService:
         """Fetch all inventory and save to JSON cache."""
         try:
             # Ensure connection
-            if not self.connection and not self.mock_mode:
+            if not self.connection:
                 res = self.connect()
                 if not res["success"]:
                     return {"success": False, "message": res["message"]}
@@ -395,20 +384,29 @@ class VSphereService:
         except Exception as e:
             return {"success": False, "message": str(e), "data": None}
 
-    def provision_vm(self, vm_moid: str, new_name: str, resource_pool: str = None) -> Dict[str, Any]:
+    def ensure_folder(self, parent_folder, name) -> vim.Folder:
+        for child in parent_folder.childEntity:
+            if isinstance(child, vim.Folder) and child.name == name:
+                return child
+        try:
+            return parent_folder.CreateFolder(name)
+        except vim.fault.DuplicateName:
+            for child in parent_folder.childEntity:
+                if isinstance(child, vim.Folder) and child.name == name:
+                    return child
+            raise
+
+    def ensure_path(self, datacenter, path: List[str]) -> vim.Folder:
+        current = datacenter.vmFolder
+        for name in path:
+            current = self.ensure_folder(current, name)
+        return current
+
+    def provision_vm(self, vm_moid: str, new_name: str, resource_pool: str = None, folder_path: List[str] = None) -> Dict[str, Any]:
         """
         Clone a VM from a template.
         """
-        if self.mock_mode:
-            print(f"MOCK: Provisioning VM '{new_name}' from Template '{vm_moid}'")
-            return {
-                "success": True,
-                "message": "VM Provisioned (Mock)",
-                "vm_name": new_name,
-                "vm_moid": f"vm-mock-{datetime.now().timestamp()}",
-                "ip_address": "192.168.1.150"
-            }
-
+        # Validate we are connected
         if not self.connection:
              vsphere_logger.error("provision_vm called but not connected to vSphere")
              return {"success": False, "message": "Not connected to vSphere"}
@@ -461,24 +459,36 @@ class VSphereService:
             clonespec.template = False 
             
             # Target Folder Strategy:
-            # 1. Try to find/create "{TemplateName}_Labs" folder in the same datacenter as the template.
-            # 2. If fails, fallback to template's parent.
-            
             target_folder = None
-            try:
-                # Assuming template is in a datacenter, we can traverse up to find it.
-                # Simplified: Get the datacenter's vmFolder.
-                dc = template_vm.parent
-                while dc and not isinstance(dc, vim.Datacenter):
-                    dc = dc.parent
+
+            if folder_path:
+                try:
+                    dc = template_vm.parent
+                    while dc and not isinstance(dc, vim.Datacenter):
+                        dc = dc.parent
+                    
+                    if dc:
+                        target_folder = self.ensure_path(dc, folder_path)
+                        vsphere_logger.info(f"Target folder ensured: {'/'.join(folder_path)}")
+                except Exception as e:
+                    vsphere_logger.error(f"Failed to ensure folder path: {e}")
+
+            if not target_folder:
+                # Fallback to default strategy
+                try:
+                    # Assuming template is in a datacenter, we can traverse up to find it.
+                    # Simplified: Get the datacenter's vmFolder.
+                    dc = template_vm.parent
+                    while dc and not isinstance(dc, vim.Datacenter):
+                        dc = dc.parent
                 
-                if dc:
-                    vm_folder = dc.vmFolder
-                    folder_name = f"{template_vm.name}_Labs"
-                    vsphere_logger.info(f"Creating/finding folder: {folder_name} in datacenter {dc.name}")
-                    target_folder = self._get_or_create_folder(vm_folder, folder_name)
-            except Exception as folder_err:
-                vsphere_logger.warning(f"Could not setup target folder: {folder_err}. Falling back to template parent.")
+                    if dc:
+                        vm_folder = dc.vmFolder
+                        folder_name = f"{template_vm.name}_Labs"
+                        vsphere_logger.info(f"Creating/finding folder: {folder_name} in datacenter {dc.name}")
+                        target_folder = self._get_or_create_folder(vm_folder, folder_name)
+                except Exception as folder_err:
+                    vsphere_logger.warning(f"Could not setup target folder: {folder_err}. Falling back to template parent.")
             
             if not target_folder:
                 target_folder = template_vm.parent
@@ -499,6 +509,21 @@ class VSphereService:
                     ip = new_vm.guest.ipAddress
                 
                 vsphere_logger.info(f"VM provisioned successfully: {new_vm.name}, MOID: {new_vm._moId}, IP: {ip}")
+
+
+                # Create Initial Snapshot
+                try:
+                    vsphere_logger.info(f"Creating initial snapshot for {new_vm.name}")
+                    snapshot_task = new_vm.CreateSnapshot_Task(
+                        name="Initial State",
+                        description="Created by SE Training Portal after provisioning",
+                        memory=False,
+                        quiesce=False
+                    )
+                    self._wait_for_task(snapshot_task)
+                except Exception as snap_e:
+                     vsphere_logger.warning(f"Failed to create initial snapshot: {snap_e}")
+
                 return {
                     "success": True, 
                     "message": "VM Provisioned Successfully",
@@ -517,9 +542,6 @@ class VSphereService:
 
     def get_vm_power_state(self, vm_moid: str) -> Dict[str, Any]:
         """Get power state of a VM."""
-        if self.mock_mode:
-            return {"success": True, "state": "poweredOn"}
-            
         if not self.connection:
              return {"success": False, "message": "Not connected to vSphere"}
 
@@ -538,10 +560,6 @@ class VSphereService:
         Control VM power state.
         Action: start, stop, restart, reset
         """
-        if self.mock_mode:
-            print(f"MOCK: {action.upper()} VM '{vm_moid}'")
-            return {"success": True, "message": f"VM {action} command sent (Mock)", "new_state": "poweredOn" if action in ["start", "restart"] else "poweredOff"}
-
         if not self.connection:
              return {"success": False, "message": "Not connected to vSphere"}
 
@@ -562,11 +580,16 @@ class VSphereService:
             elif action == "reset":
                  task = vm.Reset()
             elif action == "restart":
-                 task = vm.RebootGuest() # Try graceful reboot first? Or Reset? Let's use Reset for simplicity/guarantee or RebootGuest if tools.
-                 # Actually, "restart" usually implies RebootGuest if tools, else Reset. 
+                 # Try graceful reboot first? Or Reset? Let's use Reset for simplicity/guarantee or RebootGuest if tools.
                  # For safety in training labs, let's use Reset (Hard Reset) if Reboot fails or just Reset.
                  # Let's try Reset for now as it's cleaner for lab envs.
                  task = vm.Reset()
+            elif action == "suspend":
+                 if vm.runtime.powerState == "suspended":
+                     return {"success": True, "message": "VM already suspended"}
+                 task = vm.Suspend()
+            elif action == "revert":
+                 return self.revert_vm(vm_moid)
             else:
                  return {"success": False, "message": f"Unknown action: {action}"}
 
@@ -577,14 +600,91 @@ class VSphereService:
 
             return {"success": True, "message": f"VM {action} successful"}
 
+
+        
         except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def revert_vm(self, vm_moid: str) -> Dict[str, Any]:
+        """
+        Revert VM to the last snapshot (usually 'Initial State').
+        """
+        if not self.connection:
+             return {"success": False, "message": "Not connected to vSphere"}
+
+        try:
+            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            if not vm:
+                 return {"success": False, "message": "VM not found"}
+
+            if not vm.snapshot:
+                 return {"success": False, "message": "VM has no snapshots"}
+
+            # Revert to current snapshot (or root? Usually we want the last one OR specific one)
+            # For this simple implementation, let's revert to current snapshot if exists, 
+            # OR finding the last one. 
+            if vm.snapshot.currentSnapshot:
+                 task = vm.RevertToCurrentSnapshot_Task(suppressPowerOn=False)
+            else:
+                 # If no current snapshot, try to find root?
+                 if vm.snapshot.rootSnapshotList:
+                      snap = vm.snapshot.rootSnapshotList[0].snapshot
+                      task = snap.RevertToSnapshot_Task(suppressPowerOn=False)
+                 else:
+                      return {"success": False, "message": "Snapshot found but no current or root snapshot?"}
+
+            res = self._wait_for_task(task)
+            return res
+
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def delete_vm(self, vm_moid: str) -> Dict[str, Any]:
+        """
+        Delete a VM from vSphere (Power off if needed, then Destroy).
+        """
+        if not self.connection:
+             return {"success": False, "message": "Not connected to vSphere"}
+
+        try:
+            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            if not vm:
+                 return {"success": False, "message": "VM not found"}
+
+            # Ensure powered off
+            if vm.runtime.powerState == "poweredOn":
+                 vsphere_logger.info(f"Powering off VM {vm.name} before deletion...")
+                 task = vm.PowerOff()
+                 self._wait_for_task(task) # Wait for power off
+
+            vsphere_logger.info(f"Destroying VM {vm.name}...")
+            task = vm.Destroy_Task()
+            res = self._wait_for_task(task)
+            
+            return res
+
+        except Exception as e:
+            vsphere_logger.error(f"Error deleting VM: {e}")
             return {"success": False, "message": str(e)}
 
     # Helper Methods
     def _get_obj(self, vim_type, name_or_moid):
         """
         Get a vSphere object by name or MOID.
+        Attributes auto-reconnection on NotAuthenticated fault.
         """
+        try:
+            return self._get_obj_core(vim_type, name_or_moid)
+        except vim.fault.NotAuthenticated:
+            vsphere_logger.warning("Session NotAuthenticated in _get_obj. Reconnecting and retrying...")
+            self.connect()
+            try:
+                return self._get_obj_core(vim_type, name_or_moid)
+            except Exception as retry_e:
+                vsphere_logger.error(f"Retry failed in _get_obj: {retry_e}")
+                raise retry_e
+
+    def _get_obj_core(self, vim_type, name_or_moid):
         content = self.connection.content
         container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
         
@@ -619,19 +719,74 @@ class VSphereService:
                      return child
         
         # Create it
-        print(f"Creating folder '{folder_name}' in {parent_folder.name}...")
+        vsphere_logger.info(f"Creating folder '{folder_name}' in {parent_folder.name}...")
         return parent_folder.CreateFolder(folder_name)
+
+    def delete_folder(self, folder_name: str) -> Dict[str, Any]:
+        """
+        Delete a specific folder (and its contents) from the SE_Training_Portal root
+        within any derived Datacenter.
+        """
+        if not self.connection:
+             return {"success": False, "message": "Not connected to vSphere"}
+        
+        try:
+            content = self.connection.content
+            root_folder_name = "SE_Training_Portal"
+            target_folder = None
+            
+            # Iterate through all datacenters to find SE_Training_Portal
+            # content.rootFolder.childEntity contains Datacenters (usually)
+            
+            # Use a helper list in case childEntity is not iterable directly (it is, but efficient to be safe)
+            children = content.rootFolder.childEntity
+            
+            for child in children:
+                if isinstance(child, vim.Datacenter):
+                    dc = child
+                    # Check vmFolder of this datacenter
+                    if hasattr(dc, 'vmFolder'):
+                        # Look for SE_Training_Portal
+                        se_folder = None
+                        for folder_child in dc.vmFolder.childEntity:
+                             if getattr(folder_child, 'name', '') == root_folder_name:
+                                 se_folder = folder_child
+                                 break
+                        
+                        if se_folder:
+                            # Now check inside SE_Training_Portal for our target folder
+                            for sub in se_folder.childEntity:
+                                if getattr(sub, 'name', '') == folder_name:
+                                    target_folder = sub
+                                    break
+                
+                if target_folder:
+                    break
+            
+            if target_folder:
+                vsphere_logger.info(f"Deleting folder: {target_folder.name}")
+                task = target_folder.Destroy_Task()
+                return self._wait_for_task(task)
+            else:
+                return {"success": False, "message": "Folder not found"}
+
+        except Exception as e:
+            vsphere_logger.error(f"Error deleting folder {folder_name}: {e}")
+            return {"success": False, "message": str(e)}
 
     def _wait_for_task(self, task):
         """Wait for a vSphere task to finish."""
-        while task.info.state == vim.TaskInfo.State.running:
-            import time
-            time.sleep(1) # Simple blocking wait
-        
-        if task.info.state == vim.TaskInfo.State.success:
-            return {"success": True, "result": task.info.result}
-        else:
-            return {"success": False, "message": str(task.info.error.msg)}
+        try:
+            while task.info.state in [vim.TaskInfo.State.running, vim.TaskInfo.State.queued]:
+                import time
+                time.sleep(1) # Simple blocking wait
+            
+            if task.info.state == vim.TaskInfo.State.success:
+                return {"success": True, "result": task.info.result}
+            else:
+                return {"success": False, "message": str(task.info.error.msg)}
+        except Exception as e:
+            return {"success": False, "message": f"Task wait exception: {e}"}
 
 
 

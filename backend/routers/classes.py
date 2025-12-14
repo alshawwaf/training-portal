@@ -42,11 +42,22 @@ class ClassUpdate(BaseModel):
     status: Optional[str] = None
     description: Optional[str] = None
 
+# Template Info Schema
+class TemplateInfo(BaseModel):
+    id: int
+    name: str
+    icon: str
+    provider: str
+    
+    class Config:
+        from_attributes = True
+
 class ClassRead(BaseModel):
     id: int
     name: str
     blueprint_id: Optional[str] = None
     template_id: Optional[int] = None
+    template: Optional[TemplateInfo] = None
     max_users: int
     passcode: str
     start_date: datetime
@@ -113,7 +124,9 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
 # READ ALL
 @router.get("/", response_model=List[ClassRead])
 def list_classes(status: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(Class)
+    from sqlalchemy.orm import joinedload
+    
+    query = db.query(Class).options(joinedload(Class.template))
     if status and status in VALID_STATUSES:
         query = query.filter(Class.status == status)
     return query.all()
@@ -168,6 +181,33 @@ def delete_class(class_id: int, db: Session = Depends(get_db)):
     with open(archive_file, 'w') as f:
         json.dump(archive_data, f, indent=2)
     
+    # Clean up vSphere resources (DELETE VMs)
+    # Re-use the delete_all_environments logic but we need to call it directly
+    # Since delete_all_environments is a route handler, we should extract the logic or call it carefully.
+    # Ideally, we should refactor the logic into a service or a helper function.
+    # For now, let's just call the logic directly here or call the function if possible (dependency injection makes it tricky).
+    # Easier: Just duplicate the loop or move logic to a helper.
+    # Let's move logic to a helper function within this file or just implement it here to be safe and explicit.
+    
+    environments = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
+    for env in environments:
+        # Delete VMs
+        for vm in env.vms:
+            try:
+                vsphere_service.delete_vm(vm.vm_moid)
+            except Exception as e:
+                print(f"Failed to delete VM {vm.vm_name}: {e}")
+            db.delete(vm)
+        db.delete(env)
+
+    
+    # Delete the Class Folder from vSphere
+    # Assuming the folder structure is SE_Training_Portal/[ClassName]
+    try:
+        vsphere_service.delete_folder(db_class.name)
+    except Exception as e:
+         print(f"Failed to delete folder {db_class.name}: {e}")
+
     db.delete(db_class)
     db.commit()
     
@@ -179,7 +219,7 @@ def delete_class(class_id: int, db: Session = Depends(get_db)):
     if backup_file.exists():
         backup_file.unlink()
     
-    return {"message": "Class deleted successfully"}
+    return {"message": "Class and all associated resources deleted successfully"}
 
 # GET STATUSES
 @router.get("/meta/statuses")
@@ -252,9 +292,11 @@ def provision_class(class_id: int, db: Session = Depends(get_db)):
                 new_vm_name = f"{db_class.name}-{env_name}-{tmpl_vm.vm_name}".replace(" ", "_")
                 
                 # Call vSphere Service to clone/provision
+                folder_path = ["SE_Training_Portal", db_class.name, env_name]
                 result = vsphere_service.provision_vm(
                     vm_moid=tmpl_vm.vm_moid,
-                    new_name=new_vm_name
+                    new_name=new_vm_name,
+                    folder_path=folder_path
                 )
                 
                 if result["success"]:
@@ -269,6 +311,8 @@ def provision_class(class_id: int, db: Session = Depends(get_db)):
                     db.add(env_vm)
                 else:
                     errors.append(f"Failed to provision {new_vm_name}: {result['message']}")
+                    # Prevent zombie environment
+                    db.delete(env)
             
             provisioned_count += 1
             
@@ -342,3 +386,227 @@ def control_vm_power(class_id: int, vm_id: int, body: VMPowerAction, db: Session
         raise HTTPException(status_code=500, detail=result["message"])
         
     return result
+
+@router.delete("/environments/{class_id}/vms/{vm_id}")
+def delete_vm(class_id: int, vm_id: int, db: Session = Depends(get_db)):
+    """Delete a specific VM from an environment"""
+    vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found")
+        
+    # Verify VM belongs to an environment of the class (security check)
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == vm.env_id).first()
+    if not env or env.class_id != class_id:
+        raise HTTPException(status_code=403, detail="VM does not belong to this class")
+
+    # Call service to delete from vSphere
+    result = vsphere_service.delete_vm(vm.vm_moid)
+    
+    if not result["success"]:
+        # If VM not found in vSphere, we still want to delete from DB to clean up "zombies"
+        if "not found" in str(result.get("message", "")).lower():
+             pass 
+        else:
+             raise HTTPException(status_code=500, detail=result["message"])
+        
+    # Remove from DB
+    db.delete(vm)
+    db.commit()
+        
+    return {"success": True, "message": "VM deleted"}
+
+@router.post("/environments/{env_id}/power")
+def control_environment_power(env_id: int, body: VMPowerAction, db: Session = Depends(get_db)):
+    """Control power state of all VMs in an environment"""
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == env_id).first()
+    if not env:
+        raise HTTPException(status_code=404, detail="Environment not found")
+        
+    success_count = 0
+    errors = []
+    
+    for vm in env.vms:
+        try:
+            result = vsphere_service.control_vm_power(vm.vm_moid, body.action)
+            if result["success"]:
+                success_count += 1
+                # Update DB state if returned
+                if result.get("power_state"):
+                     vm.power_state = result["power_state"] # Note: control_vm_power implies this update in service? 
+                     # Service returns new_state but usually doesn't update DB. 
+                     # Actually control_vm_power endpoint updates DB. Service does NOT update DB.
+                     # We must update DB here.
+            else:
+                errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
+                
+        except Exception as e:
+            errors.append(f"{vm.name}: {str(e)}")
+            
+    db.commit()
+
+    return {
+        "success": len(errors) == 0,
+        "message": f"Power action '{body.action}' completed for {success_count} VMs",
+        "errors": errors if errors else None
+    }
+
+@router.post("/environments/{env_id}/revert")
+def revert_environment(env_id: int, db: Session = Depends(get_db)):
+    """Revert all VMs in an environment to their initial snapshot"""
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == env_id).first()
+    if not env:
+        raise HTTPException(status_code=404, detail="Environment not found")
+        
+    success_count = 0
+    errors = []
+    
+    for vm in env.vms:
+        try:
+            result = vsphere_service.revert_vm(vm.vm_moid)
+            if result["success"]:
+                success_count += 1
+            else:
+                errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
+        except Exception as e:
+            errors.append(f"{vm.name}: {str(e)}")
+            
+    return {
+        "success": len(errors) == 0,
+        "message": f"Reverted {success_count} VMs",
+        "errors": errors if errors else None
+    }
+
+@router.delete("/environments/{env_id}")
+def delete_environment_by_id(env_id: int, db: Session = Depends(get_db)):
+    """Delete an environment by ID and all its VMs"""
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == env_id).first()
+    if not env:
+        raise HTTPException(status_code=404, detail="Environment not found")
+        
+    success_count = 0
+    errors = []
+    
+    # Create list of VMs to delete to avoid modification during iteration issues
+    vms_to_delete = list(env.vms)
+    
+    for vm in vms_to_delete:
+        try:
+            # Delete from vSphere
+            result = vsphere_service.delete_vm(vm.vm_moid)
+            if not result["success"] and "not found" not in str(result.get("message", "")).lower():
+                 errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
+            
+            # Delete from DB
+            db.delete(vm)
+            success_count += 1
+        except Exception as e:
+            errors.append(f"{vm.name}: {str(e)}")
+            
+    # Delete environment from DB
+    db.delete(env)
+    db.commit()
+    
+    return {
+        "success": len(errors) == 0,
+        "message": f"Deleted environment with {success_count} VMs",
+        "errors": errors if errors else None
+    }
+
+# BULK ACTIONS
+@router.post("/{class_id}/environments/suspend-all")
+def suspend_all_vms(class_id: int, db: Session = Depends(get_db)):
+    """Suspend all VMs in all environments for a class"""
+    db_class = db.query(Class).filter(Class.id == class_id).first()
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found")
+    
+    environments = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
+    
+    success_count = 0
+    errors = []
+    
+    for env in environments:
+        for vm in env.vms:
+            try:
+                result = vsphere_service.control_vm_power(vm.vm_moid, "suspend")
+                if result["success"]:
+                    success_count += 1
+                else:
+                    errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
+            except Exception as e:
+                errors.append(f"{vm.name}: {str(e)}")
+    
+    return {
+        "success": len(errors) == 0,
+        "message": f"Suspended {success_count} VMs",
+        "errors": errors if errors else None
+    }
+
+
+@router.post("/{class_id}/environments/revert-all")
+def revert_all_vms(class_id: int, db: Session = Depends(get_db)):
+    """Revert all VMs to their initial snapshot in all environments for a class"""
+    db_class = db.query(Class).filter(Class.id == class_id).first()
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found")
+    
+    environments = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
+    
+    success_count = 0
+    errors = []
+    
+    for env in environments:
+        for vm in env.vms:
+            try:
+                result = vsphere_service.revert_vm(vm.vm_moid)
+                if result["success"]:
+                    success_count += 1
+                else:
+                    errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
+            except Exception as e:
+                errors.append(f"{vm.name}: {str(e)}")
+    
+    return {
+        "success": len(errors) == 0,
+        "message": f"Reverted {success_count} VMs",
+        "errors": errors if errors else None
+    }
+
+
+@router.delete("/{class_id}/environments")
+def delete_all_environments(class_id: int, db: Session = Depends(get_db)):
+    """Delete all environments and their VMs for a class"""
+    db_class = db.query(Class).filter(Class.id == class_id).first()
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found")
+    
+    environments = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
+    
+    success_count = 0
+    errors = []
+    
+    for env in environments:
+        for vm in env.vms:
+            try:
+                result = vsphere_service.delete_vm(vm.vm_moid)
+                if result["success"]:
+                    success_count += 1
+                else:
+                    # Ignore "not found" errors (zombie cleanup)
+                    if "not found" not in str(result.get("message", "")).lower():
+                        errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
+                # Delete from DB regardless
+                db.delete(vm)
+            except Exception as e:
+                errors.append(f"{vm.name}: {str(e)}")
+        
+        # Delete environment
+        db.delete(env)
+    
+    db.commit()
+    
+    return {
+        "success": len(errors) == 0,
+        "message": f"Deleted {success_count} VMs and {len(environments)} environments",
+        "errors": errors if errors else None
+    }

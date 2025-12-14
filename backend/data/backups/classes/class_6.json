@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 6,
+    "name": "Port8001Verify",
+    "instructor_id": 1,
+    "blueprint_id": null,
+    "template_id": 1,
+    "max_users": 1,
+    "passcode": "99999",
+    "start_date": "2025-01-01T09:00:00",
+    "end_date": "2025-01-01T17:00:00",
+    "status": "active",
+    "description": null,
+    "created_at": "2025-12-14T08:54:33.230576",
+    "updated_at": "2025-12-14T08:54:33.230584"
+  },
+  "backup_timestamp": "2025-12-14T08:54:33.244239",
+  "version": 1
+}

@@ -60,8 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = () => {
-    // Redirect to backend auth
-    window.location.href = 'http://localhost:8000/auth/login';
+    // Redirect to backend auth via proxy
+    window.location.href = '/auth/login';
   };
 
   const localLogin = async (creds: any) => {

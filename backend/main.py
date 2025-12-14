@@ -123,10 +123,7 @@ async def startup_event():
             "gcp_service_account_json": os.getenv("GCP_SERVICE_ACCOUNT_JSON", "{}"),
             # CloudShare Defaults
             "cloudshare_api_id": os.getenv("CLOUDSHARE_API_ID", ""),
-            "cloudshare_api_key": os.getenv("CLOUDSHARE_API_KEY", ""),
-            # Skytap Defaults
-            "skytap_username": os.getenv("SKYTAP_USERNAME", ""),
-            "skytap_api_token": os.getenv("SKYTAP_API_TOKEN", "")
+            "cloudshare_api_key": os.getenv("CLOUDSHARE_API_KEY", "")
         }
         
         for key, val in defaults.items():
@@ -144,8 +141,6 @@ async def startup_event():
                     category = "gcp"
                 elif key.startswith("cloudshare"):
                     category = "cloudshare"
-                elif key.startswith("skytap"):
-                    category = "skytap"
                 elif key.startswith("proxmox"):
                     category = "proxmox"
                 else:
@@ -168,23 +163,8 @@ async def startup_event():
         vsphere_service.connect()
         await email_service.load_config(db)
         
-        # Seed Default Templates
-        default_templates = [
-            {"name": "Base Environment", "description": "Standard training setup with basic tools", "icon": "🖥️", "provider": "Proxmox"},
-            {"name": "Advanced Security", "description": "Multi-VM security testing environment", "icon": "🔒", "provider": "AWS"},
-            {"name": "Network Simulation", "description": "Complex network topology for advanced training", "icon": "🌐", "provider": "Azure"},
-        ]
-        for tpl in default_templates:
-            existing = db.query(Template).filter(Template.name == tpl["name"]).first()
-            if not existing:
-                new_tpl = Template(**tpl)
-                db.add(new_tpl)
-            else:
-                 # Update provider for existing templates if missing
-                 if not existing.provider:
-                     existing.provider = tpl.get("provider", "Proxmox")
-                     db.add(existing)
-        db.commit()
+        # Default Templates seeding removed for production.
+        # Use API/Admin UI to create templates.
         
     except Exception as e:
         logger.error(f"Failed to seed database or load services: {e}")

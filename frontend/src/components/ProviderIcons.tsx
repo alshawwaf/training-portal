@@ -26,10 +26,6 @@ export const CloudShareIcon = (props: any) => (
     <img src="/cloudshare.png" alt="CloudShare" {...props} className={`${props.className || ''} object-contain`} />
 );
 
-export const SkytapIcon = (props: any) => (
-    <img src="/skytap.png" alt="Skytap" {...props} className={`${props.className || ''} object-contain`} />
-);
-
 export const VMwareIcon = (props: any) => (
     <img src="/vsphere.png" alt="VMware vSphere" {...props} className={`${props.className || ''} object-contain`} />
 );
@@ -48,8 +44,6 @@ export const getProviderIcon = (providerId: string) => {
             return GcpIcon;
         case 'cloudshare':
             return CloudShareIcon;
-        case 'skytap':
-            return SkytapIcon;
         case 'vmware':
         case 'vmware vsphere':
         case 'vsphere':
@@ -59,4 +53,9 @@ export const getProviderIcon = (providerId: string) => {
         default:
             return Server;
     }
+};
+
+export const ProviderIcon = ({ provider, className }: { provider: string; className?: string }) => {
+    const Icon = getProviderIcon(provider);
+    return <Icon className={className} />;
 };

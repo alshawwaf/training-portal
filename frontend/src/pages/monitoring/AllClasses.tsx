@@ -38,9 +38,10 @@ const AllClasses: React.FC = () => {
         setLoading(true);
         try {
             const res = await api.get('/classes/');
-            setClasses(res.data);
+            setClasses(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             showToast('Failed to fetch classes', 'error');
+            setClasses([]);
         } finally {
             setLoading(false);
         }
@@ -70,8 +71,8 @@ const AllClasses: React.FC = () => {
         a.click();
     };
 
-    const activeCount = classes.filter(c => c.status === 'active').length;
-    const totalCapacity = classes.reduce((sum, c) => sum + c.max_users, 0);
+    const activeCount = (Array.isArray(classes) ? classes : []).filter(c => c.status === 'active').length;
+    const totalCapacity = (Array.isArray(classes) ? classes : []).reduce((sum, c) => sum + c.max_users, 0);
 
     return (
         <div className="space-y-6">

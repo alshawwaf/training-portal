@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 20,
+    "name": "Verify_Folder_Class",
+    "instructor_id": 1,
+    "blueprint_id": null,
+    "template_id": 11,
+    "max_users": 1,
+    "passcode": "123456",
+    "start_date": "2025-01-01T00:00:00",
+    "end_date": "2025-01-02T00:00:00",
+    "status": "draft",
+    "description": "Temp class for folder verification",
+    "created_at": "2025-12-14T04:51:00.174297",
+    "updated_at": "2025-12-14T04:51:00.174301"
+  },
+  "archived_at": "2025-12-14T04:51:00.396213",
+  "reason": "deleted"
+}

@@ -25,12 +25,14 @@ const MyClasses: React.FC = () => {
         setLoading(true);
         try {
             const res = await api.get('/classes/');
-            const myClasses = res.data.filter((cls: ClassModel) => 
+            const data = Array.isArray(res.data) ? res.data : [];
+            const myClasses = data.filter((cls: ClassModel) => 
                 cls.instructor_id === user?.id
             );
             setClasses(myClasses);
         } catch (err) {
             showToast('Failed to fetch classes', 'error');
+            setClasses([]);
         } finally {
             setLoading(false);
         }

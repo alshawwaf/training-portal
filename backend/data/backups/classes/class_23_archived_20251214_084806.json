@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 23,
+    "name": "VsphereProvisionTest",
+    "instructor_id": 1,
+    "blueprint_id": null,
+    "template_id": 9,
+    "max_users": 1,
+    "passcode": "12345",
+    "start_date": "2025-01-01T09:00:00",
+    "end_date": "2025-01-01T17:00:00",
+    "status": "active",
+    "description": null,
+    "created_at": "2025-12-14T08:39:14.943004",
+    "updated_at": "2025-12-14T08:39:14.943011"
+  },
+  "archived_at": "2025-12-14T08:48:06.119036",
+  "reason": "deleted"
+}

@@ -39,12 +39,13 @@ const AllEnvironments: React.FC = () => {
         setLoading(true);
         try {
             const classRes = await api.get('/classes/');
-            const fetchedClasses = classRes.data;
+            const fetchedClasses = Array.isArray(classRes.data) ? classRes.data : [];
 
             const envPromises = fetchedClasses.map(async (cls: ClassModel) => {
                 try {
                     const res = await api.get(`/classes/${cls.id}/environments`);
-                    return res.data.map((env: any) => ({
+                    const envData = Array.isArray(res.data) ? res.data : [];
+                    return envData.map((env: any) => ({
                         ...env,
                         class_id: cls.id,
                         class_name: cls.name
@@ -58,6 +59,7 @@ const AllEnvironments: React.FC = () => {
             setEnvironments(allEnvs.flat());
         } catch (err) {
             showToast('Failed to fetch environments', 'error');
+            setEnvironments([]);
         } finally {
             setLoading(false);
         }

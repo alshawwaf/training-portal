@@ -1,7 +1,7 @@
 {
   "class": {
-    "id": 7,
-    "name": "Folder Test 2",
+    "id": 12,
+    "name": "Folder Test 7",
     "instructor_id": 1,
     "blueprint_id": null,
     "template_id": 9,
@@ -11,9 +11,9 @@
     "end_date": "2025-12-30T00:00:00",
     "status": "draft",
     "description": null,
-    "created_at": "2025-12-13T07:15:26.012080",
-    "updated_at": "2025-12-13T07:15:26.012086"
+    "created_at": "2025-12-13T07:51:33.926921",
+    "updated_at": "2025-12-13T07:51:33.926927"
   },
-  "backup_timestamp": "2025-12-13T07:15:26.032440",
-  "version": 1
+  "archived_at": "2025-12-14T08:32:35.412964",
+  "reason": "deleted"
 }

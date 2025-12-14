@@ -1,51 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Search, Calendar, Users, Trash2, Edit, Eye, Server, Key, Layers, Save, ChevronDown } from 'lucide-react';
+import { Plus, Search, Calendar, Users, Trash2, Edit, Eye, MoreVertical, XCircle, Layers } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
-import { getProviderIcon } from '../components/ProviderIcons';
+import { getProviderIcon, ProviderIcon } from '../components/ProviderIcons';
 
-interface ClassModel {
-    id: number;
-    name: string;
-    blueprint_id: string;
-    template_id?: number;
-    max_users: number;
-    passcode: string;
-    start_date: string;
-    end_date: string;
-    instructor_id: number;
-    status: string;
-    description?: string;
-    created_at?: string;
-    updated_at?: string;
-}
+// Import Types
+import type { ClassModel, Template } from '../types/class';
+import { statusConfig } from '../types/class';
 
-interface EnvironmentVM {
-    id: number;
-    name: string;
-    moid: string;
-    ip_address?: string;
-    power_state: string; // poweredOn, poweredOff, suspended
-    access_url?: string;
-}
-
-interface ClassEnvironment {
-    id: number;
-    name: string;
-    user_id?: number;
-    created_at: string;
-    vms: EnvironmentVM[];
-}
-
-const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
-    draft: { label: 'Draft', color: 'text-gray-400', bgColor: 'bg-gray-500/10 border-gray-500/20' },
-    upcoming: { label: 'Upcoming', color: 'text-blue-400', bgColor: 'bg-blue-500/10 border-blue-500/20' },
-    active: { label: 'Active', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10 border-emerald-500/20' },
-    completed: { label: 'Completed', color: 'text-purple-400', bgColor: 'bg-purple-500/10 border-purple-500/20' },
-    cancelled: { label: 'Cancelled', color: 'text-red-400', bgColor: 'bg-red-500/10 border-red-500/20' },
-    postponed: { label: 'Postponed', color: 'text-amber-400', bgColor: 'bg-amber-500/10 border-amber-500/20' },
-};
+// Import New Modals
+import CreateClassModal from '../components/classes/CreateClassModal';
+import EditClassModal from '../components/classes/EditClassModal';
+import ViewClassModal from '../components/classes/ViewClassModal';
 
 const Classes: React.FC = () => {
     const { showToast } = useToast();
@@ -56,370 +23,320 @@ const Classes: React.FC = () => {
     
     // Modal states
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    
     const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
-    const [environments, setEnvironments] = useState<ClassEnvironment[]>([]);
-    const [loadingEnvs, setLoadingEnvs] = useState(false);
-    const [editForm, setEditForm] = useState<Partial<ClassModel>>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [classToDelete, setClassToDelete] = useState<ClassModel | null>(null);
+
+    // Action menu state
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
     // Templates from API
-    const [templates, setTemplates] = useState<{id: number; name: string; description: string; icon: string; provider: string}[]>([]);
-
-    // Create form state
-    const [createForm, setCreateForm] = useState({
-        name: '',
-        blueprint_id: '',
-        template_id: '',
-        max_users: 10,
-        passcode: 'class123',
-        start_date: new Date().toISOString().slice(0, 16),
-        end_date: new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 16),
-        status: 'draft',
-        description: '',
-    });
-
-
+    const [templates, setTemplates] = useState<Template[]>([]);
 
     useEffect(() => {
         fetchClasses();
         fetchTemplates();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (openMenuId !== null && !(event.target as Element).closest('.action-menu-container')) {
+                setOpenMenuId(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [openMenuId]);
+
+    useEffect(() => {
+        if (selectedClass) {
+            const updated = classes.find(c => c.id === selectedClass.id);
+            if (updated && updated !== selectedClass) {
+                setSelectedClass(updated);
+            }
+        }
+    }, [classes]);
 
     const fetchTemplates = async () => {
         try {
-            const res = await api.get('/templates/');
-            setTemplates(res.data.map((t: any) => ({ id: t.id, name: t.name, description: t.description || '', icon: t.icon, provider: t.provider || 'vSphere' })));
-        } catch (e) {
-            console.error("Failed to fetch templates", e);
+            const response = await api.get('/templates/');
+            setTemplates(response.data);
+        } catch (error) {
+            console.error('Failed to fetch templates:', error);
         }
     };
 
     const fetchClasses = async () => {
+        setIsLoading(true);
         try {
-            const res = await api.get('/classes/');
-            setClasses(res.data);
-        } catch (e) {
-            console.error("Failed to fetch classes", e);
+            const response = await api.get('/classes/');
+            setClasses(response.data);
+        } catch (error) {
+            console.error('Failed to fetch classes:', error);
             showToast('Failed to load classes', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleCreate = async () => {
-        if (!createForm.name.trim()) {
-            showToast('Please enter a class name', 'warning');
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            // Map string template_id to integer for backend
-            const payload = {
-                ...createForm,
-                template_id: createForm.template_id ? parseInt(createForm.template_id) : undefined,
-                blueprint_id: undefined // explicit undefined to rely on template_id
-            };
-            await api.post('/classes/', payload);
-            showToast('Class created successfully', 'success');
-            setCreateModalOpen(false);
-            resetCreateForm();
-            fetchClasses();
-        } catch {
-            showToast('Failed to create class', 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const resetCreateForm = () => {
-        setCreateForm({
-            name: '',
-            blueprint_id: '',
-            template_id: '',
-            max_users: 10,
-            passcode: 'class123',
-            start_date: new Date().toISOString().slice(0, 16),
-            end_date: new Date(Date.now() + 7*24*60*60*1000).toISOString().slice(0, 16),
-            status: 'draft',
-            description: '',
-        });
-    };
-
     const handleDelete = async () => {
-        if (!selectedClass) return;
+        if (!classToDelete) return;
+        
         try {
-            await api.delete(`/classes/${selectedClass.id}`);
+            await api.delete(`/classes/${classToDelete.id}`);
+            setClasses(classes.filter(c => c.id !== classToDelete.id));
             showToast('Class deleted successfully', 'success');
             setDeleteModalOpen(false);
-            setSelectedClass(null);
-            fetchClasses();
-        } catch {
+            setClassToDelete(null);
+        } catch (error) {
+            console.error('Failed to delete class:', error);
             showToast('Failed to delete class', 'error');
         }
     };
 
-    const handleEdit = async () => {
-        if (!selectedClass) return;
-        setIsSubmitting(true);
-        try {
-            // Map template_id same as create
-            const payload = {
-                ...editForm,
-                template_id: editForm.template_id ? Number(editForm.template_id) : undefined
-            };
-            await api.put(`/classes/${selectedClass.id}`, payload);
-            showToast('Class updated successfully', 'success');
-            setEditModalOpen(false);
-            setSelectedClass(null);
-            fetchClasses();
-        } catch {
-            showToast('Failed to update class', 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     const handleProvision = async (classId: number) => {
-        if (!confirm("Are you sure you want to provision environments for this class? This may take a while.")) return;
-        setIsSubmitting(true);
         try {
-            const res = await api.post(`/classes/${classId}/provision`);
-            if (res.data.success) {
-                showToast(`Provisioning started: ${res.data.message}`, 'success');
-                setViewModalOpen(false);
-                fetchClasses();
-            } else {
-                showToast(`Provisioning completed with issues: ${res.data.errors?.join(', ')}`, 'warning');
-            }
-        } catch (e: any) {
-             const msg = e.response?.data?.detail || 'Provisioning failed';
-             showToast(msg, 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const openDeleteModal = (cls: ClassModel) => {
-        setSelectedClass(cls);
-        setDeleteModalOpen(true);
-    };
-
-    const openViewModal = (cls: ClassModel) => {
-        setSelectedClass(cls);
-        setViewModalOpen(true);
-        fetchEnvironments(cls.id);
-    };
-
-    const fetchEnvironments = async (classId: number) => {
-        setLoadingEnvs(true);
-        try {
-            const res = await api.get(`/classes/${classId}/environments`);
-            setEnvironments(res.data);
-        } catch (e) {
-            console.error("Failed to fetch environments", e);
-            showToast("Failed to load environments", "error");
-        } finally {
-            setLoadingEnvs(false);
-        }
-    };
-
-    const handlePowerControl = async (envId: number, vmId: number, action: string) => {
-        try {
-            const res = await api.post(`/environments/${envId}/vms/${vmId}/power`, { action });
-            if (res.data.success) {
-                showToast(`VM ${action} command sent`, 'success');
-                // Refresh environments to get new state
-                if (selectedClass) fetchEnvironments(selectedClass.id);
-            }
-        } catch (e: any) {
-            showToast(`Power action failed: ${e.response?.data?.detail || e.message}`, 'error');
+            showToast('Provisioning started...', 'success');
+            await api.post(`/classes/${classId}/provision`);
+            showToast('Provisioning task queued successfully', 'success');
+            fetchClasses(); // Refresh status
+            setOpenMenuId(null);
+        } catch (error) {
+            console.error('Failed to provision class:', error);
+            showToast('Failed to start provisioning', 'error');
         }
     };
 
     const openEditModal = (cls: ClassModel) => {
         setSelectedClass(cls);
-        setEditForm({
-            name: cls.name,
-            blueprint_id: cls.blueprint_id,
-            template_id: cls.template_id ? cls.template_id : undefined,
-            max_users: cls.max_users,
-            passcode: cls.passcode,
-            start_date: cls.start_date.slice(0, 16),
-            end_date: cls.end_date.slice(0, 16),
-            status: cls.status,
-            description: cls.description || '',
-        });
         setEditModalOpen(true);
+        setOpenMenuId(null);
     };
 
-    const filteredClasses = classes.filter(cls => {
-        const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || cls.status === statusFilter;
-        return matchesSearch && matchesStatus;
-    });
+    const openViewModal = (cls: ClassModel) => {
+        setSelectedClass(cls);
+        setViewModalOpen(true);
+        setOpenMenuId(null);
+    };
 
+    const openDeleteModal = (cls: ClassModel) => {
+        setClassToDelete(cls);
+        setDeleteModalOpen(true);
+        setOpenMenuId(null);
+    };
+
+    // --- Helpers ---
     const formatDate = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
+        return new Date(dateStr).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
         });
     };
 
     const formatDateTime = (dateStr: string) => {
-        return new Date(dateStr).toLocaleString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric',
-            hour: '2-digit',
+        return new Date(dateStr).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
             minute: '2-digit'
         });
     };
 
     const getStatusBadge = (status: string) => {
-        const config = statusConfig[status] || statusConfig.draft;
+        const config = statusConfig[status] || { label: status, color: 'text-gray-400', bgColor: 'bg-gray-800' };
         return (
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium border ${config.bgColor} ${config.color}`}>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.bgColor} ${config.color}`}>
                 {config.label}
             </span>
         );
     };
 
+    // Filter Logic
+    const filteredClasses = classes.filter(cls => {
+        const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              cls.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || cls.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary">Classes</h1>
-                    <p className="text-secondary mt-1">Manage your training classes and environments</p>
+            <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Classes</h1>
+                <p className="text-gray-400">Manage training classes and student environments</p>
+            </div>
+
+            {/* Actions Bar */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-900/50 p-4 rounded-xl border border-gray-800 backdrop-blur-sm">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-80">
+                        <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+                        <input
+                            type="text"
+                            placeholder="Search classes..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder-gray-600"
+                        />
+                    </div>
+                    
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-gray-200 focus:ring-2 focus:ring-blue-500/50 outline-none cursor-pointer"
+                    >
+                        <option value="all">All Status</option>
+                        {Object.entries(statusConfig).map(([key, conf]) => (
+                            <option key={key} value={key}>{conf.label}</option>
+                        ))}
+                    </select>
                 </div>
-                <button onClick={() => setCreateModalOpen(true)} className="btn-primary">
-                    <Plus className="w-5 h-5" />
+
+                <button
+                    onClick={() => setCreateModalOpen(true)}
+                    className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 group"
+                >
+                    <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     New Class
                 </button>
             </div>
 
-            {/* Search and Filters */}
-            <div className="flex items-center gap-4">
-                <div className="flex-1 relative">
-                    <Search className="w-5 h-5 text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input 
-                        type="text"
-                        placeholder="Search classes..."
-                        className="input pl-10"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <div className="relative">
-                    <select
-                        value={statusFilter}
-                        onChange={e => setStatusFilter(e.target.value)}
-                        className="input pr-10 appearance-none cursor-pointer"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="draft">Draft</option>
-                        <option value="upcoming">Upcoming</option>
-                        <option value="active">Active</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="postponed">Postponed</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-            </div>
-
-            {/* Classes Grid */}
+            {/* Classes List */}
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="card p-6 animate-pulse">
-                            <div className="h-4 bg-secondary/20 rounded w-3/4 mb-4"></div>
-                            <div className="h-3 bg-secondary/20 rounded w-1/2"></div>
-                        </div>
-                    ))}
+                <div className="text-center py-20">
+                    <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="text-gray-400 animate-pulse">Loading classes...</p>
                 </div>
             ) : filteredClasses.length === 0 ? (
-                <div className="card-elevated p-12 text-center">
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-secondary/20 flex items-center justify-center">
-                        <Calendar className="w-10 h-10 text-secondary" />
+                <div className="text-center py-20 bg-gray-900/30 rounded-2xl border border-gray-800 border-dashed">
+                    <div className="bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-8 h-8 text-gray-500" />
                     </div>
-                    <h3 className="text-xl font-semibold text-primary mb-2">No classes found</h3>
-                    <p className="text-secondary mb-6">
-                        {searchTerm || statusFilter !== 'all' ? 'Try adjusting your filters' : 'Create your first class to get started'}
+                    <h3 className="text-xl font-medium text-white mb-2">No classes found</h3>
+                    <p className="text-gray-400 max-w-sm mx-auto mb-6">
+                        {searchTerm || statusFilter !== 'all' 
+                            ? "Try adjusting your search or filters" 
+                            : "Get started by creating your first training class"}
                     </p>
-                    {!searchTerm && statusFilter === 'all' && (
-                        <button onClick={() => setCreateModalOpen(true)} className="btn-primary inline-flex">
-                            <Plus className="w-5 h-5" />
-                            Create Class
+                    {(searchTerm || statusFilter !== 'all') && (
+                        <button 
+                            onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+                            className="text-blue-400 hover:text-blue-300 font-medium"
+                        >
+                            Clear filters
                         </button>
                     )}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredClasses.map(cls => (
-                        <div key={cls.id} className="card-elevated p-6 hover:border-theme transition-all group">
-                            <div className="flex items-start justify-between mb-4">
-                                {(() => {
-                                    const tpl = templates.find(t => String(t.id) === cls.blueprint_id);
-                                    if (tpl) {
-                                        const ProviderIcon = getProviderIcon(tpl.provider);
-                                        return (
-                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center shadow-lg border border-theme">
-                                                <ProviderIcon className="w-7 h-7" />
-                                            </div>
-                                        );
-                                    }
-                                    return (
-                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                            {cls.name.charAt(0)}
+                    {filteredClasses.map((cls) => (
+                        <div key={cls.id} className="bg-gray-900/50 border border-gray-800 rounded-xl hover:border-gray-700 transition-all hover:shadow-xl hover:shadow-black/20 group backdrop-blur-sm overflow-hidden flex flex-col">
+                            {/* Card Header & Status */}
+                            <div className="p-5 pb-0 flex items-start justify-between">
+                                <div className="flex gap-3">
+                                    <div className={`p-2.5 rounded-lg ${cls.template ? 'bg-blue-500/10 text-blue-400' : 'bg-gray-800 text-gray-500'}`}>
+                                        {cls.template ? <ProviderIcon provider={cls.template.provider} className="w-6 h-6" /> : <Layers className="w-6 h-6" />}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors line-clamp-1" title={cls.name}>
+                                            {cls.name}
+                                        </h3>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            {getStatusBadge(cls.status)}
+                                            {cls.template && (
+                                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                    <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                                                    {cls.template.name}
+                                                </span>
+                                            )}
                                         </div>
-                                    );
-                                })()}
-                                {getStatusBadge(cls.status)}
+                                    </div>
+                                </div>
+                                
+                                {/* Action Menu */}
+                                <div className="relative action-menu-container">
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === cls.id ? null : cls.id); }}
+                                        className={`p-1.5 rounded-lg transition-colors ${openMenuId === cls.id ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                                    >
+                                        <MoreVertical className="w-5 h-5" />
+                                    </button>
+
+                                    {openMenuId === cls.id && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-20 py-1 overflow-hidden scale-in-center origin-top-right">
+                                            <button 
+                                                onClick={() => openViewModal(cls)}
+                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-2 transition-colors"
+                                            >
+                                                <Eye className="w-4 h-4 text-blue-400" /> View Details
+                                            </button>
+                                            <button 
+                                                onClick={() => openEditModal(cls)}
+                                                className="w-full text-left px-4 py-2.5 text-sm text-gray-300 hover:bg-gray-800 hover:text-white flex items-center gap-2 transition-colors"
+                                            >
+                                                <Edit className="w-4 h-4 text-amber-400" /> Edit Class
+                                            </button>
+                                            
+                                            <div className="border-t border-gray-800 my-1"></div>
+                                            
+                                            <button 
+                                                onClick={() => handleProvision(cls.id)}
+                                                disabled={cls.status !== 'active'}
+                                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-2 transition-colors ${
+                                                    cls.status !== 'active' 
+                                                        ? 'text-gray-600 cursor-not-allowed' 
+                                                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                                                }`}
+                                                title={cls.status !== 'active' ? "Class must be active to provision" : "Provision environments"}
+                                            >
+                                                <Layers className={`w-4 h-4 ${cls.status === 'active' ? 'text-emerald-400' : ''}`} /> Provision
+                                            </button>
+                                            
+                                            <div className="border-t border-gray-800 my-1"></div>
+                                            
+                                            <button 
+                                                onClick={() => openDeleteModal(cls)}
+                                                className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                                            >
+                                                <Trash2 className="w-4 h-4" /> Delete
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             
-                            <h3 className="text-lg font-semibold text-primary mb-2 group-hover:text-blue-500 transition-colors cursor-pointer"
-                                onClick={() => openViewModal(cls)}>
-                                {cls.name}
-                            </h3>
-                            
-                            <div className="space-y-2 mb-4">
-                                <div className="flex items-center gap-2 text-sm text-secondary">
-                                    <Calendar className="w-4 h-4" />
-                                    <span>{formatDate(cls.start_date)} - {formatDate(cls.end_date)}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-secondary">
-                                    <Users className="w-4 h-4" />
-                                    <span>0 / {cls.max_users} students</span>
+                            {/* Card Body */}
+                            <div className="p-5 space-y-3 flex-1">
+                                <p className="text-gray-400 text-sm line-clamp-2 h-10">
+                                    {cls.description || "No description provided."}
+                                </p>
+                                
+                                <div className="space-y-2 pt-2">
+                                    <div className="flex items-center text-sm text-gray-400">
+                                        <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                                        <span>{formatDate(cls.start_date)} - {formatDate(cls.end_date)}</span>
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-400">
+                                        <Users className="w-4 h-4 mr-2 text-gray-500" />
+                                        <span>Capacity: {cls.max_users} Students</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-end gap-1 pt-4 border-t border-theme">
+                            {/* Card Footer */}
+                            <div className="px-5 py-4 bg-gray-900/80 border-t border-gray-800 flex justify-between items-center text-xs text-gray-500">
+                                <span>Updated {new Date(cls.updated_at || cls.created_at || '').toLocaleDateString()}</span>
                                 <button 
                                     onClick={() => openViewModal(cls)}
-                                    className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors" 
-                                    title="View"
+                                    className="text-blue-400 hover:text-blue-300 font-medium"
                                 >
-                                    <Eye className="w-4 h-4" />
-                                </button>
-                                <button 
-                                    onClick={() => openEditModal(cls)}
-                                    className="p-2 text-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors" 
-                                    title="Edit"
-                                >
-                                    <Edit className="w-4 h-4" />
-                                </button>
-                                <button 
-                                    onClick={() => openDeleteModal(cls)}
-                                    className="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" 
-                                    title="Delete"
-                                >
-                                    <Trash2 className="w-4 h-4" />
+                                    Manage &rarr;
                                 </button>
                             </div>
                         </div>
@@ -427,471 +344,53 @@ const Classes: React.FC = () => {
                 </div>
             )}
 
-            {/* Create Class Modal */}
-            <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Create New Class" maxWidth="2xl">
-                <div className="space-y-6">
-                    {/* Basic Information Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 pb-3 border-b border-theme">
-                            <div className="p-2 bg-blue-500/10 rounded-lg">
-                                <Server className="w-5 h-5 text-blue-500" />
-                            </div>
-                            <div>
-                                <h3 className="text-primary font-medium">Basic Information</h3>
-                                <p className="text-sm text-secondary">General class details</p>
-                            </div>
-                        </div>
+            {/* --- Modals --- */}
+            
+            <CreateClassModal 
+                isOpen={createModalOpen} 
+                onClose={() => setCreateModalOpen(false)}
+                onSuccess={fetchClasses}
+                templates={templates}
+            />
 
-                        <div>
-                            <label className="input-label">Class Name</label>
-                            <input 
-                                type="text"
-                                className="input"
-                                placeholder="e.g., Security Fundamentals Q1 2025"
-                                value={createForm.name}
-                                onChange={e => setCreateForm({...createForm, name: e.target.value})}
-                            />
-                        </div>
+            <EditClassModal 
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                onSuccess={fetchClasses}
+                classData={selectedClass}
+                templates={templates}
+            />
 
-                        <div>
-                            <label className="input-label">Description (optional)</label>
-                            <textarea 
-                                className="input min-h-[80px]"
-                                placeholder="Brief description of the class..."
-                                value={createForm.description}
-                                onChange={e => setCreateForm({...createForm, description: e.target.value})}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <label className="input-label flex items-center gap-2">
-                                    <Users className="w-4 h-4" />
-                                    Max Students
-                                </label>
-                                <input 
-                                    type="number"
-                                    min={1}
-                                    max={200}
-                                    className="input"
-                                    value={createForm.max_users}
-                                    onChange={e => setCreateForm({...createForm, max_users: parseInt(e.target.value)})}
-                                />
-                            </div>
-                            <div>
-                                <label className="input-label flex items-center gap-2">
-                                    <Key className="w-4 h-4" />
-                                    Access Passcode
-                                </label>
-                                <input 
-                                    type="text"
-                                    className="input font-mono"
-                                    value={createForm.passcode}
-                                    onChange={e => setCreateForm({...createForm, passcode: e.target.value})}
-                                />
-                            </div>
-                            <div>
-                                <label className="input-label">Initial Status</label>
-                                <select 
-                                    className="input"
-                                    value={createForm.status}
-                                    onChange={e => setCreateForm({...createForm, status: e.target.value})}
-                                >
-                                    <option value="draft">Draft</option>
-                                    <option value="upcoming">Upcoming</option>
-                                    <option value="active">Active</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Blueprint Selection Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 pb-3 border-b border-theme">
-                            <div className="p-2 bg-purple-500/10 rounded-lg">
-                                <Layers className="w-5 h-5 text-purple-500" />
-                            </div>
-                            <div>
-                                <h3 className="text-primary font-medium">Environment Blueprint</h3>
-                                <p className="text-sm text-secondary">Choose template for student environments</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            {/* Dynamic Provider Icon */}
-                            {(() => {
-                                const selectedTpl = templates.find(t => String(t.id) === createForm.blueprint_id);
-                                if (selectedTpl) {
-                                    const ProviderIcon = getProviderIcon(selectedTpl.provider);
-                                    return (
-                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                                            <ProviderIcon className="w-5 h-5 text-blue-500" />
-                                        </div>
-                                    );
-                                }
-                                return (
-                                    <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center flex-shrink-0">
-                                        <Layers className="w-5 h-5 text-secondary" />
-                                    </div>
-                                );
-                            })()}
-                            <div className="relative flex-1">
-                                <select
-                                    className="input appearance-none pr-10"
-                                    value={createForm.template_id}
-                                    onChange={e => setCreateForm({...createForm, template_id: e.target.value})}
-                                >
-                                    <option value="">Select a template...</option>
-                                    {templates.map((tpl) => (
-                                        <option key={tpl.id} value={String(tpl.id)}>
-                                            {tpl.name} ({tpl.provider}) {tpl.description ? `- ${tpl.description}` : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Schedule Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 pb-3 border-b border-theme">
-                            <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                <Calendar className="w-5 h-5 text-emerald-500" />
-                            </div>
-                            <div>
-                                <h3 className="text-primary font-medium">Schedule</h3>
-                                <p className="text-sm text-secondary">When should the class be active?</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="input-label">Start Date & Time</label>
-                                <input 
-                                    type="datetime-local"
-                                    className="input"
-                                    value={createForm.start_date}
-                                    onChange={e => setCreateForm({...createForm, start_date: e.target.value})}
-                                />
-                            </div>
-                            <div>
-                                <label className="input-label">End Date & Time</label>
-                                <input 
-                                    type="datetime-local"
-                                    className="input"
-                                    value={createForm.end_date}
-                                    onChange={e => setCreateForm({...createForm, end_date: e.target.value})}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-theme">
-                        <button onClick={() => setCreateModalOpen(false)} className="btn-secondary">
-                            Cancel
-                        </button>
-                        <button onClick={handleCreate} disabled={isSubmitting} className="btn-primary">
-                            {isSubmitting ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4" />
-                                    Create Class
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </Modal>
-
-            {/* View Modal */}
-            <Modal isOpen={viewModalOpen} onClose={() => setViewModalOpen(false)} title="Class Details" maxWidth="lg">
-                {selectedClass && (
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4 pb-4 border-b border-theme">
-                            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-2xl">
-                                {selectedClass.name.charAt(0)}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-xl font-bold text-primary">{selectedClass.name}</h3>
-                                <p className="text-secondary">Template {selectedClass.blueprint_id}</p>
-                            </div>
-                            {getStatusBadge(selectedClass.status)}
-                        </div>
-
-                        {selectedClass.description && (
-                            <div className="bg-secondary/50 p-4 rounded-lg">
-                                <p className="text-sm text-secondary mb-1">Description</p>
-                                <p className="text-primary">{selectedClass.description}</p>
-                            </div>
-                        )}
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-secondary/50 p-4 rounded-lg">
-                                <p className="text-sm text-secondary">Max Students</p>
-                                <p className="text-lg font-semibold text-primary">{selectedClass.max_users}</p>
-                            </div>
-                            <div className="bg-secondary/50 p-4 rounded-lg">
-                                <p className="text-sm text-secondary">Passcode</p>
-                                <p className="text-lg font-semibold text-primary font-mono">{selectedClass.passcode}</p>
-                            </div>
-                            <div className="bg-secondary/50 p-4 rounded-lg">
-                                <p className="text-sm text-secondary">Start Date</p>
-                                <p className="text-lg font-semibold text-primary">{formatDateTime(selectedClass.start_date)}</p>
-                            </div>
-                            <div className="bg-secondary/50 p-4 rounded-lg">
-                                <p className="text-sm text-secondary">End Date</p>
-                                <p className="text-lg font-semibold text-primary">{formatDateTime(selectedClass.end_date)}</p>
-                            </div>
-                        </div>
-
-                        {/* Environments List */}
-                        <div className="pt-4 border-t border-theme">
-                             <h4 className="text-lg font-semibold text-primary mb-3">Student Environments</h4>
-                             {loadingEnvs ? (
-                                 <div className="text-center py-4">
-                                     <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto" />
-                                     <p className="text-secondary text-sm mt-2">Loading environments...</p>
-                                 </div>
-                             ) : environments.length === 0 ? (
-                                 <p className="text-secondary text-center py-4 italic">No environments provisioned yet.</p>
-                             ) : (
-                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                                     {environments.map(env => (
-                                         <div key={env.id} className="bg-secondary/50 rounded-lg p-3 border border-theme">
-                                             <div className="flex items-center justify-between mb-2">
-                                                 <span className="font-medium text-primary">{env.name}</span>
-                                                 <span className="text-xs text-secondary bg-background px-2 py-0.5 rounded-full border border-theme">
-                                                     {env.vms.length} VMs
-                                                 </span>
-                                             </div>
-                                             <div className="space-y-2">
-                                                 {env.vms.map(vm => (
-                                                     <div key={vm.id} className="flex items-center justify-between text-sm bg-background/50 p-2 rounded">
-                                                         <div className="flex items-center gap-2">
-                                                             <div className={`w-2 h-2 rounded-full ${vm.power_state === 'poweredOn' ? 'bg-green-500' : 'bg-red-500'}`} />
-                                                             <span className="text-primary">{vm.name}</span>
-                                                         </div>
-                                                         <div className="flex items-center gap-2">
-                                                             <span className="text-xs font-mono text-secondary mr-2">
-                                                                 {vm.ip_address || 'No IP'}
-                                                             </span>
-                                                             {vm.power_state === 'poweredOn' ? (
-                                                                 <button 
-                                                                     onClick={() => handlePowerControl(env.id, vm.id, 'stop')}
-                                                                     className="p-1 text-red-400 hover:bg-red-500/10 rounded"
-                                                                     title="Stop VM"
-                                                                 >
-                                                                     <div className="w-3 h-3 bg-current rounded-sm" /> 
-                                                                 </button>
-                                                             ) : (
-                                                                 <button 
-                                                                     onClick={() => handlePowerControl(env.id, vm.id, 'start')}
-                                                                     className="p-1 text-green-400 hover:bg-green-500/10 rounded"
-                                                                     title="Start VM"
-                                                                 >
-                                                                     <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[6px] border-l-current border-b-[3px] border-b-transparent ml-0.5" />
-                                                                 </button>
-                                                             )}
-                                                             <button 
-                                                                 onClick={() => handlePowerControl(env.id, vm.id, 'reset')}
-                                                                 className="p-1 text-amber-400 hover:bg-amber-500/10 rounded"
-                                                                 title="Reset VM"
-                                                             >
-                                                                 <div className="w-3 h-3 border border-current rounded-full" />
-                                                             </button>
-                                                         </div>
-                                                     </div>
-                                                 ))}
-                                             </div>
-                                         </div>
-                                     ))}
-                                 </div>
-                             )}
-                        </div>
-
-                        <div className="flex justify-end gap-3 pt-4">
-                            <button onClick={() => setViewModalOpen(false)} className="btn-secondary">
-                                Close
-                            </button>
-                            <button 
-                                onClick={() => { setViewModalOpen(false); openEditModal(selectedClass); }}
-                                className="btn-primary"
-                            >
-                                <Edit className="w-4 h-4" />
-                                Edit
-                            </button>
-                            <button
-                                onClick={() => handleProvision(selectedClass.id)}
-                                className="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors flex items-center gap-2"
-                                disabled={isSubmitting}
-                            >
-                                <Server className="w-4 h-4" />
-                                Provision
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </Modal>
-
-            {/* Edit Modal */}
-            <Modal isOpen={editModalOpen} onClose={() => setEditModalOpen(false)} title="Edit Class" maxWidth="lg">
-                <div className="space-y-4">
-                    <div>
-                        <label className="input-label">Class Name</label>
-                        <input 
-                            type="text"
-                            className="input"
-                            value={editForm.name || ''}
-                            onChange={e => setEditForm({...editForm, name: e.target.value})}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="input-label">Description</label>
-                        <textarea 
-                            className="input min-h-[80px]"
-                            value={editForm.description || ''}
-                            onChange={e => setEditForm({...editForm, description: e.target.value})}
-                        />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="input-label">Blueprint / Template</label>
-                            <div className="flex items-center gap-3 mt-1">
-                                {/* Dynamic Provider Icon */}
-                                {(() => {
-                                    const selectedTpl = templates.find(t => String(t.id) === editForm.blueprint_id);
-                                    if (selectedTpl) {
-                                        const ProviderIcon = getProviderIcon(selectedTpl.provider);
-                                        return (
-                                            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
-                                                <ProviderIcon className="w-4 h-4 text-blue-500" />
-                                            </div>
-                                        );
-                                    }
-                                    return (
-                                        <div className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center flex-shrink-0">
-                                            <Layers className="w-4 h-4 text-secondary" />
-                                        </div>
-                                    );
-                                })()}
-                                <div className="relative flex-1">
-                                    <select 
-                                        className="input appearance-none pr-10"
-                                        value={editForm.template_id || ''}
-                                        onChange={e => setEditForm({...editForm, template_id: Number(e.target.value)})}
-                                    >
-                                        <option value="">Select a template...</option>
-                                        {templates.map((tpl) => (
-                                            <option key={tpl.id} value={tpl.id}>
-                                                {tpl.name} ({tpl.provider}) {tpl.description ? `- ${tpl.description}` : ''}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="input-label">Status</label>
-                            <select 
-                                className="input"
-                                value={editForm.status || 'draft'}
-                                onChange={e => setEditForm({...editForm, status: e.target.value})}
-                            >
-                                <option value="draft">Draft</option>
-                                <option value="upcoming">Upcoming</option>
-                                <option value="active">Active</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="postponed">Postponed</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="input-label">Max Students</label>
-                            <input 
-                                type="number"
-                                className="input"
-                                value={editForm.max_users || ''}
-                                onChange={e => setEditForm({...editForm, max_users: parseInt(e.target.value)})}
-                            />
-                        </div>
-                        <div>
-                            <label className="input-label">Passcode</label>
-                            <input 
-                                type="text"
-                                className="input font-mono"
-                                value={editForm.passcode || ''}
-                                onChange={e => setEditForm({...editForm, passcode: e.target.value})}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="input-label">Start Date</label>
-                            <input 
-                                type="datetime-local"
-                                className="input"
-                                value={editForm.start_date || ''}
-                                onChange={e => setEditForm({...editForm, start_date: e.target.value})}
-                            />
-                        </div>
-                        <div>
-                            <label className="input-label">End Date</label>
-                            <input 
-                                type="datetime-local"
-                                className="input"
-                                value={editForm.end_date || ''}
-                                onChange={e => setEditForm({...editForm, end_date: e.target.value})}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button onClick={() => setEditModalOpen(false)} className="btn-secondary">
-                            Cancel
-                        </button>
-                        <button onClick={handleEdit} disabled={isSubmitting} className="btn-primary">
-                            {isSubmitting ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                'Save Changes'
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </Modal>
+            <ViewClassModal 
+                isOpen={viewModalOpen}
+                onClose={() => setViewModalOpen(false)}
+                classData={selectedClass}
+                onEdit={openEditModal}
+                onDelete={openDeleteModal}
+            />
 
             {/* Delete Confirmation Modal */}
-            <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} title="Delete Class" maxWidth="sm">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                        <div className="p-3 bg-red-500/20 rounded-full">
-                            <Trash2 className="w-6 h-6 text-red-500" />
-                        </div>
-                        <div>
-                            <p className="text-primary font-medium">Are you sure?</p>
-                            <p className="text-sm text-secondary">
-                                This will permanently delete <span className="text-primary font-medium">{selectedClass?.name}</span>
-                            </p>
-                        </div>
-                    </div>
-
+            <Modal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                title="Delete Class"
+                icon={<Trash2 className="w-6 h-6 text-red-500" />}
+            >
+                <div>
+                    <p className="text-gray-300 mb-6">
+                        Are you sure you want to delete <span className="text-white font-semibold">{classToDelete?.name}</span>? 
+                        This action cannot be undone and will remove all associated student environments.
+                    </p>
                     <div className="flex justify-end gap-3">
-                        <button onClick={() => setDeleteModalOpen(false)} className="btn-secondary">
+                        <button
+                            onClick={() => setDeleteModalOpen(false)}
+                            className="px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                        >
                             Cancel
                         </button>
-                        <button 
-                            onClick={handleDelete} 
-                            className="bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 px-5 rounded-lg transition-colors"
+                        <button
+                            onClick={handleDelete}
+                            className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-shadow shadow-lg shadow-red-500/20"
                         >
                             Delete Class
                         </button>
