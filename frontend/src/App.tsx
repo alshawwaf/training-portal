@@ -10,10 +10,8 @@ import CreateClass from './pages/CreateClass';
 import EditClass from './pages/EditClass';
 import Settings from './pages/Settings';
 import Templates from './pages/Templates';
-// Monitoring pages (admin only)
 import AllClasses from './pages/monitoring/AllClasses';
 import AllEnvironments from './pages/monitoring/AllEnvironments';
-// User workspace pages
 import MyClasses from './pages/MyClasses';
 import MyEnvironments from './pages/MyEnvironments';
 
@@ -38,7 +36,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <Layout>{children}</Layout>;
 };
 
-// Admin-only route - checks for admin role
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
   
@@ -57,9 +54,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Check for admin role (supports 'admin', 'super_admin', or 'administrator')
   const isAdmin = user.role === 'admin' || user.role === 'super_admin' || user.role === 'administrator';
-  
   if (!isAdmin) {
     return <Navigate to="/" replace />;
   }
@@ -74,58 +69,16 @@ const App: React.FC = () => {
         <ToastProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/classes" element={
-              <ProtectedRoute>
-                <Classes />
-              </ProtectedRoute>
-            } />
-            <Route path="/classes/new" element={
-              <ProtectedRoute>
-                <CreateClass />
-              </ProtectedRoute>
-            } />
-            <Route path="/classes/edit/:id" element={
-              <ProtectedRoute>
-                <EditClass />
-              </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            } />
-            <Route path="/templates" element={
-              <ProtectedRoute>
-                <Templates />
-              </ProtectedRoute>
-            } />
-            {/* Monitoring Routes (Admin Only) */}
-            <Route path="/monitoring/classes" element={
-              <AdminRoute>
-                <AllClasses />
-              </AdminRoute>
-            } />
-            <Route path="/monitoring/environments" element={
-              <AdminRoute>
-                <AllEnvironments />
-              </AdminRoute>
-            } />
-            {/* User Workspace Routes */}
-            <Route path="/my/classes" element={
-              <ProtectedRoute>
-                <MyClasses />
-              </ProtectedRoute>
-            } />
-            <Route path="/my/environments" element={
-              <ProtectedRoute>
-                <MyEnvironments />
-              </ProtectedRoute>
-            } />
+            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
+            <Route path="/classes/new" element={<ProtectedRoute><CreateClass /></ProtectedRoute>} />
+            <Route path="/classes/edit/:id" element={<ProtectedRoute><EditClass /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
+            <Route path="/monitoring/classes" element={<AdminRoute><AllClasses /></AdminRoute>} />
+            <Route path="/monitoring/environments" element={<AdminRoute><AllEnvironments /></AdminRoute>} />
+            <Route path="/my/classes" element={<ProtectedRoute><MyClasses /></ProtectedRoute>} />
+            <Route path="/my/environments" element={<ProtectedRoute><MyEnvironments /></ProtectedRoute>} />
           </Routes>
         </ToastProvider>
       </AuthProvider>

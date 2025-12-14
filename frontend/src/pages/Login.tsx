@@ -33,21 +33,19 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary relative overflow-hidden transition-colors duration-300">
-      {/* Animated Background */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black relative overflow-hidden transition-colors duration-300">
+      {/* Modern gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-600/5 to-purple-600/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]" />
       </div>
 
-      {/* Grid pattern */}
+      {/* Subtle noise texture overlay */}
       <div 
-        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" 
+        className="absolute inset-0 opacity-[0.015] pointer-events-none" 
         style={{ 
-          backgroundImage: 'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-          color: 'rgb(var(--text-primary))'
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
         }} 
       />
       
@@ -56,17 +54,10 @@ const Login: React.FC = () => {
         <div className="card backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-              <div className="relative">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
-                      <Server className="w-10 h-10 text-white" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center border-4 border-theme">
-                      <Zap className="w-3 h-3 text-white" />
-                  </div>
-              </div>
+              <img src="/icon.png" alt="Check Point" className="w-24 h-24 object-contain" />
           </div>
           
-          <h1 className="text-2xl font-bold text-primary text-center mb-2">SE Training Portal</h1>
+          <h1 className="text-2xl font-bold text-primary text-center mb-2">Check Point SE Training</h1>
           <p className="text-secondary text-center mb-8 text-sm">Access your virtualization environments</p>
 
           {!showLocal ? (
