@@ -51,7 +51,7 @@ const Login: React.FC = () => {
       
       <div className="relative z-10 w-full max-w-md px-4 animate-fade-in">
         {/* Card */}
-        <div className="card backdrop-blur-xl p-8 rounded-2xl shadow-2xl">
+        <div className="bg-gray-800/90 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-gray-700/50">
           {/* Logo */}
           <div className="flex justify-center mb-8">
               <img src="/icon.png" alt="Check Point" className="w-24 h-24 object-contain" />
