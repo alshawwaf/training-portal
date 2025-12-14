@@ -51,14 +51,14 @@ const Login: React.FC = () => {
       
       <div className="relative z-10 w-full max-w-md px-4 animate-fade-in">
         {/* Card */}
-        <div className="bg-gray-800/90 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-gray-700/50">
+        <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-pink-500/30 shadow-pink-500/10">
           {/* Logo */}
           <div className="flex justify-center mb-8">
               <img src="/icon.png" alt="Check Point" className="w-24 h-24 object-contain" />
           </div>
           
-          <h1 className="text-2xl font-bold text-primary text-center mb-2">Check Point SE Training</h1>
-          <p className="text-secondary text-center mb-8 text-sm">Access your virtualization environments</p>
+          <h1 className="text-2xl font-bold text-white text-center mb-2">Check Point SE Training</h1>
+          <p className="text-gray-400 text-center mb-8 text-sm">Access your virtualization environments</p>
 
           {!showLocal ? (
               <div className="space-y-4">

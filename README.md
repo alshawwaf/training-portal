@@ -1,4 +1,4 @@
-# SE Training Portal
+# Check Point SE Training Portal
 
 <p align="center">
   <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI"/>
@@ -19,8 +19,10 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 | **Class Management** | Create, configure, and manage training classes with customizable parameters |
 | **Templates Management** | Define multi-provider environments (Proxmox, AWS, Azure, etc.) for labs |
 | **Virtual Environments** | Automated provisioning of environments for each student |
+| **My Workspace** | Dedicated student view for managing assigned environments and VMs |
+| **Monitoring Dashboard** | Admin-level oversight of all active classes and environments |
 | **Environment Control** | Start, stop, revert, and access VMs with one click |
-| **Modern Dark UI** | Premium interface with sidebar navigation and theme toggle (Dark/Light) |
+| **Modern Dark UI** | Premium dark-themed interface with Check Point branding |
 | **Dual Authentication** | Azure AD SSO or local Superadmin login |
 | **Real-time Notifications** | Toast notifications for all user actions |
 | **Docker Ready** | Full Docker Compose setup for easy deployment |
@@ -31,7 +33,7 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        SE Training Portal                        │
+│                    Check Point SE Portal                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐  │
@@ -141,13 +143,9 @@ SE Training Portal/
 │   │   ├── database.py        # SQLAlchemy setup
 │   │   └── models.py          # User, Class, Template models
 │   ├── routers/               # API endpoints
-│   │   ├── auth.py            # Authentication routes
-│   │   ├── classes.py         # Class management routes
-│   │   └── templates.py       # Template management routes
 │   ├── services/
 │   │   └── proxmox_service.py # Proxmox VE integration
 │   ├── main.py                # FastAPI application
-│   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
 │   ├── src/
@@ -156,9 +154,14 @@ SE Training Portal/
 │   │   │   └── Modal.tsx      # Modal dialog
 │   │   ├── context/           # React Context providers
 │   │   ├── pages/             # Application pages
+│   │   │   ├── monitoring/    # Admin monitoring views
+│   │   │   │   ├── AllClasses.tsx
+│   │   │   │   └── AllEnvironments.tsx
 │   │   │   ├── Login.tsx
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── Classes.tsx
+│   │   │   ├── MyClasses.tsx
+│   │   │   ├── MyEnvironments.tsx
 │   │   │   ├── Templates.tsx
 │   │   │   └── Settings.tsx
 │   │   ├── api.ts             # Axios configuration
