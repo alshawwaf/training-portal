@@ -71,6 +71,13 @@ class PasswordChangeRequest(BaseModel):
     current_password: str
     new_password: str
 
+class ProfileUpdateRequest(BaseModel):
+    first_name: str
+    last_name: str
+    email: str  # Not used for update, just echoed back
+    current_password: str | None = None  # Required if setting new password
+    new_password: str | None = None  # Optional - only update if provided
+
 def _build_msal_app():
     return msal.ConfidentialClientApplication(
         CLIENT_ID, authority=AUTHORITY,
@@ -118,25 +125,44 @@ def local_login(creds: LoginRequest, db: Session = Depends(get_db)):
     return {"token": f"local-user-{user.id}", "user": {"name": user.name, "email": user.email, "role": user.role}}
 
 @router.post("/change-password")
-def change_password(data: PasswordChangeRequest, db: Session = Depends(get_db)):
-    # In a real app, we'd get current user from token.
-    # We will assume we are updating the DEFAULT ADMIN for now, or we should verify the token.
-    # Since we don't have a real token verification middleware for local tokens yet (it's a mock token),
-    # verifying the current password is a good enough check for now.
-    
-    user_email = os.getenv("SUPERADMIN_EMAIL", "admin@cpdemo.com")
-    user = db.query(User).filter(User.email == user_email).first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    if not verify_password(data.current_password, user.hashed_password):
+async def change_password(data: PasswordChangeRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Change password for the currently authenticated user."""
+    if not verify_password(data.current_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect current password")
         
-    user.hashed_password = get_password_hash(data.new_password)
+    current_user.hashed_password = get_password_hash(data.new_password)
     db.commit()
     
     return {"message": "Password updated successfully"}
+
+@router.put("/profile")
+async def update_profile(data: ProfileUpdateRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Update profile for the currently authenticated user."""
+    sys.stderr.write(f"DEBUG PROFILE UPDATE: User ID={current_user.id}, Name update: {data.first_name} {data.last_name}\n")
+    sys.stderr.flush()
+    
+    # Update name only (email is not editable)
+    current_user.name = f"{data.first_name} {data.last_name}".strip()
+    
+    # Update password only if both current and new password are provided
+    if data.new_password and len(data.new_password) >= 6:
+        # Verify current password first
+        if not data.current_password:
+            raise HTTPException(status_code=400, detail="Current password is required to change password")
+        if not verify_password(data.current_password, current_user.hashed_password):
+            raise HTTPException(status_code=400, detail="Current password is incorrect")
+        
+        current_user.hashed_password = get_password_hash(data.new_password)
+        sys.stderr.write(f"DEBUG PROFILE UPDATE: Password also updated\n")
+        sys.stderr.flush()
+    
+    db.commit()
+    db.refresh(current_user)
+    
+    sys.stderr.write(f"DEBUG PROFILE UPDATE: Success! New name={current_user.name}\n")
+    sys.stderr.flush()
+    
+    return {"message": "Profile updated successfully", "user": {"name": current_user.name, "email": current_user.email, "role": current_user.role}}
 
 @router.get("/login")
 async def login(request: Request):

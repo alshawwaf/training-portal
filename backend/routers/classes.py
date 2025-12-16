@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
-from db.models import Class, ClassStatus, ClassEnvironment, EnvironmentVM, Template
+from db.models import Class, ClassStatus, ClassEnvironment, EnvironmentVM, Template, TemplateVM
 from services.vsphere_service import vsphere_service
+from services.guacamole_service import guacamole_service
+from .logs import log_action
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
@@ -99,6 +101,11 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
     # Validate status
     status = cls.status if cls.status in VALID_STATUSES else "draft"
     
+    # Check for existing class with same name
+    existing_class = db.query(Class).filter(Class.name == cls.name).first()
+    if existing_class:
+        raise HTTPException(status_code=400, detail="Class name already exists")
+    
     db_class = Class(
         name=cls.name,
         blueprint_id=cls.blueprint_id,
@@ -115,6 +122,9 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_class)
     
+    # Log Action
+    log_action(db, "CREATE_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Created class with template {cls.template_id}")
+
     # Save JSON backup
     save_backup(db_class)
     save_all_backups(db)
@@ -151,6 +161,12 @@ def update_class(class_id: int, cls: ClassUpdate, db: Session = Depends(get_db))
     # Validate status if provided
     if 'status' in update_data and update_data['status'] not in VALID_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {VALID_STATUSES}")
+        
+    # Check for name uniqueness if name is being updated
+    if cls.name and cls.name != db_class.name:
+        existing_class = db.query(Class).filter(Class.name == cls.name).first()
+        if existing_class:
+            raise HTTPException(status_code=400, detail="Class name already exists")
     
     for key, value in update_data.items():
         setattr(db_class, key, value)
@@ -165,61 +181,93 @@ def update_class(class_id: int, cls: ClassUpdate, db: Session = Depends(get_db))
     return db_class
 
 # DELETE
+# DELETE
 @router.delete("/{class_id}")
-def delete_class(class_id: int, db: Session = Depends(get_db)):
+async def delete_class(class_id: int, db: Session = Depends(get_db)):
+    from fastapi.responses import StreamingResponse
+    import json
+    
+    # Pre-validation (Synchronous)
     db_class = db.query(Class).filter(Class.id == class_id).first()
     if not db_class:
         raise HTTPException(status_code=404, detail="Class not found")
+        
+    class_name = db_class.name
     
-    # Archive backup before deletion
-    archive_file = BACKUP_DIR / f"class_{class_id}_archived_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
-    archive_data = {
-        "class": db_class.to_dict(),
-        "archived_at": datetime.utcnow().isoformat(),
-        "reason": "deleted"
-    }
-    with open(archive_file, 'w') as f:
-        json.dump(archive_data, f, indent=2)
-    
-    # Clean up vSphere resources (DELETE VMs)
-    # Re-use the delete_all_environments logic but we need to call it directly
-    # Since delete_all_environments is a route handler, we should extract the logic or call it carefully.
-    # Ideally, we should refactor the logic into a service or a helper function.
-    # For now, let's just call the logic directly here or call the function if possible (dependency injection makes it tricky).
-    # Easier: Just duplicate the loop or move logic to a helper.
-    # Let's move logic to a helper function within this file or just implement it here to be safe and explicit.
-    
-    environments = db.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
-    for env in environments:
-        # Delete VMs
-        for vm in env.vms:
+    async def generate_updates():
+        from db.database import SessionLocal
+        session = SessionLocal()
+        
+        try:
+            # Re-fetch class
+            current_class = session.query(Class).filter(Class.id == class_id).first()
+            if not current_class:
+                yield json.dumps({"status": "error", "message": "Class not found during execution"}) + "\n"
+                return
+
+            log_action(session, "DELETE_CLASS", f"Class: {class_name}", "STARTED", "Started deletion process")
+            yield json.dumps({"status": "info", "message": f"Starting deletion for {class_name}..."}) + "\n"
+            
+            # Archive backup
+            yield json.dumps({"status": "progress", "message": "Archiving class data...", "percent": 10}) + "\n"
+            archive_file = BACKUP_DIR / f"class_{class_id}_archived_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+            archive_data = {
+                "class": current_class.to_dict(),
+                "archived_at": datetime.utcnow().isoformat(),
+                "reason": "deleted"
+            }
+            with open(archive_file, 'w') as f:
+                json.dump(archive_data, f, indent=2)
+                
+            # Delete VMs/Environments
+            environments = session.query(ClassEnvironment).filter(ClassEnvironment.class_id == class_id).all()
+            total_envs = len(environments)
+            
+            for i, env in enumerate(environments):
+                yield json.dumps({"status": "progress", "message": f"Deleting environment: {env.name}...", "percent": 10 + int((i/total_envs)*60)}) + "\n"
+                
+                for vm in env.vms:
+                    yield json.dumps({"status": "detail", "message": f"  - Deleting VM: {vm.vm_name}..."}) + "\n"
+                    try:
+                        vsphere_service.delete_vm(vm.vm_moid)
+                    except Exception as e:
+                        print(f"Failed to delete VM {vm.vm_name}: {e}")
+                        yield json.dumps({"status": "warning", "message": f"    Failed to delete VM {vm.vm_name} from vSphere"}) + "\n"
+                    session.delete(vm)
+                
+                session.delete(env)
+                session.commit()
+            
+            # Delete Folder
+            yield json.dumps({"status": "progress", "message": "Cleaning up vSphere resources...", "percent": 80}) + "\n"
             try:
-                vsphere_service.delete_vm(vm.vm_moid)
+                vsphere_service.delete_folder(class_name)
             except Exception as e:
-                print(f"Failed to delete VM {vm.vm_name}: {e}")
-            db.delete(vm)
-        db.delete(env)
+                print(f"Failed to delete folder {class_name}: {e}")
+                yield json.dumps({"status": "warning", "message": f"Failed to delete vSphere folder"}) + "\n"
 
-    
-    # Delete the Class Folder from vSphere
-    # Assuming the folder structure is SE_Training_Portal/[ClassName]
-    try:
-        vsphere_service.delete_folder(db_class.name)
-    except Exception as e:
-         print(f"Failed to delete folder {db_class.name}: {e}")
+            # Delete Class Record
+            session.delete(current_class)
+            session.commit()
+            
+            # Update Backups
+            yield json.dumps({"status": "progress", "message": "Updating backups...", "percent": 90}) + "\n"
+            save_all_backups(session)
+            
+            backup_file = BACKUP_DIR / f"class_{class_id}.json"
+            if backup_file.exists():
+                backup_file.unlink()
 
-    db.delete(db_class)
-    db.commit()
-    
-    # Update all_classes backup
-    save_all_backups(db)
-    
-    # Remove individual backup
-    backup_file = BACKUP_DIR / f"class_{class_id}.json"
-    if backup_file.exists():
-        backup_file.unlink()
-    
-    return {"message": "Class and all associated resources deleted successfully"}
+            log_action(session, "DELETE_CLASS", f"Class: {class_name}", "SUCCESS", "Deleted class and associated resources")
+            yield json.dumps({"status": "completed", "message": "Class and all associated resources deleted successfully", "percent": 100}) + "\n"
+            
+        except Exception as e:
+            log_action(session, "DELETE_CLASS", f"Class: {class_name}", "ERROR", f"Deletion failed: {str(e)}")
+            yield json.dumps({"status": "error", "message": f"Critical Failure: {str(e)}"}) + "\n"
+        finally:
+            session.close()
+
+    return StreamingResponse(generate_updates(), media_type="application/x-ndjson")
 
 # GET STATUSES
 @router.get("/meta/statuses")
@@ -247,10 +295,15 @@ def export_backup(db: Session = Depends(get_db)):
         "total_count": len(classes)
     }
 
-# PROVISION CLASS
+# PROVISION CLASS (STREAMING)
 @router.post("/{class_id}/provision")
-def provision_class(class_id: int, db: Session = Depends(get_db)):
-    """Provision environments for the class based on selected template"""
+async def provision_class(class_id: int, db: Session = Depends(get_db)):
+    """Provision environments for the class with streaming status updates"""
+    from fastapi.responses import StreamingResponse
+    import json
+    import time
+
+    # Pre-validation (Synchronous checks before stream starts)
     db_class = db.query(Class).filter(Class.id == class_id).first()
     if not db_class:
         raise HTTPException(status_code=404, detail="Class not found")
@@ -271,62 +324,170 @@ def provision_class(class_id: int, db: Session = Depends(get_db)):
     if not template.vms:
          raise HTTPException(status_code=400, detail="Template has no VMs to provision")
 
-    provisioned_count = 0
-    errors = []
-
-    try:
-        # Create environments for max_users
-        for i in range(1, db_class.max_users + 1):
-            env_name = f"Student {i}"
-            
-            # Create Environment Record
-            env = ClassEnvironment(
-                class_id=class_id,
-                name=env_name
-            )
-            db.add(env)
-            db.flush() # Get ID
-
-            # Provision VMs for this environment
-            for tmpl_vm in template.vms:
-                new_vm_name = f"{db_class.name}-{env_name}-{tmpl_vm.vm_name}".replace(" ", "_")
-                
-                # Call vSphere Service to clone/provision
-                folder_path = ["SE_Training_Portal", db_class.name, env_name]
-                result = vsphere_service.provision_vm(
-                    vm_moid=tmpl_vm.vm_moid,
-                    new_name=new_vm_name,
-                    folder_path=folder_path
-                )
-                
-                if result["success"]:
-                    # Create Environment VM Record
-                    env_vm = EnvironmentVM(
-                        env_id=env.id,
-                        vm_name=result.get("vm_name", new_vm_name),
-                        vm_moid=result.get("vm_moid", "unknown"),
-                        ip_address=result.get("ip_address"),
-                        access_url=None 
-                    )
-                    db.add(env_vm)
-                else:
-                    errors.append(f"Failed to provision {new_vm_name}: {result['message']}")
-                    # Prevent zombie environment
-                    db.delete(env)
-            
-            provisioned_count += 1
-            
-        db.commit()
+    # Generator for Streaming Response
+    async def generate_updates():
+        # Session for DB operations in main loop
+        from db.database import SessionLocal
+        session = SessionLocal()
         
-        return {
-            "success": True, 
-            "message": f"Provisioned {provisioned_count} environments",
-            "errors": errors
-        }
+        try:
+            # Re-fetch objects
+            current_class = session.query(Class).filter(Class.id == class_id).first()
+            if not current_class:
+                raise Exception("Class not found during provisioning execution")
+            
+            # Re-fetch template
+            current_template = session.query(Template).filter(Template.id == current_class.template_id).first()
+            if not current_template:
+                raise Exception("Template not found during provisioning execution")
+                
+            max_users = current_class.max_users
+            class_name = current_class.name
+            
+            # Log Start
+            log_action(session, "PROVISION_CLASS", f"Class: {class_name}", "STARTED", f"Started provisioning for {max_users} students")
+            yield json.dumps({"status": "info", "message": f"Starting provisioning for {class_name}..."}) + "\n"
 
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+            # 1. Create all ClassEnvironment records first
+            environments = []
+            for i in range(1, max_users + 1):
+                env_name = f"Student {i}"
+                env = ClassEnvironment(class_id=class_id, name=env_name)
+                session.add(env)
+                session.commit()
+                session.refresh(env)
+                environments.append(env)
+                yield json.dumps({"status": "progress", "message": f"Created environment record: {env_name}", "percent": 5}) + "\n"
+
+            # 2. Prepare Provisioning Tasks
+            import asyncio
+            import os
+            import logging
+            
+            provisioning_mode = os.getenv("PROVISIONING_MODE", "parallel").lower()
+            vsphere_logger = logging.getLogger("vsphere")
+            
+            tasks = []
+            # Limit concurrency to avoid overwhelming vCenter
+            concurrency_limit = 5 
+            semaphore = asyncio.Semaphore(concurrency_limit) # only used in parallel mode
+
+            # Helper for single VM provision
+            async def provision_single_vm(env, tmpl_vm):
+                vm_name = f"{class_name}-{env.name}-{tmpl_vm.vm_name}".replace(" ", "_")
+                folder_path = ["SE_Training_Portal", class_name, env.name]
+                
+                # Wrapper to include metadata in result
+                def do_provision():
+                    return vsphere_service.provision_vm(
+                        vm_moid=tmpl_vm.vm_moid,
+                        new_name=vm_name,
+                        folder_path=folder_path
+                    )
+
+                if provisioning_mode == "parallel":
+                    async with semaphore:
+                        loop = asyncio.get_event_loop()
+                        # Run blocking call in executor
+                        result = await loop.run_in_executor(None, do_provision)
+                else:
+                    # Sequential mode (just await the executor without semaphore or run directly if async - but service is sync)
+                    loop = asyncio.get_event_loop()
+                    result = await loop.run_in_executor(None, do_provision)
+
+                return {
+                    "result": result,
+                    "env_id": env.id,
+                    "vm_name": vm_name,
+                    "tmpl_vm_name": tmpl_vm.vm_name,
+                    "guest_os": tmpl_vm.guest_os  # Pass guest OS from template
+                }
+
+            # Queue tasks
+            for env in environments:
+                for tmpl_vm in current_template.vms:
+                    tasks.append(provision_single_vm(env, tmpl_vm))
+
+            yield json.dumps({"status": "info", "message": f"Queued {len(tasks)} VM provisioning tasks (Mode: {provisioning_mode})..."}) + "\n"
+
+            # 3. Execute and Stream Results
+            completed_count = 0
+            errors = []
+            
+            if provisioning_mode == "parallel":
+                # Parallel Execution
+                for future in asyncio.as_completed(tasks):
+                    data = await future
+                    result = data["result"]
+                    env_id = data["env_id"]
+                    vm_name = data["vm_name"]
+                    
+                    if result["success"]:
+                        # Save to DB
+                        env_vm = EnvironmentVM(
+                            env_id=env_id,
+                            vm_name=result.get("vm_name", vm_name),
+                            vm_moid=result.get("vm_moid", "unknown"),
+                            ip_address=result.get("ip_address"),
+                            access_url=None,
+                            guest_os=data.get("guest_os")  # From template VM
+                        )
+                        session.add(env_vm)
+                        session.commit()
+                        yield json.dumps({"status": "success", "message": f"  ✓ Created {vm_name}"}) + "\n"
+                    else:
+                        error_msg = result['message']
+                        errors.append(f"{vm_name}: {error_msg}")
+                        yield json.dumps({"status": "error", "message": f"  ✗ Failed {vm_name}: {error_msg}"}) + "\n"
+                    
+                    completed_count += 1
+                    # Progress update (5% to 95%)
+                    percent = 5 + int((completed_count / len(tasks)) * 90)
+                    yield json.dumps({"status": "progress", "message": f"Provisioning... ({completed_count}/{len(tasks)})", "percent": percent}) + "\n"
+            
+            else:
+                # Sequential Execution (Linear Loop)
+                for task in tasks:
+                    data = await task # This runs them sequentially because we await each one
+                    result = data["result"]
+                    env_id = data["env_id"]
+                    vm_name = data["vm_name"]
+                    
+                    if result["success"]:
+                        env_vm = EnvironmentVM(
+                            env_id=env_id,
+                            vm_name=result.get("vm_name", vm_name),
+                            vm_moid=result.get("vm_moid", "unknown"),
+                            ip_address=result.get("ip_address"),
+                            access_url=None,
+                            guest_os=data.get("guest_os")  # From template VM
+                        )
+                        session.add(env_vm)
+                        session.commit()
+                        yield json.dumps({"status": "success", "message": f"  ✓ Created {vm_name}"}) + "\n"
+                    else:
+                        error_msg = result['message']
+                        errors.append(f"{vm_name}: {error_msg}")
+                        yield json.dumps({"status": "error", "message": f"  ✗ Failed {vm_name}: {error_msg}"}) + "\n"
+
+                    completed_count += 1
+                    percent = 5 + int((completed_count / len(tasks)) * 90)
+                    yield json.dumps({"status": "progress", "message": f"Provisioning... ({completed_count}/{len(tasks)})", "percent": percent}) + "\n"
+
+            if errors:
+                log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "WARNING", f"Completed with {len(errors)} errors: {', '.join(errors)}")
+                yield json.dumps({"status": "completed_with_errors", "message": f"Completed with {len(errors)} errors.", "errors": errors, "percent": 100}) + "\n"
+            else:
+                log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Successfully provisioned {completed_count} VMs")
+                yield json.dumps({"status": "completed", "message": "All environments provisioned successfully!", "percent": 100}) + "\n"
+                
+        except Exception as e:
+            log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "ERROR", f"Critical Failure: {str(e)}")
+            yield json.dumps({"status": "error", "message": f"Critical Failure: {str(e)}"}) + "\n"
+        finally:
+            session.close()
+
+    return StreamingResponse(generate_updates(), media_type="application/x-ndjson")
 
 # LIST ENVIRONMENTS
 @router.get("/{class_id}/environments")
@@ -351,7 +512,8 @@ def get_class_environments(class_id: int, db: Session = Depends(get_db)):
                 "moid": vm.vm_moid,
                 "ip_address": vm.ip_address,
                 "power_state": state_info.get("state", "unknown"),
-                "access_url": vm.access_url
+                "access_url": vm.access_url,
+                "guest_os": vm.guest_os  # For automatic console button detection
             })
             
         result.append({
@@ -415,6 +577,40 @@ def delete_vm(class_id: int, vm_id: int, db: Session = Depends(get_db)):
         
     return {"success": True, "message": "VM deleted"}
 
+
+# VMRC CONSOLE ACCESS (Hypervisor-level, works without IP)
+@router.get("/environments/{class_id}/vms/{vm_id}/vmrc")
+def get_vmrc_console(class_id: int, vm_id: int, db: Session = Depends(get_db)):
+    """
+    Get VMRC (VMware Remote Console) URL for a VM.
+    This is hypervisor-level console access that works even when VM has no IP.
+    Requires VMRC client installed on user's machine.
+    """
+    vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found")
+        
+    # Verify VM belongs to an environment of the class (security check)
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == vm.env_id).first()
+    if not env or env.class_id != class_id:
+        raise HTTPException(status_code=403, detail="VM does not belong to this class")
+
+    if not vm.vm_moid:
+        raise HTTPException(status_code=400, detail="VM does not have a vSphere MOID")
+
+    # Generate VMRC ticket via vSphere API
+    result = vsphere_service.generate_vmrc_ticket(vm.vm_moid)
+    
+    if not result.get("success"):
+        raise HTTPException(status_code=500, detail=result.get("message", "Failed to generate VMRC ticket"))
+        
+    return {
+        "success": True,
+        "vmrc_uri": result.get("uri"),
+        "ticket": result.get("ticket"),
+        "vm_name": vm.vm_name,
+        "message": "Open VMRC URL in browser or VMRC client"
+    }
 @router.post("/environments/{env_id}/power")
 def control_environment_power(env_id: int, body: VMPowerAction, db: Session = Depends(get_db)):
     """Control power state of all VMs in an environment"""
@@ -610,3 +806,58 @@ def delete_all_environments(class_id: int, db: Session = Depends(get_db)):
         "message": f"Deleted {success_count} VMs and {len(environments)} environments",
         "errors": errors if errors else None
     }
+
+@router.get("/{class_id}/environments/{env_id}/vms/{vm_id}/console")
+def get_vm_console(class_id: int, env_id: int, vm_id: int, db: Session = Depends(get_db)):
+    """
+    Get HTML5 console URL for a VM via Apache Guacamole.
+    Supports RDP (Windows), SSH (Linux), and VNC (console) connections.
+    """
+    # 1. Verify ownership/existence
+    env_vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not env_vm:
+        raise HTTPException(status_code=404, detail="VM not found in database")
+        
+    class_env = db.query(ClassEnvironment).filter(ClassEnvironment.id == env_id).first()
+    if not class_env or class_env.class_id != class_id:
+        raise HTTPException(status_code=404, detail="Environment not found matching this class")
+        
+    if env_vm.env_id != env_id:
+        raise HTTPException(status_code=400, detail="VM does not belong to this environment")
+
+    # 2. Get the class and template to determine protocol settings
+    db_class = db.query(Class).filter(Class.id == class_id).first()
+    
+    # Default protocol and port
+    protocol = "rdp"
+    port = 3389
+    vm_username = None
+    vm_password = None
+    
+    # Try to get protocol from template VM configuration
+    if db_class and db_class.template_id:
+        # Find matching template VM by name pattern
+        template_vms = db.query(TemplateVM).filter(TemplateVM.template_id == db_class.template_id).all()
+        for tvm in template_vms:
+            # Match by checking if the env VM name contains the template VM name
+            if tvm.vm_name in env_vm.vm_name:
+                protocol = tvm.access_protocol or "rdp"
+                port = tvm.access_port or {"rdp": 3389, "ssh": 22, "vnc": 5900}.get(protocol, 3389)
+                break
+    
+    # 3. Generate Guacamole console URL
+    result = guacamole_service.get_console_url_for_vm(
+        vm_id=env_vm.id,
+        vm_name=env_vm.vm_name,
+        ip_address=env_vm.ip_address,
+        protocol=protocol,
+        port=port,
+        username=vm_username,
+        password=vm_password,
+        student_name=class_env.name
+    )
+    
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result["message"])
+        
+    return result

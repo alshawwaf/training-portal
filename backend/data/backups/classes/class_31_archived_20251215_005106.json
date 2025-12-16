@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 31,
+    "name": "Verify Test Class",
+    "instructor_id": 1,
+    "blueprint_id": "9",
+    "template_id": 9,
+    "max_users": 3,
+    "passcode": "class123654321",
+    "start_date": "2025-12-15T04:56:22.777000",
+    "end_date": "2025-12-22T04:56:22.777000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-14T23:57:35.835159",
+    "updated_at": "2025-12-15T00:05:44.496281"
+  },
+  "archived_at": "2025-12-15T00:51:06.036237",
+  "reason": "deleted"
+}

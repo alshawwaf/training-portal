@@ -24,7 +24,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
         name: '',
         blueprint_id: '',
         template_id: '',
-        max_users: 10,
+        max_users: 2,
         passcode: 'class123',
         start_date: new Date(),
         end_date: new Date(Date.now() + 7*24*60*60*1000),
@@ -86,28 +86,44 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
             maxWidth="2xl"
         >
             <form onSubmit={handleCreate} className="space-y-6">
+                {/* Class Name - Always on top */}
+                <div>
+                    <label className="label">Class Name</label>
+                    <div className="relative">
+                        <Layers className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
+                        <input
+                            type="text"
+                            value={form.name}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                            className="input pl-10"
+                            placeholder="e.g. Advanced Security Workshop"
+                            required
+                        />
+                    </div>
+                </div>
+
                 {/* Template Selection - Custom Dropdown */}
                 <div className="relative z-50">
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Class Template</label>
+                    <label className="label">Class Template</label>
                     <div className="relative">
                         <button
                             type="button"
                             onClick={() => setIsTemplateDropdownOpen(!isTemplateDropdownOpen)}
                             className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${
                                 isTemplateDropdownOpen 
-                                    ? 'bg-gray-800 border-blue-500/50 ring-1 ring-blue-500/50' 
-                                    : 'bg-gray-900/50 border-gray-700 hover:border-gray-600 hover:bg-gray-800'
+                                    ? 'bg-secondary border-blue-500/50 ring-1 ring-blue-500/50' 
+                                    : 'bg-secondary/50 border-theme hover:border-blue-400/50 hover:bg-secondary'
                             }`}
                         >
                             <div className="flex items-center gap-3">
                                 {selectedTemplate ? (
                                     <>
-                                        <div className="p-2 rounded-lg bg-gray-800 border border-gray-700">
+                                        <div className="p-2 rounded-lg bg-secondary border border-theme">
                                             <ProviderIcon provider={selectedTemplate.provider} className="w-5 h-5" />
                                         </div>
                                         <div className="text-left">
-                                            <div className="font-medium text-gray-200">{selectedTemplate.name}</div>
-                                            <div className="text-xs text-gray-500 capitalize">{selectedTemplate.provider} Template</div>
+                                            <div className="font-medium text-primary">{selectedTemplate.name}</div>
+                                            <div className="text-xs text-secondary capitalize">{selectedTemplate.provider} Template</div>
                                         </div>
                                     </>
                                 ) : (
@@ -118,7 +134,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                         </button>
 
                         {isTemplateDropdownOpen && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto z-50">
+                            <div className="absolute top-full left-0 right-0 mt-2 bg-primary border border-theme rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto z-50">
                                 {availableTemplates.map(template => (
                                     <button
                                         key={template.id}
@@ -127,15 +143,15 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                             setForm({...form, template_id: template.id.toString(), blueprint_id: template.id.toString()});
                                             setIsTemplateDropdownOpen(false);
                                         }}
-                                        className="w-full flex items-center justify-between p-3 hover:bg-gray-800 transition-colors border-b border-gray-800 last:border-0"
+                                        className="w-full flex items-center justify-between p-3 hover:bg-secondary transition-colors border-b border-theme last:border-0"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-gray-800/50 border border-gray-700/50">
+                                            <div className="p-2 rounded-lg bg-secondary/50 border border-theme/50">
                                                 <ProviderIcon provider={template.provider} className="w-4 h-4" />
                                             </div>
                                             <div className="text-left">
-                                                <div className="font-medium text-gray-300">{template.name}</div>
-                                                <div className="text-xs text-gray-500">{template.description || 'No description'}</div>
+                                                <div className="font-medium text-primary">{template.name}</div>
+                                                <div className="text-xs text-secondary">{template.description || 'No description'}</div>
                                             </div>
                                         </div>
                                         {form.template_id === template.id.toString() && (
@@ -144,7 +160,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                     </button>
                                 ))}
                                 {availableTemplates.length === 0 && (
-                                    <div className="p-4 text-center text-gray-500 text-sm">No templates available</div>
+                                    <div className="p-4 text-center text-secondary text-sm">No templates available</div>
                                 )}
                             </div>
                         )}
@@ -153,32 +169,16 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
 
                 {/* Class Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">Class Name</label>
-                        <div className="relative">
-                            <Layers className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
-                            <input
-                                type="text"
-                                value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-gray-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder-gray-600"
-                                placeholder="e.g. Advanced Security Workshop"
-                                required
-                            />
-                        </div>
-                    </div>
-
                     {/* Passcode */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">Access Code</label>
+                        <label className="label">Access Code</label>
                         <div className="relative">
                             <Key className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
                             <input
                                 type="text"
                                 value={form.passcode}
                                 onChange={(e) => setForm({ ...form, passcode: e.target.value })}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-gray-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder-gray-600 font-mono"
+                                className="input pl-10 font-mono"
                                 required
                             />
                         </div>
@@ -186,7 +186,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
 
                     {/* Start Date */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">Start Date & Time</label>
+                        <label className="label">Start Date & Time</label>
                         <DatePicker
                             selected={form.start_date}
                             onChange={(date) => setForm({ ...form, start_date: date || new Date() })}
@@ -199,7 +199,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
 
                     {/* End Date */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">End Date & Time</label>
+                        <label className="label">End Date & Time</label>
                         <DatePicker
                             selected={form.end_date}
                             onChange={(date) => setForm({ ...form, end_date: date || new Date() })}
@@ -213,7 +213,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
 
                     {/* Max Users */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">Max Students</label>
+                        <label className="label">Max Students</label>
                         <div className="relative">
                             <Users className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
                             <input
@@ -222,7 +222,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                 max="200"
                                 value={form.max_users}
                                 onChange={(e) => setForm({ ...form, max_users: parseInt(e.target.value) })}
-                                className="w-full bg-gray-900/50 border border-gray-700 rounded-xl pl-10 pr-4 py-2.5 text-gray-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder-gray-600"
+                                className="input pl-10"
                                 required
                             />
                         </div>
@@ -230,11 +230,11 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                 </div>
 
                 {/* Footer Actions */}
-                <div className="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-800">
+                <div className="flex justify-end gap-3 pt-4 mt-6 border-t border-theme">
                     <button
                         type="button"
                         onClick={() => { onClose(); resetForm(); }}
-                        className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                        className="btn-secondary"
                     >
                         Cancel
                     </button>

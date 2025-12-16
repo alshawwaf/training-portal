@@ -22,9 +22,6 @@ export const GcpIcon = (props: any) => (
     </svg>
 );
 
-export const CloudShareIcon = (props: any) => (
-    <img src="/cloudshare.png" alt="CloudShare" {...props} className={`${props.className || ''} object-contain`} />
-);
 
 export const VMwareIcon = (props: any) => (
     <img src="/vsphere.png" alt="VMware vSphere" {...props} className={`${props.className || ''} object-contain`} />
@@ -42,8 +39,6 @@ export const getProviderIcon = (providerId: string) => {
             return AzureIcon;
         case 'gcp':
             return GcpIcon;
-        case 'cloudshare':
-            return CloudShareIcon;
         case 'vmware':
         case 'vmware vsphere':
         case 'vsphere':

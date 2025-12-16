@@ -1,27 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { useToast } from '../../context/ToastContext';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom'; // No longer needed
 import { 
-    BookOpen, Users, Calendar, Eye, Edit, Trash2, Server, 
+    BookOpen, Users, Eye, Edit, Server, 
     RefreshCw, Download
 } from 'lucide-react';
 
-interface ClassModel {
-    id: number;
-    name: string;
-    blueprint_id: string;
-    template_id?: number;
-    max_users: number;
-    passcode: string;
-    start_date: string;
-    end_date: string;
-    instructor_id: number;
-    status: string;
-    description?: string;
-    created_at?: string;
-}
+// Import Shared Components
+import ClassInfoModal from '../../components/classes/ClassInfoModal';
+import EditClassModal from '../../components/classes/EditClassModal';
+// import { ProviderIcon } from '../../components/ProviderIcon'; // Removed unused import
 
+// Import Types
+import type { ClassModel, Template } from '../../types/class';
+
+// Status Config (could be imported from types/class if exported, otherwise keep local map or move to shared config)
 const statusColors: Record<string, string> = {
     draft: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
     active: 'bg-green-500/10 text-green-400 border-green-500/20',
@@ -33,6 +27,14 @@ const AllClasses: React.FC = () => {
     const { showToast } = useToast();
     const [classes, setClasses] = useState<ClassModel[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Templates (Needed for Edit Modal)
+    const [templates, setTemplates] = useState<Template[]>([]);
+
+    // Modal State
+    const [viewModalOpen, setViewModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedClass, setSelectedClass] = useState<ClassModel | null>(null);
 
     const fetchClasses = async () => {
         setLoading(true);
@@ -47,8 +49,18 @@ const AllClasses: React.FC = () => {
         }
     };
 
+    const fetchTemplates = async () => {
+        try {
+            const response = await api.get('/templates/');
+            setTemplates(response.data);
+        } catch (error) {
+            console.error('Failed to fetch templates:', error);
+        }
+    };
+
     useEffect(() => {
         fetchClasses();
+        fetchTemplates();
     }, []);
 
     const formatDate = (dateStr: string) => {
@@ -69,6 +81,30 @@ const AllClasses: React.FC = () => {
         a.href = url;
         a.download = 'all_classes.csv';
         a.click();
+    };
+
+    // Modal Handlers
+    const openViewModal = (cls: ClassModel) => {
+        setSelectedClass(cls);
+        setViewModalOpen(true);
+    };
+
+    const openEditModal = (cls: ClassModel) => {
+        setSelectedClass(cls);
+        setEditModalOpen(true);
+    };
+
+     const handleProvision = async (cls: ClassModel) => {
+        if (cls.status !== 'active') return;
+        
+        try {
+            await api.post(`/classes/${cls.id}/provision`);
+            showToast(`Provisioning started for ${cls.name}`, 'success');
+            fetchClasses(); // Refresh to update status if needed
+        } catch (error: any) {
+            console.error('Provisioning failed:', error);
+            showToast(error.response?.data?.detail || 'Failed to start provisioning', 'error');
+        }
     };
 
     const activeCount = (Array.isArray(classes) ? classes : []).filter(c => c.status === 'active').length;
@@ -186,20 +222,20 @@ const AllClasses: React.FC = () => {
                                     </td>
                                     <td className="p-4 text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                            <Link
-                                                to="/classes"
-                                                className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg"
+                                            <button
+                                                onClick={() => openViewModal(cls)}
+                                                className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                                                 title="View"
                                             >
                                                 <Eye className="w-4 h-4" />
-                                            </Link>
-                                            <Link
-                                                to={`/classes/edit/${cls.id}`}
-                                                className="p-2 text-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-lg"
+                                            </button>
+                                            <button
+                                                onClick={() => openEditModal(cls)}
+                                                className="p-2 text-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
                                                 title="Edit"
                                             >
                                                 <Edit className="w-4 h-4" />
-                                            </Link>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -208,6 +244,21 @@ const AllClasses: React.FC = () => {
                     </table>
                 )}
             </div>
+
+            {/* Modals */}
+            <ClassInfoModal 
+                isOpen={viewModalOpen}
+                onClose={() => setViewModalOpen(false)}
+                classData={selectedClass}
+            />
+
+            <EditClassModal 
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                onSuccess={fetchClasses} // Refresh list after edit
+                classData={selectedClass}
+                templates={templates}
+            />
         </div>
     );
 };

@@ -106,8 +106,7 @@ async def get_proxmox_status(db: Session = Depends(get_db)):
         return {
             "connected": len(nodes) > 0,
             "nodes": nodes,
-            "vm_count": len(vms),
-            "mock_mode": proxmox_service.mock_mode
+            "vm_count": len(vms)
         }
     except Exception as e:
         return {"connected": False, "error": str(e)}
@@ -182,8 +181,7 @@ async def get_vsphere_status(db: Session = Depends(get_db)):
         vms = vsphere_service.get_vms()
         
         return {
-            "connected": len(datacenters) > 0 or vsphere_service.mock_mode,
-            "mock_mode": vsphere_service.mock_mode,
+            "connected": len(datacenters) > 0,
             "datacenters": datacenters,
             "clusters": clusters,
             "hosts": hosts,

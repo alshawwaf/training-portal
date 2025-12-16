@@ -13,34 +13,37 @@
     --bg-primary: 250 251 252;
     --bg-secondary: 244 246 248;
     --bg-elevated: 255 255 255;
-    
+
     /* Text - High contrast slate tones */
     --text-primary: 15 23 42;
     --text-secondary: 71 85 105;
     --text-muted: 148 163 184;
-    
+
     /* Borders & Dividers */
     --border-color: 226 232 240;
     --border-subtle: 241 245 249;
-    
+
     /* Cards - Clean whites with depth */
     --card-bg: 255 255 255;
     --card-border: 226 232 240;
-    
+
     /* Accent Colors */
     --accent-primary: 99 102 241;
     --accent-secondary: 139 92 246;
-    
+
     /* Scrollbar */
     --scrollbar-track: 241 245 249;
     --scrollbar-thumb: 203 213 225;
     --scrollbar-thumb-hover: 148 163 184;
-    
+
     /* Shadows for light mode */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+      0 2px 4px -2px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+      0 4px 6px -4px rgba(0, 0, 0, 0.03);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05),
+      0 8px 10px -6px rgba(0, 0, 0, 0.02);
   }
 
   /* Dark Mode - Rich, Deep, Immersive */
@@ -49,34 +52,37 @@
     --bg-primary: 8 10 20;
     --bg-secondary: 15 18 30;
     --bg-elevated: 22 26 42;
-    
+
     /* Text - Soft whites for reduced eye strain */
     --text-primary: 248 250 252;
     --text-secondary: 148 163 184;
     --text-muted: 100 116 139;
-    
+
     /* Borders - Subtle glow effect */
     --border-color: 45 55 72;
     --border-subtle: 30 38 55;
-    
+
     /* Cards - Rich dark surfaces */
     --card-bg: 20 24 40;
     --card-border: 40 50 70;
-    
+
     /* Accent Colors - Slightly brighter for dark backgrounds */
     --accent-primary: 129 140 248;
     --accent-secondary: 167 139 250;
-    
+
     /* Scrollbar */
     --scrollbar-track: 15 18 30;
     --scrollbar-thumb: 45 55 72;
     --scrollbar-thumb-hover: 71 85 105;
-    
+
     /* Shadows for dark mode - softer, with subtle glow */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+      0 2px 4px -2px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4),
+      0 4px 6px -4px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5),
+      0 8px 10px -6px rgba(0, 0, 0, 0.3);
   }
 
   body {
@@ -85,7 +91,7 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont,
       "Segoe UI", Roboto, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
@@ -112,7 +118,7 @@
   /* ========================================
      CARD COMPONENTS
      ======================================== */
-  
+
   .card {
     background-color: rgba(var(--card-bg), 0.7);
     backdrop-filter: blur(16px) saturate(180%);
@@ -122,12 +128,12 @@
     box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
   }
-  
+
   .card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
   }
-  
+
   .card-elevated {
     background-color: rgb(var(--card-bg));
     border: 1px solid rgba(var(--card-border), 0.6);
@@ -135,11 +141,11 @@
     box-shadow: var(--shadow-xl);
     transition: all 0.3s ease;
   }
-  
+
   .card-elevated:hover {
     box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.08);
   }
-  
+
   /* Dark mode card glow effect */
   .dark .card-elevated:hover {
     box-shadow: 0 25px 30px -10px rgba(99, 102, 241, 0.1);
@@ -148,7 +154,7 @@
   /* ========================================
      BUTTON VARIANTS
      ======================================== */
-  
+
   .btn-primary {
     @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 
            text-white font-semibold py-2.5 px-6 rounded-xl 
@@ -158,12 +164,12 @@
     background-size: 200% 100%;
     background-position: left center;
   }
-  
+
   .btn-primary:hover {
     background-position: right center;
     box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
   }
-  
+
   .btn-secondary {
     background-color: rgb(var(--bg-elevated));
     border: 1px solid rgb(var(--border-color));
@@ -173,14 +179,14 @@
     border-radius: 0.75rem;
     transition: all 0.25s ease;
   }
-  
+
   .btn-secondary:hover {
     background-color: rgb(var(--bg-secondary));
     border-color: rgb(var(--accent-primary));
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
   }
-  
+
   .btn-ghost {
     color: rgb(var(--text-secondary));
     font-weight: 500;
@@ -189,12 +195,12 @@
     transition: all 0.2s ease;
     position: relative;
   }
-  
+
   .btn-ghost:hover {
     color: rgb(var(--text-primary));
     background-color: rgba(var(--accent-primary), 0.1);
   }
-  
+
   .btn-danger {
     @apply bg-gradient-to-r from-red-600 to-rose-600 
            text-white font-semibold py-2.5 px-5 rounded-xl 
@@ -202,7 +208,7 @@
            hover:-translate-y-0.5 hover:shadow-lg
            flex items-center justify-center gap-2;
   }
-  
+
   .btn-danger:hover {
     box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.4);
   }
@@ -210,7 +216,7 @@
   /* ========================================
      INPUT STYLES
      ======================================== */
-  
+
   .input {
     background-color: rgb(var(--bg-secondary));
     border: 1.5px solid rgb(var(--border-color));
@@ -220,23 +226,24 @@
     width: 100%;
     transition: all 0.25s ease;
   }
-  
+
   .input:focus {
     outline: none;
     border-color: rgb(var(--accent-primary));
     box-shadow: 0 0 0 3px rgba(var(--accent-primary), 0.15);
     background-color: rgb(var(--bg-elevated));
   }
-  
+
   .input::placeholder {
     color: rgb(var(--text-muted));
   }
 
-  .input-label {
+  .input-label,
+  .label {
     display: block;
     font-size: 0.875rem;
     font-weight: 600;
-    color: rgb(var(--text-primary));
+    color: rgb(var(--text-secondary));
     margin-bottom: 0.5rem;
     letter-spacing: 0.01em;
   }
@@ -244,36 +251,52 @@
   /* ========================================
      BADGE STYLES
      ======================================== */
-  
+
   .badge {
     @apply px-3 py-1.5 rounded-full text-xs font-semibold inline-flex items-center gap-1.5;
     transition: all 0.2s ease;
   }
-  
+
   .badge-success {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.1));
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.15),
+      rgba(52, 211, 153, 0.1)
+    );
     color: rgb(5 150 105); /* Darker green for light mode readability */
     border: 1px solid rgba(16, 185, 129, 0.3);
   }
-  
+
   .badge-warning {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(251, 191, 36, 0.1));
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.15),
+      rgba(251, 191, 36, 0.1)
+    );
     color: rgb(180 83 9); /* Darker amber for light mode */
     border: 1px solid rgba(245, 158, 11, 0.3);
   }
-  
+
   .badge-info {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.15),
+      rgba(139, 92, 246, 0.1)
+    );
     color: rgb(79 70 229); /* Darker indigo for light mode */
     border: 1px solid rgba(99, 102, 241, 0.3);
   }
-  
+
   .badge-danger {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(248, 113, 113, 0.1));
+    background: linear-gradient(
+      135deg,
+      rgba(239, 68, 68, 0.15),
+      rgba(248, 113, 113, 0.1)
+    );
     color: rgb(185 28 28); /* Darker red for light mode */
     border: 1px solid rgba(239, 68, 68, 0.3);
   }
-  
+
   /* Dark mode badge adjustments */
   .dark .badge-success {
     color: rgb(52 211 153);
@@ -291,7 +314,7 @@
   /* ========================================
      THEME-AWARE UTILITIES
      ======================================== */
-  
+
   .text-primary {
     color: rgb(var(--text-primary));
   }
@@ -320,24 +343,28 @@
   /* ========================================
      SPECIAL EFFECTS
      ======================================== */
-  
+
   /* Gradient text for headings */
   .gradient-text {
-    background: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)));
+    background: linear-gradient(
+      135deg,
+      rgb(var(--accent-primary)),
+      rgb(var(--accent-secondary))
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   /* Glow effect for interactive elements */
   .glow-on-hover {
     transition: box-shadow 0.3s ease;
   }
-  
+
   .glow-on-hover:hover {
     box-shadow: 0 0 20px rgba(var(--accent-primary), 0.3);
   }
-  
+
   /* Frosted glass effect */
   .glass {
     background: rgba(var(--card-bg), 0.6);
@@ -345,24 +372,345 @@
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(var(--border-color), 0.3);
   }
-  
+
   /* Animated gradient border */
   .gradient-border {
     position: relative;
     background: rgb(var(--card-bg));
     border-radius: 1rem;
   }
-  
+
   .gradient-border::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: -1px;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgb(var(--accent-primary)), rgb(var(--accent-secondary)));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    background: linear-gradient(
+      135deg,
+      rgb(var(--accent-primary)),
+      rgb(var(--accent-secondary))
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
   }
+}
+
+/* ========================================
+   LIGHT MODE OVERRIDES
+   Override hardcoded dark-mode Tailwind classes in light mode
+   ======================================== */
+
+/* Background overrides - only when NOT in dark mode */
+:root:not(.dark) .bg-gray-900,
+:root:not(.dark) .bg-gray-900\/50,
+:root:not(.dark) .bg-gray-900\/30,
+:root:not(.dark) .bg-gray-900\/80,
+html:not(.dark) .bg-gray-900,
+html:not(.dark) .bg-gray-900\/50,
+html:not(.dark) .bg-gray-900\/30,
+html:not(.dark) .bg-gray-900\/80 {
+  background-color: rgb(var(--bg-elevated)) !important;
+}
+
+:root:not(.dark) .bg-gray-800,
+:root:not(.dark) .bg-gray-800\/50,
+:root:not(.dark) .bg-gray-800\/80,
+html:not(.dark) .bg-gray-800,
+html:not(.dark) .bg-gray-800\/50,
+html:not(.dark) .bg-gray-800\/80 {
+  background-color: rgb(var(--bg-secondary)) !important;
+}
+
+:root:not(.dark) .bg-gray-700,
+html:not(.dark) .bg-gray-700 {
+  background-color: rgb(var(--border-color)) !important;
+}
+
+/* Text overrides - NOTE: text-white is NOT overridden to preserve white text on colored buttons */
+
+:root:not(.dark) .text-gray-100,
+:root:not(.dark) .text-gray-200,
+html:not(.dark) .text-gray-100,
+html:not(.dark) .text-gray-200 {
+  color: rgb(var(--text-primary)) !important;
+}
+
+:root:not(.dark) .text-gray-300,
+html:not(.dark) .text-gray-300 {
+  color: rgb(var(--text-primary)) !important;
+}
+
+:root:not(.dark) .text-gray-400,
+html:not(.dark) .text-gray-400 {
+  color: rgb(var(--text-secondary)) !important;
+}
+
+:root:not(.dark) .text-gray-500,
+html:not(.dark) .text-gray-500 {
+  color: rgb(var(--text-muted)) !important;
+}
+
+:root:not(.dark) .text-gray-600,
+html:not(.dark) .text-gray-600 {
+  color: rgb(var(--text-muted)) !important;
+}
+
+/* Border overrides */
+:root:not(.dark) .border-gray-700,
+:root:not(.dark) .border-gray-700\/50,
+html:not(.dark) .border-gray-700,
+html:not(.dark) .border-gray-700\/50 {
+  border-color: rgb(var(--border-color)) !important;
+}
+
+:root:not(.dark) .border-gray-800,
+html:not(.dark) .border-gray-800 {
+  border-color: rgb(var(--border-color)) !important;
+}
+
+:root:not(.dark) .border-gray-600,
+html:not(.dark) .border-gray-600 {
+  border-color: rgb(var(--border-color)) !important;
+}
+
+/* Hover states in light mode */
+:root:not(.dark) .hover\:bg-gray-800:hover,
+html:not(.dark) .hover\:bg-gray-800:hover {
+  background-color: rgb(var(--bg-secondary)) !important;
+}
+
+/* hover:text-white is NOT overridden to preserve white text on colored buttons */
+
+:root:not(.dark) .hover\:border-gray-600:hover,
+:root:not(.dark) .hover\:border-gray-700:hover,
+html:not(.dark) .hover\:border-gray-600:hover,
+html:not(.dark) .hover\:border-gray-700:hover {
+  border-color: rgb(var(--accent-primary)) !important;
+}
+
+/* Placeholder overrides */
+:root:not(.dark) .placeholder-gray-500::placeholder,
+:root:not(.dark) .placeholder-gray-600::placeholder,
+html:not(.dark) .placeholder-gray-500::placeholder,
+html:not(.dark) .placeholder-gray-600::placeholder {
+  color: rgb(var(--text-muted)) !important;
+}
+
+/* Focus ring overrides */
+:root:not(.dark) .focus\:ring-blue-500\/50:focus,
+html:not(.dark) .focus\:ring-blue-500\/50:focus {
+  --tw-ring-color: rgba(var(--accent-primary), 0.3) !important;
+}
+
+:root:not(.dark) .focus\:border-blue-500:focus,
+html:not(.dark) .focus\:border-blue-500:focus {
+  border-color: rgb(var(--accent-primary)) !important;
+}
+
+/* Divide color overrides */
+:root:not(.dark) .divide-gray-700 > :not([hidden]) ~ :not([hidden]),
+:root:not(.dark) .divide-gray-800 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) .divide-gray-700 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) .divide-gray-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--border-color)) !important;
+}
+
+/* Shadow adjustments for light mode */
+:root:not(.dark) .shadow-xl,
+:root:not(.dark) .shadow-lg,
+html:not(.dark) .shadow-xl,
+html:not(.dark) .shadow-lg {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+:root:not(.dark) .shadow-2xl,
+html:not(.dark) .shadow-2xl {
+  box-shadow: var(--shadow-xl) !important;
+}
+
+/* ========================================
+   DATEPICKER STYLES - ULTRA HIGH SPECIFICITY
+   ======================================== */
+
+/* Light mode DatePicker - using wrapper class for maximum specificity */
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker-popper,
+body:not(.dark) .custom-datepicker-wrapper .react-datepicker-popper,
+.custom-datepicker-wrapper .react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker,
+html:not(.dark) .react-datepicker-popper .react-datepicker {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  font-family: inherit !important;
+  overflow: hidden !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__header,
+html:not(.dark) .react-datepicker-popper .react-datepicker__header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 16px !important;
+  border-radius: 0 !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__current-month,
+html:not(.dark) .react-datepicker-popper .react-datepicker__current-month {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  margin-bottom: 8px !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day-names,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day-names {
+  margin-top: 8px !important;
+  display: flex !important;
+  justify-content: space-around !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day-name,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day-name {
+  color: #64748b !important;
+  font-weight: 600 !important;
+  width: 2.2rem !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__month,
+html:not(.dark) .react-datepicker-popper .react-datepicker__month {
+  margin: 12px !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__week,
+html:not(.dark) .react-datepicker-popper .react-datepicker__week {
+  display: flex !important;
+  justify-content: space-around !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day {
+  color: #1e293b !important;
+  width: 2.2rem !important;
+  height: 2.2rem !important;
+  line-height: 2.2rem !important;
+  margin: 3px !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day:hover,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day:hover {
+  background-color: #e0e7ff !important;
+  color: #4f46e5 !important;
+  transform: scale(1.05) !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--selected,
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--keyboard-selected,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day--selected,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day--keyboard-selected {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--today,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day--today {
+  font-weight: 700 !important;
+  background-color: #f0f9ff !important;
+  border: 2px solid #3b82f6 !important;
+  color: #3b82f6 !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--outside-month,
+html:not(.dark) .react-datepicker-popper .react-datepicker__day--outside-month {
+  color: #cbd5e1 !important;
+  opacity: 0.5 !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__navigation,
+html:not(.dark) .react-datepicker-popper .react-datepicker__navigation {
+  top: 16px !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__navigation-icon::before,
+html:not(.dark) .react-datepicker-popper .react-datepicker__navigation-icon::before {
+  border-color: #64748b !important;
+  border-width: 2px 2px 0 0 !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before,
+html:not(.dark) .react-datepicker-popper .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  border-color: #6366f1 !important;
+}
+
+/* Time picker styles for light mode */
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-container,
+html:not(.dark) .react-datepicker-popper .react-datepicker__time-container {
+  border-left: 1px solid #e2e8f0 !important;
+  width: 100px !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-container .react-datepicker__time,
+html:not(.dark) .react-datepicker-popper .react-datepicker__time-container .react-datepicker__time {
+  background-color: #ffffff !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-container .react-datepicker__time-box,
+html:not(.dark) .react-datepicker-popper .react-datepicker__time-container .react-datepicker__time-box {
+  width: 100px !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__header--time,
+html:not(.dark) .react-datepicker-popper .react-datepicker__header--time {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 12px !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker-time__header,
+html:not(.dark) .react-datepicker-popper .react-datepicker-time__header {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-list-item,
+html:not(.dark) .react-datepicker-popper .react-datepicker__time-list-item {
+  color: #1e293b !important;
+  padding: 10px 14px !important;
+  height: auto !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-list-item:hover,
+html:not(.dark) .react-datepicker-popper .react-datepicker__time-list-item:hover {
+  background-color: #e0e7ff !important;
+  color: #4f46e5 !important;
+}
+
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-list-item--selected,
+html:not(.dark) .react-datepicker-popper .react-datepicker__time-list-item--selected {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Triangle arrow */
+html:not(.dark) .custom-datepicker-wrapper .react-datepicker__triangle,
+html:not(.dark) .react-datepicker-popper .react-datepicker__triangle {
+  display: none !important;
 }

@@ -18,6 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # pgAdmin - Visual Database Management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: se_portal_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@cpdemo.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-Cpwins!1}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
   # FastAPI Backend
   backend:
     build: ./backend
@@ -37,13 +54,15 @@ services:
       - PROXMOX_USER=${PROXMOX_USER:-root@pam}
       - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-your-proxmox-password}
       - PROXMOX_NODE=${PROXMOX_NODE:-pve}
-      - PROXMOX_MOCK=${PROXMOX_MOCK:-true}
       - VSPHERE_HOST=${VSPHERE_HOST:-}
       - VSPHERE_USER=${VSPHERE_USER:-administrator@vsphere.local}
       - VSPHERE_PASSWORD=${VSPHERE_PASSWORD:-}
       - VSPHERE_PORT=${VSPHERE_PORT:-443}
       - VSPHERE_VERIFY_SSL=${VSPHERE_VERIFY_SSL:-false}
-      - VSPHERE_MOCK=${VSPHERE_MOCK:-true}
+      # Guacamole secret key - MUST match JSON_SECRET_KEY in guacamole service
+      - GUACAMOLE_SECRET_KEY=${GUACAMOLE_SECRET_KEY}
+      - GUACAMOLE_URL=${GUACAMOLE_URL:-http://guacamole:8080/guacamole}
+      - GUACAMOLE_EXTERNAL_URL=${GUACAMOLE_EXTERNAL_URL:-http://localhost:8085/guacamole}
     depends_on:
       db:
         condition: service_healthy
@@ -56,7 +75,7 @@ services:
     container_name: se_portal_frontend
     restart: always
     ports:
-      - "8989:8989"
+      - "9090:9090"
     environment:
       - VITE_API_URL=http://backend:8000
     depends_on:
@@ -65,20 +84,38 @@ services:
       - ./frontend:/app
       - /app/node_modules
 
-  # pgAdmin (optional, for database management)
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: se_portal_pgadmin
+
+  # Guacamole Daemon (guacd) - Protocol proxy for RDP/SSH/VNC
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: se_portal_guacd
     restart: always
-    profiles:
-      - tools
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    networks:
+      - default
+
+  # Guacamole Web Application - HTML5 console access
+  guacamole:
+    image: guacamole/guacamole:latest
+    container_name: se_portal_guacamole
+    restart: always
     ports:
-      - "5050:80"
+      - "8085:8080"
+    environment:
+      GUACD_HOSTNAME: guacd
+      GUACD_PORT: 4822
+      GUACAMOLE_HOME: /etc/guacamole
+      # JSON Auth - key MUST be set in .env file (GUACAMOLE_SECRET_KEY)
+      JSON_SECRET_KEY: ${GUACAMOLE_SECRET_KEY}
+    volumes:
+      # Guacamole config with JSON auth secret
+      - ./guacamole/guacamole.properties:/etc/guacamole/guacamole.properties:ro
+      # Custom branding (CSS and JSON)
+      - ./guacamole/branding:/etc/guacamole/branding:ro
     depends_on:
-      - db
+      - guacd
+    networks:
+      - default
 
 volumes:
   db_data:
+  pgadmin_data:

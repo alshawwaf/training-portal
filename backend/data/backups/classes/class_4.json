@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 4,
+    "name": "vbn",
+    "instructor_id": 1,
+    "blueprint_id": "1",
+    "template_id": 1,
+    "max_users": 1,
+    "passcode": "class123",
+    "start_date": "2025-12-16T02:08:23.310000",
+    "end_date": "2025-12-23T02:08:23.310000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-16T02:08:36.306105",
+    "updated_at": "2025-12-16T02:08:36.306110"
+  },
+  "backup_timestamp": "2025-12-16T02:08:36.331477",
+  "version": 1
+}

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
-import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List, Eye, EyeOff } from 'lucide-react';
+import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List, Eye, EyeOff, LayoutGrid, Rows3, Edit3 } from 'lucide-react';
 import Modal from '../components/Modal';
 import SettingsSection from '../components/SettingsSection';
-import { AwsIcon, AzureIcon, GcpIcon, CloudShareIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
+import { AwsIcon, AzureIcon, GcpIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
 
 interface SystemSetting {
     key: string;
@@ -18,11 +18,12 @@ interface SystemSetting {
 const Settings: React.FC = () => {
     const { user, isLoading } = useAuth();
     const { showToast } = useToast();
-    const [activeTab, setActiveTab] = useState<'account' | 'cloud' | 'onprem' | 'system'>('account');
+    const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'cloud' | 'onprem' | 'system'>('profile');
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [browserNotifications, setBrowserNotifications] = useState(false);
     
-    const [viewDensity, setViewDensity] = useState<'comfortable' | 'compact'>('comfortable');
+    const [viewDensity] = useState<'comfortable' | 'compact'>('compact');
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
     
     // System Settings State
     const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
@@ -34,6 +35,17 @@ const Settings: React.FC = () => {
     const [pwdModalOpen, setPwdModalOpen] = useState(false);
     const [pwdForm, setPwdForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
     const [pwdLoading, setPwdLoading] = useState(false);
+
+    // Profile Edit State
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileForm, setProfileForm] = useState({ 
+        first_name: '', 
+        last_name: '',
+        email: '',
+        current_password: '',
+        new_password: ''
+    });
+    const [profileSaving, setProfileSaving] = useState(false);
 
     const [smtpModalOpen, setSmtpModalOpen] = useState(false);
     
@@ -72,7 +84,6 @@ const Settings: React.FC = () => {
         { id: 'aws', name: 'Amazon Web Services', icon: AwsIcon, color: 'orange', description: 'Configure AWS credentials for EC2 and other services.' },
         { id: 'azure', name: 'Microsoft Azure', icon: AzureIcon, color: 'blue', description: 'Connect to Azure subscription for VM management.' },
         { id: 'gcp', name: 'Google Cloud Platform', icon: GcpIcon, color: 'red', description: 'Manage Google Compute Engine resources.' },
-        { id: 'cloudshare', name: 'CloudShare', icon: CloudShareIcon, color: 'red', description: 'Integration with CloudShare environments.' },
     ];
 
     const [selectedProvider, setSelectedProvider] = useState<CloudProvider | null>(null);
@@ -292,6 +303,34 @@ const Settings: React.FC = () => {
         }
     };
 
+    const handleSaveProfile = async () => {
+        // Validate: if changing password, current_password is required
+        if (profileForm.new_password && !profileForm.current_password) {
+            showToast('Current password is required to set a new password', 'error');
+            return;
+        }
+        
+        setProfileSaving(true);
+        try {
+            await api.put('/auth/profile', {
+                first_name: profileForm.first_name,
+                last_name: profileForm.last_name,
+                email: profileForm.email,
+                current_password: profileForm.current_password || null,
+                new_password: profileForm.new_password || null
+            });
+            showToast('Profile updated successfully', 'success');
+            setIsEditingProfile(false);
+            // Refresh user data
+            window.location.reload();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (e: any) {
+            showToast(e.response?.data?.detail || 'Failed to update profile', 'error');
+        } finally {
+            setProfileSaving(false);
+        }
+    };
+
     const handleTestEmail = async () => {
         setTestEmailLoading(true);
         try {
@@ -360,7 +399,8 @@ const Settings: React.FC = () => {
     };
 
     const tabs = [
-        { id: 'account', label: 'My Account', icon: User },
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'cloud', label: 'Cloud Providers', icon: Cloud },
         { id: 'onprem', label: 'On-Premise', icon: Server },
         { id: 'system', label: 'Configuration', icon: Shield },
@@ -389,33 +429,29 @@ const Settings: React.FC = () => {
                         Manage your account preferences and system configuration
                     </p>
                 </div>
-                {/* View Density Toggle */}
+                {/* View Mode Toggle */}
                 <div className="flex gap-1 p-1 bg-secondary/30 rounded-lg border border-theme">
                     <button 
-                        onClick={() => setViewDensity('comfortable')}
-                        className={`px-4 py-1.5 rounded-md text-sm transition-all flex items-center gap-2 ${
-                            viewDensity === 'comfortable' 
-                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm font-medium ring-1 ring-black/5' 
+                        onClick={() => setViewMode('list')}
+                        className={`p-2 rounded-md transition-all ${
+                            viewMode === 'list' 
+                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-black/5' 
                                 : 'text-secondary hover:text-primary hover:bg-white/50 dark:hover:bg-gray-800/50'
                         }`}
+                        title="List View"
                     >
-                        <svg className={`w-4 h-4 ${viewDensity === 'comfortable' ? 'text-blue-500' : 'text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        Comfortable
+                        <Rows3 className={`w-4 h-4 ${viewMode === 'list' ? 'text-blue-500' : 'text-secondary'}`} />
                     </button>
                     <button 
-                        onClick={() => setViewDensity('compact')}
-                        className={`px-4 py-1.5 rounded-md text-sm transition-all flex items-center gap-2 ${
-                            viewDensity === 'compact' 
-                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm font-medium ring-1 ring-black/5' 
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded-md transition-all ${
+                            viewMode === 'grid' 
+                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-black/5' 
                                 : 'text-secondary hover:text-primary hover:bg-white/50 dark:hover:bg-gray-800/50'
                         }`}
+                        title="Grid View"
                     >
-                        <svg className={`w-4 h-4 ${viewDensity === 'compact' ? 'text-blue-500' : 'text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        Compact
+                        <LayoutGrid className={`w-4 h-4 ${viewMode === 'grid' ? 'text-blue-500' : 'text-secondary'}`} />
                     </button>
                 </div>
             </div>
@@ -425,7 +461,8 @@ const Settings: React.FC = () => {
                 <div className="w-full lg:w-64 flex-shrink-0 sticky top-24 z-10 self-start">
                     <nav className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 p-1">
                         {tabs.map(tab => {
-                             if (tab.id !== 'account' && user.role !== 'admin') return null;
+                             // Profile and Notifications visible to all, others admin-only
+                             if (tab.id !== 'profile' && tab.id !== 'notifications' && user.role !== 'admin') return null;
                             const Icon = tab.icon;
                             return (
                                 <button
@@ -450,28 +487,114 @@ const Settings: React.FC = () => {
 
                 {/* Main Content Area */}
                 <div className="flex-1 space-y-6">
-                    {/* Account Tab */}
-                    {activeTab === 'account' && (
-                        <>
+                    {/* Profile Tab */}
+                    {activeTab === 'profile' && (
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}>
                             <SettingsSection title="Profile" icon={User} color="blue" density={viewDensity}>
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                                            {user?.name?.charAt(0) || 'U'}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-primary">{user?.name}</h3>
-                                            <p className="text-secondary">{user?.email}</p>
-                                            <span className="badge badge-info mt-2 inline-block capitalize">{user?.role}</span>
-                                        </div>
-                                    </div>
+                                    {!isEditingProfile ? (
+                                        <>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                                                    {user?.name?.charAt(0) || 'U'}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="text-lg font-semibold text-primary">{user?.name}</h3>
+                                                    <p className="text-secondary">{user?.email}</p>
+                                                    <span className="badge badge-info mt-2 inline-block capitalize">{user?.role}</span>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setPwdModalOpen(true)}
+                                                    className="p-2 rounded-lg hover:bg-secondary/20 transition-colors"
+                                                    title="Change Password"
+                                                >
+                                                    🔑
+                                                </button>
+                                            </div>
+                                            <button 
+                                                onClick={() => {
+                                                    setProfileForm({ 
+                                                        first_name: user?.name?.split(' ')[0] || '', 
+                                                        last_name: user?.name?.split(' ').slice(1).join(' ') || '',
+                                                        email: user?.email || '',
+                                                        current_password: '',
+                                                        new_password: ''
+                                                    });
+                                                    setIsEditingProfile(true);
+                                                }}
+                                                className="btn-secondary flex items-center gap-2"
+                                            >
+                                                <Edit3 className="w-4 h-4" />
+                                                Edit Profile
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="space-y-3">
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="label">First Name</label>
+                                                        <input
+                                                            type="text"
+                                                            className="input"
+                                                            value={profileForm.first_name}
+                                                            onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="label">Last Name</label>
+                                                        <input
+                                                            type="text"
+                                                            className="input"
+                                                            value={profileForm.last_name}
+                                                            onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="label">Email <span className="text-xs text-secondary">(read-only)</span></label>
+                                                    <input
+                                                        type="email"
+                                                        className="input bg-secondary/20 cursor-not-allowed"
+                                                        value={profileForm.email}
+                                                        disabled
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={handleSaveProfile}
+                                                    disabled={profileSaving}
+                                                    className="btn-primary flex items-center gap-2"
+                                                >
+                                                    {profileSaving ? (
+                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    ) : (
+                                                        <Save className="w-4 h-4" />
+                                                    )}
+                                                    Save Changes
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditingProfile(false)}
+                                                    className="btn-secondary"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </SettingsSection>
+                        </div>
+                    )}
 
-                            <SettingsSection title="Notifications" icon={Bell} color="amber" density={viewDensity}>
+                    {/* Notifications Tab */}
+                    {activeTab === 'notifications' && (
+                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}>
+                            <SettingsSection title="Email Notifications" icon={Bell} color="amber" density={viewDensity}>
                                 <div className="space-y-4">
                                     <ToggleOption 
-                                        title="Email Notifications"
+                                        title="Email Alerts"
                                         description="Receive email alerts for class updates"
                                         enabled={emailNotifications}
                                         onChange={(val) => {
@@ -479,9 +602,14 @@ const Settings: React.FC = () => {
                                             handleUpdatePreferences(val, undefined);
                                         }}
                                     />
+                                </div>
+                            </SettingsSection>
+
+                            <SettingsSection title="Browser Notifications" icon={Globe} color="purple" density={viewDensity}>
+                                <div className="space-y-4">
                                     <ToggleOption 
-                                        title="Browser Notifications"
-                                        description="Show desktop notifications"
+                                        title="Desktop Notifications"
+                                        description="Show desktop push notifications"
                                         enabled={browserNotifications}
                                         onChange={async (val) => {
                                             if (val) {
@@ -505,53 +633,65 @@ const Settings: React.FC = () => {
                                     />
                                 </div>
                             </SettingsSection>
-
-                            <SettingsSection title="Security" icon={Shield} color="emerald" density={viewDensity}>
-                                <div className="space-y-4">
-                                    <button onClick={() => setPwdModalOpen(true)} className="btn-secondary w-full justify-between group flex items-center">
-                                        <span className="flex items-center gap-2 text-primary">
-                                             <Lock className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
-                                             Change Password
-                                        </span>
-                                        <ChevronRight className="w-4 h-4 text-secondary group-hover:text-primary transition-colors" />
-                                    </button>
-                                </div>
-                            </SettingsSection>
-                        </>
+                        </div>
                     )}
 
                     {/* Cloud Providers Tab */}
                     {activeTab === 'cloud' && user?.role === 'admin' && (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
                                 {cloudProviders.map(provider => (
-                                    <div 
-                                        key={provider.id}
-                                        onClick={() => handleOpenProviderModal(provider)}
-                                        className="card hover:border-blue-500/50 cursor-pointer group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
-                                    >
-                                        <div className={`absolute top-0 right-0 w-24 h-24 bg-${provider.color}-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`} />
-                                        
-                                        <div className="flex items-start justify-between mb-4 relative z-10">
-                                            <div className={`p-3 rounded-xl bg-${provider.color}-500/10 text-${provider.color}-500`}>
-                                                <provider.icon className="w-8 h-8" />
+                                    viewMode === 'grid' ? (
+                                        <div 
+                                            key={provider.id}
+                                            onClick={() => handleOpenProviderModal(provider)}
+                                            className="card hover:border-blue-500/50 cursor-pointer group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
+                                        >
+                                            <div className={`absolute top-0 right-0 w-24 h-24 bg-${provider.color}-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`} />
+                                            
+                                            <div className="flex items-start justify-between mb-4 relative z-10">
+                                                <div className={`p-3 rounded-xl bg-${provider.color}-500/10 text-${provider.color}-500`}>
+                                                    <provider.icon className="w-8 h-8" />
+                                                </div>
+                                                {systemSettings.some(s => s.category === provider.id && s.value && s.value !== 'false') && (
+                                                    <div className="badge badge-success flex items-center gap-1">
+                                                        <Check className="w-3 h-3" />
+                                                        Configured
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            <h3 className="text-xl font-bold text-primary mb-1">{provider.name}</h3>
+                                            <p className="text-sm text-secondary line-clamp-2">{provider.description}</p>
+                                            
+                                            <div className="mt-4 flex items-center text-blue-500 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                                                Manage Settings
+                                                <ChevronRight className="w-4 h-4 ml-1" />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        /* List View: Horizontal row card */
+                                        <div 
+                                            key={provider.id}
+                                            onClick={() => handleOpenProviderModal(provider)}
+                                            className="card flex items-center gap-4 p-4 hover:border-blue-500/50 cursor-pointer group transition-all"
+                                        >
+                                            <div className={`p-3 rounded-xl bg-${provider.color}-500/10 text-${provider.color}-500 shrink-0`}>
+                                                <provider.icon className="w-6 h-6" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-semibold text-primary truncate">{provider.name}</h3>
+                                                <p className="text-xs text-secondary truncate">{provider.description}</p>
                                             </div>
                                             {systemSettings.some(s => s.category === provider.id && s.value && s.value !== 'false') && (
-                                                <div className="badge badge-success flex items-center gap-1">
+                                                <div className="badge badge-success flex items-center gap-1 shrink-0">
                                                     <Check className="w-3 h-3" />
                                                     Configured
                                                 </div>
                                             )}
+                                            <ChevronRight className="w-5 h-5 text-secondary group-hover:text-blue-500 transition-colors shrink-0" />
                                         </div>
-                                        
-                                        <h3 className="text-xl font-bold text-primary mb-1">{provider.name}</h3>
-                                        <p className="text-sm text-secondary line-clamp-2">{provider.description}</p>
-                                        
-                                        <div className="mt-4 flex items-center text-blue-500 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                                            Manage Settings
-                                            <ChevronRight className="w-4 h-4 ml-1" />
-                                        </div>
-                                    </div>
+                                    )
                                 ))}
                             </div>
 

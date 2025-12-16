@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from db.database import engine, Base, SessionLocal
 from db.models import User, UserRole, SystemSetting, Template
-from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure
+from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, logs, guacamole
 from services.proxmox_service import proxmox_service
 from services.email_service import email_service
 from services.vsphere_service import vsphere_service
@@ -120,10 +120,7 @@ async def startup_event():
             "azure_client_secret": os.getenv("AZURE_CLIENT_SECRET", ""),
             # GCP Defaults
             "gcp_project_id": os.getenv("GCP_PROJECT_ID", ""),
-            "gcp_service_account_json": os.getenv("GCP_SERVICE_ACCOUNT_JSON", "{}"),
-            # CloudShare Defaults
-            "cloudshare_api_id": os.getenv("CLOUDSHARE_API_ID", ""),
-            "cloudshare_api_key": os.getenv("CLOUDSHARE_API_KEY", "")
+            "gcp_service_account_json": os.getenv("GCP_SERVICE_ACCOUNT_JSON", "{}")
         }
         
         for key, val in defaults.items():
@@ -139,8 +136,6 @@ async def startup_event():
                     category = "azure"
                 elif key.startswith("gcp"):
                     category = "gcp"
-                elif key.startswith("cloudshare"):
-                    category = "cloudshare"
                 elif key.startswith("proxmox"):
                     category = "proxmox"
                 else:
@@ -179,14 +174,12 @@ app.include_router(email.router)
 app.include_router(templates.router)
 app.include_router(dashboard.router)
 app.include_router(infrastructure.router)
+app.include_router(logs.router)
+app.include_router(guacamole.router)
 
 @app.get("/")
 def read_root():
-    p_status = "Disconnected"
-    if proxmox_service.mock_mode:
-        p_status = "Mock Mode"
-    elif proxmox_service.proxmox:
-        p_status = "Connected"
+    p_status = "Connected" if proxmox_service.proxmox else "Disconnected"
 
     logger.debug(f"Root endpoint called. Proxmox Status: {p_status}")
     return {

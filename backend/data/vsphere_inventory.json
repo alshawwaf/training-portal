@@ -1,5 +1,5 @@
 {
-  "last_sync": "2025-12-13T23:22:56.239137",
+  "last_sync": "2025-12-14T20:36:18.989301",
   "datacenters": [
     {
       "name": "vCenter-Datacenter",
@@ -172,15 +172,6 @@
       "cpu": 4,
       "memory_mb": 16384,
       "is_template": true
-    },
-    {
-      "name": "Clone_Test_with_Pool-Student_1-pfSense",
-      "moid": "vm-5022",
-      "power_state": "poweredOn",
-      "guest_os": "FreeBSD 12 or later versions (64-bit)",
-      "cpu": 2,
-      "memory_mb": 4096,
-      "is_template": false
     },
     {
       "name": "R82-ansible",

@@ -9,14 +9,13 @@ import os
 import json
 from datetime import datetime
 
-# Try to import pyvmomi, but provide mock mode if not available
+# pyvmomi is required for vSphere connectivity
 try:
     from pyVim.connect import SmartConnect, Disconnect
     from pyVmomi import vim
     PYVMOMI_AVAILABLE = True
 except ImportError:
     PYVMOMI_AVAILABLE = False
-    vsphere_logger.warning("pyvmomi not installed. vSphere service cannot function correctly.")
 
 from sqlalchemy.orm import Session
 from db.models import SystemSetting
@@ -92,24 +91,14 @@ class VSphereService:
             else:
                 vsphere_logger.info("No vSphere settings in DB, using Environment Variables.")
 
-            # Re-evaluate Mock Mode based on final config
-            if PYVMOMI_AVAILABLE:
-                 # Check explicit Env Var override again
-                 env_mock = os.getenv("VSPHERE_MOCK", "").lower()
-                 if env_mock == "true":
-                     self.mock_mode = True
-                 elif env_mock == "false":
-                     self.mock_mode = False
-                 else:
-                     # No explicit override, decide based on Host presence
-                     self.mock_mode = not bool(self.host)
-                 
-                 if not self.mock_mode:
-                     vsphere_logger.info("Using Real vSphere Connection.")
-                 else:
-                     vsphere_logger.warning("Mock mode detected (unexpected for production).")
-            else:
-                 self.mock_mode = True
+
+            # Log vSphere connection info
+            if PYVMOMI_AVAILABLE and self.host:
+                vsphere_logger.info(f"vSphere configured for real connection to {self.host}")
+            elif not PYVMOMI_AVAILABLE:
+                vsphere_logger.error("pyvmomi not available - cannot connect to vSphere")
+            elif not self.host:
+                vsphere_logger.warning("No vSphere host configured")
 
             # Sync Scheduler Configuration (Defaults if not in DB)
             sync_mode = "manual"
@@ -535,6 +524,8 @@ class VSphereService:
                  vsphere_logger.error(f"Clone task failed: {result['message']}")
                  return {"success": False, "message": result["message"]}
 
+
+
         except Exception as e:
             vsphere_logger.error(f"Exception during VM provisioning: {e}", exc_info=True)
             return {"success": False, "message": str(e)}
@@ -543,7 +534,7 @@ class VSphereService:
     def get_vm_power_state(self, vm_moid: str) -> Dict[str, Any]:
         """Get power state of a VM."""
         if not self.connection:
-             return {"success": False, "message": "Not connected to vSphere"}
+            return {"success": False, "message": "Not connected to vSphere"}
 
         try:
             vm = self._get_obj([vim.VirtualMachine], vm_moid)
@@ -561,7 +552,7 @@ class VSphereService:
         Action: start, stop, restart, reset
         """
         if not self.connection:
-             return {"success": False, "message": "Not connected to vSphere"}
+            return {"success": False, "message": "Not connected to vSphere"}
 
         try:
             vm = self._get_obj([vim.VirtualMachine], vm_moid)
@@ -600,8 +591,6 @@ class VSphereService:
 
             return {"success": True, "message": f"VM {action} successful"}
 
-
-        
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -639,12 +628,43 @@ class VSphereService:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
+
+    def generate_vmrc_ticket(self, vm_moid: str) -> Dict[str, Any]:
+        """
+        Generate a VMRC ticket for a VM.
+        Returns the ticket value and a formatted vmrc:// URI.
+        """
+        if not self.connection:
+            return {"success": False, "message": "Not connected to vSphere"}
+
+        try:
+            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            if not vm:
+                return {"success": False, "message": "VM not found"}
+
+
+            # Acquire Session Clone Ticket
+            ticket = self.connection.content.sessionManager.AcquireCloneTicket()
+            
+            # Format URI
+            # vmrc://clone:<ticket>@<vcenter_host>/?moid=<vm_moid>
+            uri = f"vmrc://clone:{ticket}@{self.host}:{self.port}/?moid={vm_moid}"
+            
+            return {
+                "success": True,
+                "ticket": ticket,
+                "uri": uri
+            }
+        except Exception as e:
+            vsphere_logger.error(f"Failed to generate VMRC ticket for {vm_moid}: {e}")
+            return {"success": False, "message": str(e)}
+
     def delete_vm(self, vm_moid: str) -> Dict[str, Any]:
         """
         Delete a VM from vSphere (Power off if needed, then Destroy).
         """
         if not self.connection:
-             return {"success": False, "message": "Not connected to vSphere"}
+            return {"success": False, "message": "Not connected to vSphere"}
 
         try:
             vm = self._get_obj([vim.VirtualMachine], vm_moid)
@@ -792,3 +812,5 @@ class VSphereService:
 
 # Singleton instance
 vsphere_service = VSphereService()
+
+

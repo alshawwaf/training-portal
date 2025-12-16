@@ -5,7 +5,7 @@ import { ToastProvider } from './context/ToastContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Classes from './pages/Classes';
+import Classes from './pages/TrainingClasses';
 import CreateClass from './pages/CreateClass';
 import EditClass from './pages/EditClass';
 import Settings from './pages/Settings';
@@ -14,6 +14,9 @@ import AllClasses from './pages/monitoring/AllClasses';
 import AllEnvironments from './pages/monitoring/AllEnvironments';
 import MyClasses from './pages/MyClasses';
 import MyEnvironments from './pages/MyEnvironments';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import Logs from './pages/monitoring/Logs';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -77,8 +80,11 @@ const App: React.FC = () => {
             <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
             <Route path="/monitoring/classes" element={<AdminRoute><AllClasses /></AdminRoute>} />
             <Route path="/monitoring/environments" element={<AdminRoute><AllEnvironments /></AdminRoute>} />
+            <Route path="/monitoring/logs" element={<AdminRoute><Logs /></AdminRoute>} />
             <Route path="/my/classes" element={<ProtectedRoute><MyClasses /></ProtectedRoute>} />
             <Route path="/my/environments" element={<ProtectedRoute><MyEnvironments /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           </Routes>
         </ToastProvider>
       </AuthProvider>

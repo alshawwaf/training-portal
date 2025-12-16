@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 38,
+    "name": "Parallel Test Class",
+    "instructor_id": 1,
+    "blueprint_id": null,
+    "template_id": 14,
+    "max_users": 2,
+    "passcode": "verification123",
+    "start_date": "2025-12-20T12:00:00",
+    "end_date": "2025-12-25T12:00:00",
+    "status": "draft",
+    "description": null,
+    "created_at": "2025-12-15T03:13:09.335677",
+    "updated_at": "2025-12-15T03:13:09.335686"
+  },
+  "archived_at": "2025-12-15T03:27:13.158286",
+  "reason": "deleted"
+}

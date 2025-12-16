@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 30,
+    "name": "SBT1",
+    "instructor_id": 1,
+    "blueprint_id": "9",
+    "template_id": 9,
+    "max_users": 4,
+    "passcode": "Cpwins!1",
+    "start_date": "2025-12-15T04:47:12.531000",
+    "end_date": "2025-12-22T04:47:12.531000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-14T23:47:33.429027",
+    "updated_at": "2025-12-14T23:48:03.916009"
+  },
+  "archived_at": "2025-12-14T23:51:16.295665",
+  "reason": "deleted"
+}

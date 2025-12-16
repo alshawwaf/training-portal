@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 37,
+    "name": "classret",
+    "instructor_id": 1,
+    "blueprint_id": "14",
+    "template_id": 14,
+    "max_users": 2,
+    "passcode": "class123",
+    "start_date": "2025-12-15T03:08:07.167000",
+    "end_date": "2025-12-22T03:08:07.167000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-15T03:08:20.504552",
+    "updated_at": "2025-12-15T03:08:20.504606"
+  },
+  "archived_at": "2025-12-15T03:16:36.948302",
+  "reason": "deleted"
+}

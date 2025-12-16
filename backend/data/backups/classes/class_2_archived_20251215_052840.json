@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 2,
+    "name": "SBT43",
+    "instructor_id": 1,
+    "blueprint_id": "1",
+    "template_id": 1,
+    "max_users": 2,
+    "passcode": "class123",
+    "start_date": "2025-12-15T05:19:50.796000",
+    "end_date": "2025-12-22T05:19:50.796000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-15T05:20:04.321030",
+    "updated_at": "2025-12-15T05:20:04.321039"
+  },
+  "archived_at": "2025-12-15T05:28:40.832205",
+  "reason": "deleted"
+}

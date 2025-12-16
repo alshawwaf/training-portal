@@ -181,5 +181,21 @@ class EnvironmentVM(Base):
     vm_moid = Column(String) # MOID in vSphere
     ip_address = Column(String, nullable=True)
     access_url = Column(String, nullable=True) # Guacamole link etc.
+    guest_os = Column(String, nullable=True)  # Guest OS type (e.g., "Windows 10", "Linux")
     
     environment = relationship("ClassEnvironment", back_populates="vms")
+
+
+class ActionLog(Base):
+    """Log of system actions for audit and monitoring"""
+    __tablename__ = "action_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    action = Column(String, index=True) # e.g., "PROVISION", "DELETE_CLASS", "LOGIN"
+    entity_name = Column(String) # e.g., "Class: Set 1"
+    status = Column(String, index=True) # "STARTED", "SUCCESS", "ERROR"
+    details = Column(Text, nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    user = relationship("User")

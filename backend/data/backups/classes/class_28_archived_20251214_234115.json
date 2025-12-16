@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 28,
+    "name": "Test Notification Class",
+    "instructor_id": 1,
+    "blueprint_id": "9",
+    "template_id": 9,
+    "max_users": 3,
+    "passcode": "class123123456",
+    "start_date": "2025-12-14T23:39:24.219000",
+    "end_date": "2025-12-15T01:45:00",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-14T23:40:48.761026",
+    "updated_at": "2025-12-14T23:40:48.761034"
+  },
+  "archived_at": "2025-12-14T23:41:15.163817",
+  "reason": "deleted"
+}

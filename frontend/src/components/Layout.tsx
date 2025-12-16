@@ -16,18 +16,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       { label: 'Dashboard', path: '/', icon: LayoutDashboard },
       { label: 'Classes', path: '/classes', icon: BookOpen },
       { label: 'Templates', path: '/templates', icon: Layers },
-      { label: 'Settings', path: '/settings', icon: Settings },
   ];
 
   const monitoringItems = [
-      { label: 'All Classes', path: '/monitoring/classes', icon: BookOpen },
-      { label: 'All Environments', path: '/monitoring/environments', icon: Monitor },
+    { label: 'All Classes', path: '/monitoring/classes', icon: BookOpen },
+    { label: 'All Environments', path: '/monitoring/environments', icon: Monitor },
+    { label: 'Logs', path: '/monitoring/logs', icon: Activity },
   ];
 
   const workspaceItems = [
       { label: 'My Classes', path: '/my/classes', icon: FolderOpen },
       { label: 'My Environments', path: '/my/environments', icon: Activity },
   ];
+
+  const settingsItem = { label: 'Settings', path: '/settings', icon: Settings };
 
   const renderNavItem = (item: { label: string; path: string; icon: React.ElementType }) => (
     <Link
@@ -82,6 +84,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <div className="pt-3 border-t border-theme">
                 <p className="px-4 mb-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">My Workspace</p>
                 <div className="space-y-1">{workspaceItems.map(renderNavItem)}</div>
+            </div>
+
+            {/* Settings at bottom */}
+            <div className="pt-3 border-t border-theme">
+                <div className="space-y-1">{renderNavItem(settingsItem)}</div>
             </div>
         </nav>
 

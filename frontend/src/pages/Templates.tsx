@@ -40,7 +40,7 @@ interface InventoryVM {
     power_state: string;
 }
 
-const providerOptions = ['vSphere', 'Proxmox', 'AWS', 'Azure', 'GCP', 'CloudShare'];
+const providerOptions = ['vSphere', 'Proxmox', 'AWS', 'Azure', 'GCP'];
 
 const Templates: React.FC = () => {
     const { showToast } = useToast();
@@ -304,7 +304,6 @@ const Templates: React.FC = () => {
             case 'aws': return 'from-orange-500/20 to-yellow-500/20 text-orange-600 dark:text-orange-400';
             case 'azure': return 'from-blue-500/20 to-sky-500/20 text-blue-600 dark:text-blue-400';
             case 'gcp': return 'from-red-500/20 to-rose-500/20 text-red-600 dark:text-red-400';
-            case 'cloudshare': return 'from-purple-500/20 to-pink-500/20 text-purple-600 dark:text-purple-400';
             default: return 'from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400';
         }
     };

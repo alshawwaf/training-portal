@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    MoreVertical, Eye, Trash2, Search, Calendar, Users, Server, Edit, Play, Square, RotateCcw, Key, RefreshCw 
+    MoreVertical, Eye, Trash2, Search, Calendar, Users, Server, Play, Square, RotateCcw, Key, RefreshCw 
 } from 'lucide-react';
 import Modal from '../Modal';
-import { ProviderIcon } from '../ProviderIcons';
+
 import type { ClassModel, ClassEnvironment } from '../../types/class';
 import { useToast } from '../../context/ToastContext';
 import api from '../../api';
 
-interface ViewClassModalProps {
+interface ClassDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;
     classData: ClassModel | null;
-    onEdit: (cls: ClassModel) => void;
-    onDelete: (cls: ClassModel) => void;
 }
 
-const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classData, onEdit, onDelete }) => {
+const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, classData }) => {
     const { showToast } = useToast();
     const [environments, setEnvironments] = useState<ClassEnvironment[]>([]);
     const [loadingEnvs, setLoadingEnvs] = useState(false);
@@ -25,12 +23,10 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
     // Action menu states
     const [openEnvMenuId, setOpenEnvMenuId] = useState<number | null>(null);
     const [openVmMenuId, setOpenVmMenuId] = useState<number | null>(null);
-    const [isClassActionMenuOpen, setIsClassActionMenuOpen] = useState(false);
 
     useEffect(() => {
         if (classData && isOpen) {
             fetchEnvironments(classData.id);
-            setIsClassActionMenuOpen(false);
         }
     }, [classData, isOpen]);
 
@@ -47,21 +43,7 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
         }
     };
 
-    const handleProvision = async () => {
-        if (!classData) return;
-        
-        try {
-            showToast('Provisioning started...', 'success');
-            await api.post(`/classes/${classData.id}/provision`);
-            showToast('Provisioning task queued successfully', 'success');
-            // Refresh environments to see the new task/environments (give it a moment or poll?)
-            // We'll fetch immediately, and maybe the user clicks refresh if it takes time.
-            fetchEnvironments(classData.id);
-        } catch (error) {
-            console.error('Failed to provision class:', error);
-            showToast('Failed to start provisioning', 'error');
-        }
-    };
+
 
     const handleEnvPower = async (envId: number, action: string) => {
         try {
@@ -191,72 +173,30 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
             title={classData.name}
             icon={<Eye className="w-6 h-6 text-blue-400" />}
             maxWidth="5xl"
-            headerActions={
-                <div className="relative">
-                    <button 
-                        onClick={() => setIsClassActionMenuOpen(!isClassActionMenuOpen)}
-                        className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-colors"
-                    >
-                        <MoreVertical className="w-5 h-5" />
-                    </button>
 
-                    {isClassActionMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 py-1">
-                            <button 
-                                onClick={() => {
-                                    onEdit(classData);
-                                    setIsClassActionMenuOpen(false);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700/50 flex items-center gap-2"
-                            >
-                                <Edit className="w-4 h-4" /> Edit Class
-                            </button>
-                            <button 
-                                onClick={() => {
-                                    handleProvision();
-                                    setIsClassActionMenuOpen(false);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700/50 flex items-center gap-2"
-                            >
-                                <Play className="w-4 h-4" /> Provision Environments
-                            </button>
-                            <div className="border-t border-gray-700 my-1"></div>
-                            <button 
-                                onClick={() => {
-                                    onDelete(classData);
-                                    setIsClassActionMenuOpen(false);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700/50 flex items-center gap-2"
-                            >
-                                <Trash2 className="w-4 h-4" /> Delete Class
-                            </button>
-                        </div>
-                    )}
-                </div>
-            }
         >
             <div className="space-y-8">
                 {/* Header Info */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                        <div className="text-sm text-gray-400 mb-1">Passcode</div>
-                        <div className="text-xl font-mono text-white flex items-center gap-2">
+                    <div className="bg-secondary/20 p-4 rounded-xl border border-theme">
+                        <div className="text-sm font-medium text-primary/70 mb-1">Passcode</div>
+                        <div className="text-xl font-mono text-primary flex items-center gap-2">
                             <Key className="w-4 h-4 text-blue-400" />
                             {classData.passcode}
                         </div>
                     </div>
-                    <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                        <div className="text-sm text-gray-400 mb-1">Duration</div>
-                        <div className="text-white flex items-center gap-2">
+                    <div className="bg-secondary/20 p-4 rounded-xl border border-theme">
+                        <div className="text-sm font-medium text-primary/70 mb-1">Duration</div>
+                        <div className="text-primary flex items-center gap-2">
                              <Calendar className="w-4 h-4 text-purple-400" />
                              <span className="text-sm">
                                  {formatDate(classData.start_date)} - {formatDate(classData.end_date)}
                              </span>
                         </div>
                     </div>
-                    <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
-                        <div className="text-sm text-gray-400 mb-1">Capacity</div>
-                        <div className="text-white flex items-center gap-2">
+                    <div className="bg-secondary/20 p-4 rounded-xl border border-theme">
+                        <div className="text-sm font-medium text-primary/70 mb-1">Capacity</div>
+                        <div className="text-primary flex items-center gap-2">
                             <Users className="w-4 h-4 text-emerald-400" />
                             {environments.length} / {classData.max_users} Students
                         </div>
@@ -266,54 +206,54 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                 {/* Environments List */}
                 <div>
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
                             <Server className="w-5 h-5 text-blue-400" />
                             Student Environments
                         </h3>
                         <div className="flex items-center gap-2">
                             <div className="relative">
-                                <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" />
+                                <Search className="absolute left-3 top-2.5 w-4 h-4 text-secondary" />
                                 <input
                                     type="text"
                                     placeholder="Search environments..."
                                     value={envSearch}
                                     onChange={(e) => setEnvSearch(e.target.value)}
-                                    className="bg-gray-800 border border-gray-700 rounded-lg pl-9 pr-4 py-2 text-sm text-gray-200 focus:ring-2 focus:ring-blue-500/50 outline-none w-64"
+                                    className="bg-elevated border border-theme rounded-lg pl-9 pr-4 py-2 text-sm text-primary focus:ring-2 focus:ring-blue-500/50 outline-none w-64"
                                 />
                             </div>
                             <button 
                                 onClick={() => classData && fetchEnvironments(classData.id)}
-                                className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                className="p-2 hover:bg-theme-hover rounded-lg text-secondary hover:text-primary transition-colors"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loadingEnvs ? 'animate-spin' : ''}`} />
                             </button>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4 pb-24">
                         {loadingEnvs ? (
-                            <div className="text-center py-12 text-gray-400">
+                            <div className="text-center py-12 text-secondary">
                                 <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
                                 Loading environments...
                             </div>
                         ) : filteredEnvironments.length === 0 ? (
-                            <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-8 text-center">
-                                <Server className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                                <h3 className="text-lg font-medium text-gray-300">No environments yet</h3>
-                                <p className="text-gray-500 mt-1">Students haven't joined or provisioned this class yet.</p>
+                            <div className="bg-secondary/10 border border-theme rounded-xl p-8 text-center">
+                                <Server className="w-12 h-12 text-secondary mx-auto mb-3" />
+                                <h3 className="text-lg font-medium text-primary">No environments yet</h3>
+                                <p className="text-secondary mt-1">Students haven't joined or provisioned this class yet.</p>
                             </div>
                         ) : (
                             filteredEnvironments.map((env) => (
-                                <div key={env.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl hover:border-gray-600 transition-colors">
+                                <div key={env.id} className="bg-elevated border border-theme rounded-xl hover:border-secondary transition-colors">
                                     {/* Environment Header */}
-                                    <div className="px-6 py-4 border-b border-gray-700/50 bg-gray-800/50 flex items-center justify-between">
+                                    <div className="px-6 py-4 border-b border-theme bg-secondary/5 flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
                                                 <Server className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <h4 className="font-medium text-white">{env.name}</h4>
-                                                <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
+                                                <h4 className="font-medium text-primary">{env.name}</h4>
+                                                <div className="flex items-center gap-3 text-xs text-secondary mt-1">
                                                     <span>User ID: {env.user_id || 'Unassigned'}</span>
                                                     <span>•</span>
                                                     <span>{new Date(env.created_at).toLocaleDateString()}</span>
@@ -326,46 +266,46 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                                             <div className="relative">
                                                 <button 
                                                     onClick={() => setOpenEnvMenuId(openEnvMenuId === env.id ? null : env.id)}
-                                                    className="px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-700/50 hover:bg-gray-700 border border-gray-600 rounded-lg transition-colors flex items-center gap-1"
+                                                    className="px-3 py-1.5 text-xs font-medium text-secondary bg-theme-hover hover:bg-secondary/20 border border-theme rounded-lg transition-colors flex items-center gap-1"
                                                 >
                                                     Actions <MoreVertical className="w-3 h-3" />
                                                 </button>
 
                                                 {openEnvMenuId === env.id && (
-                                                    <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-20 py-1">
-                                                        <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                    <div className="absolute right-0 mt-2 w-48 bg-elevated border border-theme rounded-lg shadow-xl z-50 py-1">
+                                                        <div className="px-3 py-1.5 text-xs font-semibold text-secondary uppercase tracking-wider">
                                                             Power All VMs
                                                         </div>
                                                         <button 
                                                             onClick={() => handleEnvPower(env.id, 'start')}
-                                                            className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm text-green-500 hover:bg-theme-hover flex items-center gap-2"
                                                         >
                                                             <Play className="w-4 h-4" /> Start All
                                                         </button>
                                                         <button 
                                                             onClick={() => handleEnvPower(env.id, 'stop')}
-                                                            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-theme-hover flex items-center gap-2"
                                                         >
                                                             <Square className="w-4 h-4" /> Stop All
                                                         </button>
                                                         <button 
                                                             onClick={() => handleEnvPower(env.id, 'restart')}
-                                                            className="w-full text-left px-4 py-2 text-sm text-amber-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm text-amber-500 hover:bg-theme-hover flex items-center gap-2"
                                                         >
                                                             <RotateCcw className="w-4 h-4" /> Restart All
                                                         </button>
                                                         
-                                                        <div className="my-1 border-t border-gray-700"></div>
+                                                        <div className="my-1 border-t border-theme"></div>
 
                                                         <button 
                                                             onClick={() => handleEnvRevert(env.id)}
-                                                            className="w-full text-left px-4 py-2 text-sm text-orange-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm text-orange-500 hover:bg-theme-hover flex items-center gap-2"
                                                         >
                                                             <RefreshCw className="w-4 h-4" /> Revert Env
                                                         </button>
                                                         <button 
                                                             onClick={() => handleEnvDelete(env.id)}
-                                                            className="w-full text-left px-4 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                            className="w-full text-left px-4 py-2 text-sm text-secondary hover:text-red-500 hover:bg-theme-hover flex items-center gap-2"
                                                         >
                                                             <Trash2 className="w-4 h-4" /> Delete Env
                                                         </button>
@@ -376,9 +316,9 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                                     </div>
 
                                     {/* VMs List */}
-                                    <div className="divide-y divide-gray-700/50">
+                                    <div className="divide-y divide-theme">
                                         {env.vms.map((vm) => (
-                                            <div key={vm.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-800/20 transition-colors">
+                                            <div key={vm.id} className="px-6 py-4 flex items-center justify-between hover:bg-secondary/5 transition-colors">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-2 h-2 rounded-full ${
                                                         vm.power_state === 'poweredOn' ? 'bg-green-500 shadow-lg shadow-green-500/50' :
@@ -386,8 +326,8 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                                                         'bg-red-500 shadow-lg shadow-red-500/50'
                                                     }`}></div>
                                                     <div>
-                                                        <div className="font-mono text-sm text-gray-200">{vm.name}</div>
-                                                        <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                                                        <div className="font-mono text-sm text-primary">{vm.name}</div>
+                                                        <div className="flex items-center gap-3 text-xs text-secondary mt-0.5">
                                                             <span>{vm.ip_address || 'No IP'}</span>
                                                             {vm.power_state !== 'poweredOn' && (
                                                                 <span className="italic">({vm.power_state})</span>
@@ -401,7 +341,7 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                                                     {vm.power_state === 'poweredOn' ? (
                                                         <button 
                                                             onClick={() => handlePowerControl(env.id, vm.id, 'stop')}
-                                                            className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" 
+                                                            className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" 
                                                             title="Stop VM"
                                                         >
                                                             <Square className="w-4 h-4" />
@@ -409,7 +349,7 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                                                     ) : (
                                                         <button 
                                                             onClick={() => handlePowerControl(env.id, vm.id, 'start')}
-                                                            className="p-1.5 text-green-400 hover:bg-green-500/10 rounded-lg transition-colors"
+                                                            className="p-1.5 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors"
                                                             title="Start VM"
                                                         >
                                                             <Play className="w-4 h-4" />
@@ -420,29 +360,29 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
                                                     <div className="relative">
                                                         <button 
                                                             onClick={() => setOpenVmMenuId(openVmMenuId === vm.id ? null : vm.id)}
-                                                            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                                                            className="p-1.5 text-secondary hover:text-primary hover:bg-theme-hover rounded-lg transition-colors"
                                                         >
                                                             <MoreVertical className="w-4 h-4" />
                                                         </button>
                                                         
                                                         {openVmMenuId === vm.id && (
-                                                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-30 py-1">
+                                                            <div className="absolute right-0 mt-2 w-48 bg-elevated border border-theme rounded-lg shadow-xl z-50 py-1">
                                                                 <button 
                                                                     onClick={() => handlePowerControl(env.id, vm.id, 'restart')}
-                                                                    className="w-full text-left px-4 py-2 text-sm text-amber-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                                    className="w-full text-left px-4 py-2 text-sm text-amber-500 hover:bg-theme-hover flex items-center gap-2"
                                                                 >
                                                                     <RotateCcw className="w-4 h-4" /> Restart
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleVmRevert(vm.id)}
-                                                                    className="w-full text-left px-4 py-2 text-sm text-orange-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                                    className="w-full text-left px-4 py-2 text-sm text-orange-500 hover:bg-theme-hover flex items-center gap-2"
                                                                 >
                                                                     <RefreshCw className="w-4 h-4" /> Revert Snapshot
                                                                 </button>
-                                                                <div className="border-t border-gray-700 my-1"></div>
+                                                                <div className="border-t border-theme my-1"></div>
                                                                 <button 
                                                                     onClick={() => handleVmDelete(vm.id)}
-                                                                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700/50 flex items-center gap-2"
+                                                                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-theme-hover flex items-center gap-2"
                                                                 >
                                                                     <Trash2 className="w-4 h-4" /> Delete VM
                                                                 </button>
@@ -463,4 +403,4 @@ const ViewClassModal: React.FC<ViewClassModalProps> = ({ isOpen, onClose, classD
     );
 };
 
-export default ViewClassModal;
+export default ClassDetailsModal;

@@ -54,13 +54,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
 
     return (
         <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm transition-opacity"
             onClick={handleBackdropClick}
         >
             <div 
                 ref={modalRef}
                 className={clsx(
-                    "bg-elevated rounded-xl border border-theme shadow-2xl w-full transform transition-all scale-100 max-h-[90vh] flex flex-col",
+                    "bg-elevated opacity-100 rounded-xl border border-theme shadow-2xl w-full transform transition-all scale-100 max-h-[90vh] flex flex-col",
                     maxWidthClasses[maxWidth]
                 )}
             >
