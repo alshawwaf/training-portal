@@ -18,8 +18,9 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 |---------|-------------|
 | **Class Management** | Create, configure, and manage training classes with customizable parameters |
 | **Templates Management** | Define multi-provider environments (Proxmox, AWS, Azure, etc.) for labs |
-| **Virtual Environments** | Automated provisioning of environments for each student |
+| **Virtual Environments** | Automated provisioning of environments for each student (Proxmox & vSphere) |
 | **My Workspace** | Dedicated student view for managing assigned environments and VMs |
+| **Console Access** | Built-in HTML5 console for all VMs using **noVNC** (raw VNC support) |
 | **Monitoring Dashboard** | Admin-level oversight of all active classes and environments |
 | **Environment Control** | Start, stop, revert, and access VMs with one click |
 | **Modern Dark UI** | Premium dark-themed interface with Check Point branding |
@@ -37,14 +38,14 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐  │
-│  │   Frontend   │───▶│   Backend    │───▶│    Proxmox VE    │  │
-│  │  React/Vite  │    │   FastAPI    │    │   Virtualization │  │
+│  │   Frontend   │───▶│   Backend    │───▶│ Proxmox / vSphere│  │
+│  │  React/Vite  │    │   FastAPI    │    │  Virtualization  │  │
 │  │  Port: 8989  │    │  Port: 8000  │    │                  │  │
 │  └──────────────┘    └──────────────┘    └──────────────────┘  │
 │                             │                                    │
 │                             ▼                                    │
 │                      ┌──────────────┐                           │
-│                      │  PostgreSQL  │                           │
+│                      │  SQLite/PG   │                           │
 │                      │  Port: 5432  │                           │
 │                      └──────────────┘                           │
 │                                                                  │
@@ -59,7 +60,7 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 | **Backend** | FastAPI, SQLAlchemy, Pydantic |
 | **Database** | PostgreSQL 15 (SQLite for development) |
 | **Auth** | Azure AD (MSAL) + Local Superadmin |
-| **Virtualization** | Proxmox VE API |
+| **Virtualization** | Proxmox VE API & VMware vSphere (pyVmomi) |
 | **Containerization** | Docker & Docker Compose |
 
 ---
@@ -144,7 +145,8 @@ SE Training Portal/
 │   │   └── models.py          # User, Class, Template models
 │   ├── routers/               # API endpoints
 │   ├── services/
-│   │   └── proxmox_service.py # Proxmox VE integration
+│   │   ├── proxmox_service.py # Proxmox VE integration
+│   │   └── vsphere_service.py # VMware vSphere integration
 │   ├── main.py                # FastAPI application
 │   └── Dockerfile
 ├── frontend/

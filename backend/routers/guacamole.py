@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from db.database import get_db
-from db.models import EnvironmentVM, ClassEnvironment, Class, TemplateVM
+from db.models import EnvironmentVM, ClassEnvironment
 from services.guacamole_service import guacamole_service
 import os
 
@@ -17,8 +17,59 @@ GUACAMOLE_INTERNAL_URL = os.getenv("GUACAMOLE_URL", "http://guacamole:8080/guaca
 GUACAMOLE_EXTERNAL_URL = os.getenv("GUACAMOLE_EXTERNAL_URL", "http://localhost:8085/guacamole")
 
 
+@router.get("/ticket/{class_id}/{env_id}/{vm_id}")
+def get_fresh_ticket(
+    class_id: int,
+    env_id: int, 
+    vm_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Generate a FRESH vSphere ticket on-demand (called by JavaScript right before connecting).
+    Returns the WebSocket URL with a fresh ticket that's valid for immediate use.
+    """
+    import logging
+    from services.vsphere_service import vsphere_service
+    
+    guac_log = logging.getLogger("guacamole")
+    
+    # Verify VM exists and belongs to the class/env
+    env_vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not env_vm or not env_vm.vm_moid:
+        raise HTTPException(status_code=404, detail="VM not found")
+        
+    class_env = db.query(ClassEnvironment).filter(ClassEnvironment.id == env_id).first()
+    if not class_env or class_env.class_id != class_id:
+        raise HTTPException(status_code=404, detail="Environment not found")
+        
+    if env_vm.env_id != env_id:
+        raise HTTPException(status_code=400, detail="VM does not belong to this environment")
+    
+    # Generate FRESH ticket
+    ticket_result = vsphere_service.generate_html5_console_ticket(env_vm.vm_moid)
+    
+    if not ticket_result.get("success"):
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate ticket: {ticket_result.get('message', 'Unknown error')}"
+        )
+    
+    # Return the WebSocket URL with fresh ticket
+    ws_url = ticket_result.get("ws_url")
+    if not ws_url:
+        host = ticket_result.get("host")
+        port = ticket_result.get("port", 443)
+        ticket = ticket_result.get("ticket", "")
+        from urllib.parse import quote
+        ws_url = f"wss://{host}:{port}/ticket/{quote(ticket, safe='')}"
+    
+    guac_log.info(f"Generated fresh ticket for VM {env_vm.vm_name} (MOID: {env_vm.vm_moid})")
+    
+    return {"ws_url": ws_url}
+
+
 @router.get("/{class_id}/{env_id}/{vm_id}")
-async def get_console_page(
+def get_console_page(
     class_id: int, 
     env_id: int, 
     vm_id: int, 
@@ -44,35 +95,400 @@ async def get_console_page(
     if env_vm.env_id != env_id:
         raise HTTPException(status_code=400, detail="VM does not belong to this environment")
 
-    # 2. Get protocol settings from template (as default)
-    db_class = db.query(Class).filter(Class.id == class_id).first()
-    default_protocol = "rdp"
-    port = 3389
+    # 2. Determine protocol and port
+    # Priority: 1) Query param override → 2) Stored in EnvironmentVM → 3) Guest OS fallback
     
-    if db_class and db_class.template_id:
-        template_vms = db.query(TemplateVM).filter(TemplateVM.template_id == db_class.template_id).all()
-        for tvm in template_vms:
-            if tvm.vm_name in env_vm.vm_name:
-                default_protocol = tvm.access_protocol or "rdp"
-                port = tvm.access_port or {"rdp": 3389, "ssh": 22, "vnc": 5900}.get(default_protocol, 3389)
-                break
+    # Start with stored values from EnvironmentVM (copied from TemplateVM during provisioning)
+    stored_protocol = env_vm.access_protocol
+    stored_port = env_vm.access_port
+    guest_os = (env_vm.guest_os or "").lower()
+    
+    # Default to VNC for console access (works without IP)
+    default_protocol = "vnc"
+    port = 5900
+    
+    # If we have a stored protocol, use that
+    if stored_protocol:
+        default_protocol = stored_protocol.lower()
+        port = stored_port or {"rdp": 3389, "ssh": 22, "vnc": 5900}.get(default_protocol, 5900)
 
-    # 3. Use override protocol if provided, otherwise use template default
+    # 3. Use override protocol if provided, otherwise use determined default
+    # Fix: If protocol is invalid/typo (e.g. 'vn'), fallback to default instead of failing
     final_protocol = protocol.lower() if protocol else default_protocol
-    if final_protocol not in ["rdp", "ssh", "vnc"]:
-        final_protocol = default_protocol
+    target_protocols = ["rdp", "ssh", "vnc"]
+    
+    # Fuzzy matching or fallback for typos
+    if final_protocol not in target_protocols:
+        # Check for common typos
+        if final_protocol == "vn": final_protocol = "vnc"
+        else: final_protocol = default_protocol
     
     # Update port if protocol was overridden
     if protocol and protocol.lower() != default_protocol:
-        port = {"rdp": 3389, "ssh": 22, "vnc": 5900}.get(final_protocol, 3389)
+        port = {"rdp": 3389, "ssh": 22, "vnc": 5900}.get(final_protocol, 5900)
 
-    # 4. Generate encrypted token
+    # 4. Handle VNC console for vSphere VMs (no IP required)
+    # vSphere VMs require WebMKS - Guacamole VNC cannot connect to vSphere's WebSocket protocol
+    hostname = env_vm.ip_address
+    
+    # LOGIC FIX: If it's a vSphere VM, we almost ALWAYS want WebMKS for "Console" access
+    # unless the user explicitly requested SSH/RDP and we have an IP.
+    # If no IP is present, we MUST fallback to VNC/WebMKS.
+    
+    is_vsphere = bool(env_vm.vm_moid)
+    force_webmks = is_vsphere and (final_protocol == "vnc" or not hostname)
+    
+    if force_webmks:
+        # vSphere VM - Use WebMKS via WebSocket proxy (NOT Guacamole)
+        from services.vsphere_service import vsphere_service
+        from fastapi.responses import HTMLResponse
+        import logging
+        import base64
+        import json
+        guac_log = logging.getLogger("guacamole")
+        
+        # For vSphere VMs, use WebSocket proxy to bypass CORS/SSL issues
+        # Pass VM context to the proxy (it will generate the ticket on-demand)
+        guac_log.info(f"WebMKS console page for vSphere VM {env_vm.vm_name} (MOID: {env_vm.vm_moid})")
+        
+        ws_config = {
+            "vm_moid": env_vm.vm_moid,
+            "class_id": class_id,
+            "env_id": env_id,
+            "vm_id": vm_id
+        }
+        
+        ws_token = base64.urlsafe_b64encode(json.dumps(ws_config).encode()).decode()
+        
+        # Use the WebSocket proxy URL
+        ws_base = os.getenv("BACKEND_WS_URL", "ws://localhost:8000")
+        ws_url = f"{ws_base}/ws/console/{ws_token}"
+        
+        # Return noVNC console page using the integrated noVNC library
+        html_content = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{env_vm.vm_name} - Console</title>
+    <style>
+        html, body {{
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+        }}
+        body {{
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }}
+        .header {{
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #334155;
+            z-index: 100;
+        }}
+        .header h1 {{
+            color: #e2e8f0;
+            font-size: 16px;
+            font-weight: 600;
+        }}
+        .header .controls {{
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }}
+        .header .status {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 13px;
+        }}
+        .status-dot {{
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fbbf24;
+            animation: pulse 2s infinite;
+        }}
+        .status-dot.connected {{ background: #22c55e; animation: none; }}
+        .status-dot.error {{ background: #ef4444; animation: none; }}
+        @keyframes pulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.5; }} }}
+
+        .btn {{
+            padding: 6px 12px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .btn:hover {{ background: #2563eb; transform: translateY(-1px); }}
+        .btn-secondary {{ background: #475569; }}
+        .btn-secondary:hover {{ background: #64748b; }}
+
+        #console-container {{
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+        }}
+
+        #console-container:fullscreen {{
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+        }}
+        
+        #vnc-canvas-container {{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }}
+
+        .loader {{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #e2e8f0;
+            z-index: 10;
+            transition: opacity 0.5s;
+        }}
+        .spinner {{
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }}
+        @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+
+        .error-box {{
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            text-align: center;
+        }}
+        .error-box h2 {{ color: #f87171; margin-bottom: 12px; }}
+        .error-box p {{ color: #94a3b8; line-height: 1.6; margin-bottom: 20px; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖥️ {env_vm.vm_name}</h1>
+        <div class="controls">
+            <button class="btn btn-secondary" id="cad-button">Ctrl+Alt+Del</button>
+            <button class="btn btn-secondary" id="fullscreen-button">Fullscreen</button>
+            <div class="status">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">Connecting...</span>
+            </div>
+        </div>
+    </div>
+    <div id="console-container">
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <h2>Connecting to {env_vm.vm_name}</h2>
+            <p>Establishing secure console session...</p>
+        </div>
+        <div id="vnc-canvas-container"></div>
+    </div>
+
+    <script type="module">
+        import RFB from '/noVNC-master/core/rfb.js';
+
+        const WS_URL = "{ws_url}";
+        const loader = document.getElementById('loader');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+
+        function updateStatus(status, text) {{
+            statusDot.className = 'status-dot ' + status;
+            statusText.textContent = text;
+        }}
+
+        function showError(message) {{
+            loader.style.opacity = '1';
+            loader.style.display = 'block';
+            loader.innerHTML = `
+                <div class="error-box">
+                    <h2>⚠️ Connection Failed</h2>
+                    <p>${{message}}</p>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button class="btn" onclick="location.reload()">Retry</button>
+                        <button class="btn btn-secondary" onclick="window.close()">Close</button>
+                    </div>
+                </div>
+            `;
+            updateStatus('error', 'Disconnected');
+        }}
+
+        function connect() {{
+            const canvasContainer = document.getElementById('vnc-canvas-container');
+            
+            // Wait for display to be ready and have height
+            if (canvasContainer.clientHeight < 10) {{
+                console.log("Container not ready, waiting...");
+                setTimeout(connect, 200);
+                return;
+            }}
+
+            try {{
+                // Use our internal proxy via WebSocket
+                
+                window.rfb = new RFB(canvasContainer, WS_URL, {{
+                    wsProtocols: ['binary']
+                }});
+
+                window.rfb.scaleViewport = true;
+                window.rfb.resizeSession = true;
+
+                window.rfb.addEventListener("connect", () => {{
+                    console.log("noVNC Connected");
+                    updateStatus('connected', 'Connected');
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                    
+                    // CRITICAL: Force a resize event after a short delay to ensure 
+                    // noVNC correctly calculates the container dimensions.
+                    // This fixes the 'black screen until fullscreen' issue.
+                    setTimeout(() => {{
+                        window.dispatchEvent(new Event('resize'));
+                        console.log("Forced resize event triggered");
+                    }}, 1000);
+                }});
+
+                window.rfb.addEventListener("disconnect", (e) => {{
+                    console.log("noVNC Disconnected", e);
+                    if (e.detail.clean) {{
+                        updateStatus('error', 'Disconnected');
+                    }} else {{
+                        showError("The connection was closed unexpectedly.");
+                    }}
+                }});
+
+                window.rfb.addEventListener("credentialsrequired", (e) => {{
+                    // Usually not needed for vSphere as ticket is in URL
+                    const password = prompt("Password required:");
+                    window.rfb.sendCredentials({{ password: password }});
+                }});
+
+                window.rfb.addEventListener("desktopname", (e) => {{
+                    console.log("Desktop name:", e.detail.name);
+                }});
+
+            }} catch (err) {{
+                console.error("noVNC Setup Error:", err);
+                showError("Failed to initialize console: " + err.message);
+            }}
+        }}
+
+        document.getElementById('cad-button').onclick = () => {{
+            if (window.rfb) window.rfb.sendCtrlAltDel();
+        }};
+
+        document.getElementById('fullscreen-button').onclick = () => {{
+            const container = document.getElementById('console-container');
+            const requestFullscreen = container.requestFullscreen || 
+                                    container.mozRequestFullScreen || 
+                                    container.webkitRequestFullscreen || 
+                                    container.msRequestFullscreen;
+            const exitFullscreen = document.exitFullscreen || 
+                                 document.mozCancelFullScreen || 
+                                 document.webkitExitFullscreen || 
+                                 document.msExitFullscreen;
+
+            if (!document.fullscreenElement && !document.mozFullScreenElement && 
+                !document.webkitFullscreenElement && !document.msFullscreenElement) {{
+                if (requestFullscreen) {{
+                    requestFullscreen.call(container).catch(err => {{
+                        console.error(`Error attempting to enable full-screen mode: ${{err.message}}`);
+                    }});
+                }}
+            }} else {{
+                if (exitFullscreen) {{
+                    exitFullscreen.call(document);
+                }}
+            }}
+        }};
+
+        // Handle fullscreen change to force a resize
+        const onFullscreenChange = () => {{
+            console.log("Fullscreen changed, forcing resize...");
+            setTimeout(() => {{
+                window.dispatchEvent(new Event('resize'));
+                if (window.rfb) {{
+                    // Some versions of noVNC need an explicit scale update
+                    window.rfb.scaleViewport = true;
+                }}
+            }}, 500);
+        }};
+
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+        document.addEventListener('mozfullscreenchange', onFullscreenChange);
+        document.addEventListener('MSFullscreenChange', onFullscreenChange);
+
+        // Start connection
+        connect();
+    </script>
+</body>
+</html>
+"""
+
+        return HTMLResponse(content=html_content, headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        })
+
+    else:
+        vnc_password = None
+    
+    # SSH/RDP require IP address
+    if final_protocol in ["ssh", "rdp"] and not env_vm.ip_address:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"{final_protocol.upper()} requires the VM to have an IP address. Use VNC console instead."
+        )
+    
+    # Ensure we have a hostname for connection
+    if not hostname:
+        raise HTTPException(status_code=400, detail="No connection target available for this VM")
+
+
+    # 5. Generate encrypted token
     result = guacamole_service.get_console_url_for_vm(
         vm_id=env_vm.id,
         vm_name=env_vm.vm_name,
-        ip_address=env_vm.ip_address,
+        ip_address=hostname,  # This is now either VM IP or ESXi host
         protocol=final_protocol,
         port=port,
+        password=vnc_password,  # Pass the vSphere ticket as VNC password
         student_name=class_env.name
     )
     
@@ -205,8 +621,8 @@ async def get_console_page(
     </script>
 </body>
 </html>
-"""
-    
+    """ 
+
     return HTMLResponse(content=html_content, headers={
         "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
         "Pragma": "no-cache",

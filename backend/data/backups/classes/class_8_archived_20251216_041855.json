@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 8,
+    "name": "kmk",
+    "instructor_id": 1,
+    "blueprint_id": "2",
+    "template_id": 2,
+    "max_users": 2,
+    "passcode": "class123",
+    "start_date": "2025-12-16T04:18:12.470000",
+    "end_date": "2025-12-23T04:18:12.470000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-16T04:18:26.716450",
+    "updated_at": "2025-12-16T04:18:26.716455"
+  },
+  "archived_at": "2025-12-16T04:18:55.954076",
+  "reason": "deleted"
+}

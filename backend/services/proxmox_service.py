@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 class ProxmoxService:
     def __init__(self):
-        self.host = os.getenv("PROXMOX_HOST", "192.168.1.100")
+        self.host = os.getenv("PROXMOX_HOST", "")
         self.user = os.getenv("PROXMOX_USER", "root@pam")
         self.password = os.getenv("PROXMOX_PASSWORD", "password")
         self.port = int(os.getenv("PROXMOX_PORT", "8006"))
         self.token_id = os.getenv("PROXMOX_TOKEN_ID")
         self.token_secret = os.getenv("PROXMOX_TOKEN_SECRET")
-        self.node = os.getenv("PROXMOX_NODE", "pve")
+        self.node = os.getenv("PROXMOX_NODE", "")
         self.verify_ssl = os.getenv("PROXMOX_VERIFY_SSL", "false").lower() == "true"
         self.proxmox = None
         

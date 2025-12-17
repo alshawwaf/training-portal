@@ -15,7 +15,7 @@ const EditClass: React.FC = () => {
     const [formData, setFormData] = useState({
         name: '',
         blueprint_id: '1',
-        max_users: 10,
+        max_users: 1,
         passcode: '',
         start_date: '',
         end_date: '',

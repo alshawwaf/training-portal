@@ -59,7 +59,7 @@ class Class(Base):
     instructor_id = Column(Integer, ForeignKey("users.id"))
     blueprint_id = Column(String) # Proxmox Template ID (Legacy)
     template_id = Column(Integer, ForeignKey("templates.id"), nullable=True) # vSphere Template
-    max_users = Column(Integer, default=10)
+    max_users = Column(Integer, default=1)
     passcode = Column(String)
     start_date = Column(DateTime, default=datetime.datetime.utcnow)
     end_date = Column(DateTime)
@@ -182,6 +182,8 @@ class EnvironmentVM(Base):
     ip_address = Column(String, nullable=True)
     access_url = Column(String, nullable=True) # Guacamole link etc.
     guest_os = Column(String, nullable=True)  # Guest OS type (e.g., "Windows 10", "Linux")
+    access_protocol = Column(String, nullable=True)  # ssh, rdp (from template)
+    access_port = Column(Integer, nullable=True)  # 22, 3389 (from template)
     
     environment = relationship("ClassEnvironment", back_populates="vms")
 

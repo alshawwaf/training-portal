@@ -9,10 +9,13 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
 import json
+import base64
 import os
 from pathlib import Path
 
+import logging
 router = APIRouter(prefix="/classes", tags=["classes"])
+logger = logging.getLogger("classes")
 
 # JSON backup directory
 BACKUP_DIR = Path("data/backups/classes")
@@ -400,7 +403,9 @@ async def provision_class(class_id: int, db: Session = Depends(get_db)):
                     "env_id": env.id,
                     "vm_name": vm_name,
                     "tmpl_vm_name": tmpl_vm.vm_name,
-                    "guest_os": tmpl_vm.guest_os  # Pass guest OS from template
+                    "guest_os": tmpl_vm.guest_os,  # Guest OS from template
+                    "access_protocol": tmpl_vm.access_protocol,  # Protocol from template
+                    "access_port": tmpl_vm.access_port  # Port from template
                 }
 
             # Queue tasks
@@ -430,7 +435,9 @@ async def provision_class(class_id: int, db: Session = Depends(get_db)):
                             vm_moid=result.get("vm_moid", "unknown"),
                             ip_address=result.get("ip_address"),
                             access_url=None,
-                            guest_os=data.get("guest_os")  # From template VM
+                            guest_os=data.get("guest_os"),  # From template VM
+                            access_protocol=data.get("access_protocol"),  # From template VM
+                            access_port=data.get("access_port")  # From template VM
                         )
                         session.add(env_vm)
                         session.commit()
@@ -460,7 +467,9 @@ async def provision_class(class_id: int, db: Session = Depends(get_db)):
                             vm_moid=result.get("vm_moid", "unknown"),
                             ip_address=result.get("ip_address"),
                             access_url=None,
-                            guest_os=data.get("guest_os")  # From template VM
+                            guest_os=data.get("guest_os"),  # From template VM
+                            access_protocol=data.get("access_protocol"),  # From template VM
+                            access_port=data.get("access_port")  # From template VM
                         )
                         session.add(env_vm)
                         session.commit()
@@ -513,7 +522,9 @@ def get_class_environments(class_id: int, db: Session = Depends(get_db)):
                 "ip_address": vm.ip_address,
                 "power_state": state_info.get("state", "unknown"),
                 "access_url": vm.access_url,
-                "guest_os": vm.guest_os  # For automatic console button detection
+                "guest_os": vm.guest_os,  # For automatic console button detection
+                "access_protocol": vm.access_protocol,  # ssh, rdp, vnc from template
+                "access_port": vm.access_port  # 22, 3389, etc. from template
             })
             
         result.append({
@@ -611,6 +622,93 @@ def get_vmrc_console(class_id: int, vm_id: int, db: Session = Depends(get_db)):
         "vm_name": vm.vm_name,
         "message": "Open VMRC URL in browser or VMRC client"
     }
+
+
+# HTML5 CONSOLE ACCESS (Browser-based, no client required)
+@router.get("/environments/{class_id}/vms/{vm_id}/console")
+def get_html5_console(
+    class_id: int, 
+    vm_id: int, 
+    protocol: str = None,  # Optional: rdp, ssh, vnc (default: vnc for console)
+    db: Session = Depends(get_db)
+):
+    """
+    Unified console access for VMs via Guacamole.
+    
+    Access Types:
+    - VNC/Console: Always works - connects to hypervisor's VM screen (no IP needed)
+    - RDP: Requires VM IP address - Windows remote desktop
+    - SSH: Requires VM IP address - Linux terminal
+    
+    Default behavior:
+    - vSphere VMs: VNC console (works without IP)
+    - Proxmox VMs: VNC console (works without IP)
+    - If protocol=rdp or protocol=ssh and no IP: shows error
+    
+    Query params:
+        protocol: Optional override (rdp, ssh, vnc)
+    """
+    from fastapi.responses import RedirectResponse, HTMLResponse
+    
+    vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found")
+        
+    # Verify VM belongs to an environment of the class (security check)
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == vm.env_id).first()
+    if not env or env.class_id != class_id:
+        raise HTTPException(status_code=403, detail="VM does not belong to this class")
+    
+    # Determine the protocol
+    # Default to VNC (console) which works without IP
+    final_protocol = (protocol or "vnc").lower()
+    
+    # SSH and RDP require an IP address
+    if final_protocol in ["ssh", "rdp"] and not vm.ip_address:
+        return HTMLResponse(content=f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{final_protocol.upper()} - {vm.vm_name}</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+               background: #1a1a2e; color: #eee; display: flex; align-items: center; 
+               justify-content: center; min-height: 100vh; margin: 0; }}
+        .warning {{ background: #2a2a3e; padding: 40px; border-radius: 12px; text-align: center; 
+                   border: 1px solid #fbbf24; max-width: 500px; }}
+        h1 {{ color: #fbbf24; margin-bottom: 16px; }}
+        p {{ color: #aaa; line-height: 1.6; }}
+        .btn {{ display: inline-block; margin-top: 20px; padding: 12px 24px; 
+               background: #3b82f6; color: white; text-decoration: none;
+               border-radius: 8px; font-weight: 500; margin: 8px; }}
+        .btn:hover {{ background: #2563eb; }}
+        .btn-secondary {{ background: #4b5563; }}
+        .btn-secondary:hover {{ background: #374151; }}
+    </style>
+</head>
+<body>
+    <div class="warning">
+        <h1>⚠️ No IP Address for {final_protocol.upper()}</h1>
+        <p><strong>{final_protocol.upper()}</strong> requires the VM to have an IP address.</p>
+        <p>The VM <strong>{vm.vm_name}</strong> does not have an IP address yet.</p>
+        <p>You can use <strong>Console</strong> instead, which works without an IP.</p>
+        <a href="/api/classes/environments/{class_id}/vms/{vm_id}/console?protocol=vnc" class="btn">Open Console (VNC)</a>
+        <a href="javascript:location.reload()" class="btn btn-secondary">Retry {final_protocol.upper()}</a>
+    </div>
+</body>
+</html>
+""", status_code=400)
+    
+    # Build redirect URL to the Guacamole console endpoint
+    base_url = f"/api/console/{class_id}/{env.id}/{vm_id}"
+    if final_protocol:
+        base_url += f"?protocol={final_protocol}"
+    
+    return RedirectResponse(url=base_url, status_code=302)
+
+
+
+
 @router.post("/environments/{env_id}/power")
 def control_environment_power(env_id: int, body: VMPowerAction, db: Session = Depends(get_db)):
     """Control power state of all VMs in an environment"""

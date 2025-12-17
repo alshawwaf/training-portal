@@ -659,6 +659,100 @@ class VSphereService:
             vsphere_logger.error(f"Failed to generate VMRC ticket for {vm_moid}: {e}")
             return {"success": False, "message": str(e)}
 
+    def generate_html5_console_ticket(self, vm_moid: str) -> Dict[str, Any]:
+        """
+        Generate an HTML5 console ticket (WebMKS) for browser-based console access.
+        This works without any client installation - opens in browser.
+        VM must be powered on.
+        
+        Returns ticket info for WebMKS connection including:
+        - host: ESXi host to connect to
+        - port: Port for WebSocket connection
+        - ticket: One-time authentication ticket
+        - cfgFile: VM config file path
+        """
+        if not self.connection:
+            return {"success": False, "message": "Not connected to vSphere"}
+
+        try:
+            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            if not vm:
+                return {"success": False, "message": "VM not found"}
+
+            # Check if VM is powered on - webmks only works for running VMs
+            if vm.runtime.powerState != "poweredOn":
+                return {
+                    "success": False, 
+                    "message": f"VM must be powered on for HTML5 console. Current state: {vm.runtime.powerState}"
+                }
+
+            # Acquire WebMKS ticket for HTML5 console
+            vsphere_logger.info(f"Acquiring WebMKS ticket for VM {vm.name} (MOID: {vm_moid})")
+            vsphere_logger.info(f"VM Power State: {vm.runtime.powerState}")
+            
+            ticket = vm.AcquireTicket("webmks")
+            
+            # Diagnostic logging - inspect full ticket object
+            vsphere_logger.debug(f"Ticket object type: {type(ticket)}")
+            vsphere_logger.debug(f"Ticket attributes: {dir(ticket)}")
+            vsphere_logger.debug(f"Ticket.ticket value: '{ticket.ticket}' (length: {len(ticket.ticket)})")
+            vsphere_logger.debug(f"Ticket.host: {ticket.host}")
+            vsphere_logger.debug(f"Ticket.port: {ticket.port}")
+            vsphere_logger.debug(f"Ticket.cfgFile: {ticket.cfgFile if hasattr(ticket, 'cfgFile') else 'N/A'}")
+            vsphere_logger.debug(f"Ticket.sslThumbprint: {ticket.sslThumbprint if hasattr(ticket, 'sslThumbprint') else 'N/A'}")
+            vsphere_logger.debug(f"Ticket.url: {ticket.url if hasattr(ticket, 'url') else 'N/A'}")
+            
+            # Diagnostic logs for console connection
+            vsphere_logger.info(f"Generated WebMKS ticket for {vm.name}. Ticket length: {len(ticket.ticket)}. URL available: {hasattr(ticket, 'url')}")
+
+            
+            # Production-ready approach: Use ticket.url if available
+            # The ticket.url contains the complete WebSocket URL with the full ticket embedded
+            ws_url = None
+            full_ticket = None
+            
+            if hasattr(ticket, 'url') and ticket.url:
+                # ticket.url format: wss://host:port/ticket/{full_ticket_string}
+                # Extract host, port, and full ticket from URL
+                import re
+                url_match = re.match(r'wss://([^:]+):(\d+)/ticket/(.+)', ticket.url)
+                if url_match:
+                    url_host = url_match.group(1)
+                    url_port = url_match.group(2)
+                    full_ticket = url_match.group(3)
+                    
+                    # CRITICAL: ticket.url may contain localhost.localdomain or other non-routable hostnames
+                    # Replace with the actual ESXi host IP from ticket.host
+                    # This ensures the URL is accessible from Docker containers
+                    ws_url = f"wss://{ticket.host}:{url_port}/ticket/{full_ticket}"
+                    
+                    vsphere_logger.info(f"Using ticket.url for WebMKS connection (ticket length: {len(full_ticket)})")
+                    if url_host != ticket.host:
+                        vsphere_logger.info(f"Replaced hostname {url_host} with {ticket.host} for Docker accessibility")
+                else:
+                    vsphere_logger.warning(f"ticket.url format unexpected: {ticket.url}")
+            
+            # Fallback: Manual construction (for older vSphere versions or if ticket.url is malformed)
+            if not ws_url:
+                vsphere_logger.warning("ticket.url not available or malformed, using fallback manual construction")
+                full_ticket = ticket.ticket
+                ws_url = f"wss://{ticket.host}:{ticket.port}/ticket/{ticket.ticket}"
+            
+            return {
+                "success": True,
+                "host": ticket.host,
+                "port": ticket.port,
+                "ticket": full_ticket,  # Full ticket string for WebSocket authentication
+                "ws_url": ws_url,  # Complete WebSocket URL with corrected hostname
+                "cfgFile": ticket.cfgFile,
+                "sslThumbprint": ticket.sslThumbprint if hasattr(ticket, 'sslThumbprint') else None,
+                "vm_name": vm.name,
+                "vcenter_host": self.host
+            }
+        except Exception as e:
+            vsphere_logger.error(f"Failed to generate HTML5 console ticket for {vm_moid}: {e}")
+            return {"success": False, "message": str(e)}
+
     def delete_vm(self, vm_moid: str) -> Dict[str, Any]:
         """
         Delete a VM from vSphere (Power off if needed, then Destroy).

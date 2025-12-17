@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from db.database import engine, Base, SessionLocal
 from db.models import User, UserRole, SystemSetting, Template
-from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, logs, guacamole
+from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, logs, guacamole, console_ws
 from services.proxmox_service import proxmox_service
 from services.email_service import email_service
 from services.vsphere_service import vsphere_service
@@ -56,6 +56,13 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="SE Training Portal API", version="1.0.0")
 
+# Mount static files for WMKS SDK
+from fastapi.staticfiles import StaticFiles
+app.mount("/static", StaticFiles(directory="static"), name="static")
+# Also mount at /api/static for frontend proxy compatibility
+app.mount("/api/static", StaticFiles(directory="static"), name="api_static")
+
+
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
@@ -80,6 +87,12 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting up application...")
+    
+    # Debug: Print all routes
+    for route in app.routes:
+        if hasattr(route, "path"):
+            logger.info(f"Route: {route.path} [{route.name}]")
+            
     db = SessionLocal()
     try:
         # Seed Admin User
@@ -98,8 +111,8 @@ async def startup_event():
         
         # Seed Default System Settings
         defaults = {
-            "proxmox_host": "192.168.1.100",
-            "proxmox_node": "pve",
+            "proxmox_host": "",
+            "proxmox_node": "",
             "backup_retention_days": "7",
             # SMTP Defaults - Use Superadmin email as default
             "smtp_server": "smtp.example.com",
@@ -176,6 +189,7 @@ app.include_router(dashboard.router)
 app.include_router(infrastructure.router)
 app.include_router(logs.router)
 app.include_router(guacamole.router)
+app.include_router(console_ws.router)
 
 @app.get("/")
 def read_root():

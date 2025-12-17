@@ -10,8 +10,8 @@ const CreateClass: React.FC = () => {
     const [formData, setFormData] = useState({
         name: '',
         blueprint_id: '1',
-        max_users: 10,
-        passcode: 'class123',
+        max_users: 1,
+        passcode: 'Cpwins!1',
         start_date: new Date().toISOString().slice(0, 16),
         end_date: new Date().toISOString().slice(0, 16),
     });

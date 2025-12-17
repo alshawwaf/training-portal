@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: backendUrl,
           changeOrigin: true,
+          ws: true,
           rewrite: (path) => path.replace(/^\/api/, ""),
         },
         "/auth": {

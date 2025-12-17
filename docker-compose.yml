@@ -50,10 +50,10 @@ services:
       - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-admin@cpdemo.com}
       - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-Cpwins!1}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8989}
-      - PROXMOX_HOST=${PROXMOX_HOST:-192.168.1.100}
+      - PROXMOX_HOST=${PROXMOX_HOST:-}
       - PROXMOX_USER=${PROXMOX_USER:-root@pam}
-      - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-your-proxmox-password}
-      - PROXMOX_NODE=${PROXMOX_NODE:-pve}
+      - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-}
+      - PROXMOX_NODE=${PROXMOX_NODE:-}
       - VSPHERE_HOST=${VSPHERE_HOST:-}
       - VSPHERE_USER=${VSPHERE_USER:-administrator@vsphere.local}
       - VSPHERE_PASSWORD=${VSPHERE_PASSWORD:-}
@@ -83,7 +83,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-
 
   # Guacamole Daemon (guacd) - Protocol proxy for RDP/SSH/VNC
   guacd:

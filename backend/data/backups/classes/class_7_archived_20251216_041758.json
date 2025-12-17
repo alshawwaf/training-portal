@@ -1,0 +1,19 @@
+{
+  "class": {
+    "id": 7,
+    "name": "win",
+    "instructor_id": 1,
+    "blueprint_id": "2",
+    "template_id": 2,
+    "max_users": 1,
+    "passcode": "class123",
+    "start_date": "2025-12-16T03:53:55.873000",
+    "end_date": "2025-12-23T03:53:55.873000",
+    "status": "draft",
+    "description": "",
+    "created_at": "2025-12-16T03:54:40.165278",
+    "updated_at": "2025-12-16T03:54:40.165283"
+  },
+  "archived_at": "2025-12-16T04:17:58.427660",
+  "reason": "deleted"
+}

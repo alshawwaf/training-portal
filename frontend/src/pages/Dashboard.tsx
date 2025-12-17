@@ -49,6 +49,8 @@ interface EnvironmentVM {
   power_state: string;
   access_url?: string;
   guest_os?: string;  // Guest OS type for automatic button detection
+  access_protocol?: string;  // ssh, rdp from template
+  access_port?: number;  // 22, 3389 from template
 }
 
 interface MyEnvironment {
@@ -193,38 +195,25 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Handle VMRC console - hypervisor-level access (works without IP)
-  const handleVmrc = async (
+  // Handle hypervisor console - browser-based vSphere HTML5 console (works without IP)
+  const handleHypervisorConsole = (
     envId: number,
     vmId: number,
     classId?: number
   ) => {
-    try {
-      const targetClassId =
-        classId ||
-        myEnvironments.find((e) => e.id === envId)?.class_id ||
-        classes[0]?.id;
-      if (!targetClassId) {
-        showToast("Could not determine class for this VM", "error");
-        return;
-      }
-
-      // Call VMRC endpoint to get the vmrc:// URL
-      const response = await api.get(`/classes/environments/${targetClassId}/vms/${vmId}/vmrc`);
-      
-      if (response.data.success && response.data.vmrc_uri) {
-        // Open VMRC URI - will launch VMRC client if installed
-        window.location.href = response.data.vmrc_uri;
-        showToast("Opening VMRC console (requires VMRC client)...", "success");
-      } else {
-        showToast(response.data.message || "Failed to get VMRC URI", "error");
-      }
-    } catch (e: any) {
-      showToast(
-        `VMRC access failed: ${e.response?.data?.detail || e.message}`,
-        "error"
-      );
+    const targetClassId =
+      classId ||
+      myEnvironments.find((e) => e.id === envId)?.class_id ||
+      classes[0]?.id;
+    if (!targetClassId) {
+      showToast("Could not determine class for this VM", "error");
+      return;
     }
+
+    // Open browser-based HTML5 console in new tab (no client required!)
+    const consoleUrl = `${window.location.origin}/api/classes/environments/${targetClassId}/vms/${vmId}/console`;
+    window.open(consoleUrl, '_blank', 'width=1024,height=768,menubar=no,toolbar=no');
+    showToast("Opening browser console...", "success");
   };
 
   useEffect(() => {
@@ -582,44 +571,35 @@ const Dashboard: React.FC = () => {
                           <span className="text-xs font-mono text-secondary mr-1">
                             {vm.ip_address || "No IP"}
                           </span>
-                          {/* Console access buttons - Auto-detected based on guest OS */}
+                          {/* Console access buttons - SSH (Linux) / RDP (Windows) / VMRC */}
                           <div className="flex items-center gap-0.5 mr-1">
-                            {/* VNC Console - Available for all OS types */}
-                            <button
-                              onClick={() => handleConsole(env.id, vm.id, env.class_id, "vnc")}
-                              className="p-1.5 bg-secondary/30 hover:bg-blue-500/20 text-secondary hover:text-blue-400 rounded-l transition-colors"
-                              title="VNC Console (VM Screen)"
-                            >
-                              <Monitor className="w-3.5 h-3.5" />
-                            </button>
-                            
-                            {/* SSH - Show for Linux VMs (non-Windows) */}
+                            {/* SSH - Default for Linux VMs (non-Windows) */}
                             {(!vm.guest_os || !vm.guest_os.toLowerCase().includes("windows")) && (
                               <button
                                 onClick={() => handleConsole(env.id, vm.id, env.class_id, "ssh")}
-                                className="p-1.5 bg-secondary/30 hover:bg-green-500/20 text-secondary hover:text-green-400 transition-colors"
+                                className="p-1.5 bg-secondary/30 hover:bg-green-500/20 text-secondary hover:text-green-400 rounded-l transition-colors"
                                 title="SSH Terminal (Linux)"
                               >
                                 <Terminal className="w-3.5 h-3.5" />
                               </button>
                             )}
                             
-                            {/* RDP - Show for Windows VMs */}
+                            {/* RDP - Default for Windows VMs */}
                             {vm.guest_os?.toLowerCase().includes("windows") && (
                               <button
                                 onClick={() => handleConsole(env.id, vm.id, env.class_id, "rdp")}
-                                className="p-1.5 bg-secondary/30 hover:bg-purple-500/20 text-secondary hover:text-purple-400 transition-colors"
+                                className="p-1.5 bg-secondary/30 hover:bg-purple-500/20 text-secondary hover:text-purple-400 rounded-l transition-colors"
                                 title="RDP Desktop (Windows)"
                               >
                                 <LayoutGrid className="w-3.5 h-3.5" />
                               </button>
                             )}
                             
-                            {/* VMRC - Always available (hypervisor-level) */}
+                            {/* Browser Console - Hypervisor-level (works without IP/SSH/RDP) */}
                             <button
-                              onClick={() => handleVmrc(env.id, vm.id, env.class_id)}
+                              onClick={() => handleHypervisorConsole(env.id, vm.id, env.class_id)}
                               className="p-1.5 bg-secondary/30 hover:bg-orange-500/20 text-secondary hover:text-orange-400 rounded-r transition-colors"
-                              title="VMRC Console (Hypervisor - works without IP)"
+                              title="Browser Console (vSphere - no client required)"
                             >
                               <Laptop className="w-3.5 h-3.5" />
                             </button>

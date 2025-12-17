@@ -34,7 +34,8 @@ SE Training Portal/
 │   │   ├── auth.py            # Authentication endpoints
 │   │   └── classes.py         # Class management endpoints
 │   ├── services/              # Business logic & external services
-│   │   └── proxmox_service.py # Proxmox VE API wrapper
+│   │   ├── proxmox_service.py # Proxmox VE API wrapper
+│   │   └── vsphere_service.py # VMware vSphere API wrapper
 │   ├── main.py                # FastAPI app initialization
 │   ├── requirements.txt       # Python dependencies
 │   └── Dockerfile             # Backend container definition
@@ -89,10 +90,11 @@ User Browser
          │
     ┌────┴────┐
     ▼         ▼
-┌───────┐  ┌──────────┐
-│  DB   │  │ Proxmox  │
-│(Postgres)│(VE API) │
-└───────┘  └──────────┘
+┌───────┐  ┌──────────────┐
+│  DB   │  │   Providers  │
+│(Postgre│  │ (Proxmox /   │
+│ SQLite)│  │  vSphere)    │
+└───────┘  └──────────────┘
 ```
 
 ---
@@ -370,6 +372,23 @@ PROXMOX_NODE=pve
 | `start_vm(vmid)` | Start a VM |
 | `stop_vm(vmid)` | Stop a VM |
 | `revert_vm(vmid)` | Revert to snapshot |
+
+---
+
+## vSphere Integration
+
+### Tech Stack
+- **Library**: `pyvmomi`
+- **Protocol**: Raw VNC over WebSockets
+- **Client Library**: `noVNC`
+
+### Console Proxy Architecture
+
+The vSphere console uses a custom WebSocket proxy to bridge browser clients with ESXi hosts:
+
+1.  **Ticket Acquisition**: Backend requests a `WebMKS` ticket via `vsphere_service.py`.
+2.  **noVNC Initialization**: The frontend (`guacamole.py`) serves an HTML5 page with noVNC.
+3.  **Relay Service**: Our backend `console_ws.py` handles the bi-directional binary stream, enabling direct console access without SSL/CORS blockers.
 
 ---
 
