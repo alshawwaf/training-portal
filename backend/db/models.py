@@ -195,7 +195,8 @@ class ActionLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     action = Column(String, index=True) # e.g., "PROVISION", "DELETE_CLASS", "LOGIN"
     entity_name = Column(String) # e.g., "Class: Set 1"
-    status = Column(String, index=True) # "STARTED", "SUCCESS", "ERROR"
+    level = Column(String, index=True, default="INFO") # INFO, WARNING, ERROR, SUCCESS
+    source = Column(String, index=True, default="APP") # APP, VSPHERE, PROXMOX, SYSTEM
     details = Column(Text, nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

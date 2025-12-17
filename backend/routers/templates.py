@@ -134,13 +134,25 @@ def update_template(template_id: int, update: TemplateUpdate, db: Session = Depe
 @router.delete("/{template_id}")
 def delete_template(template_id: int, db: Session = Depends(get_db)):
     """Delete a template and all its VMs"""
+    from db.models import Class  # Import here to avoid circular imports
+    
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
     
+    # Check if any classes are using this template
+    referencing_classes = db.query(Class).filter(Class.template_id == template_id).all()
+    if referencing_classes:
+        class_names = [c.name for c in referencing_classes]
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete template. It is being used by {len(class_names)} class(es): {', '.join(class_names)}. Please delete or update these classes first."
+        )
+    
+    template_name = template.name
     db.delete(template)
     db.commit()
-    logger.info(f"Deleted template: {template.name}")
+    logger.info(f"Deleted template: {template_name}")
     return {"message": "Template deleted successfully"}
 
 

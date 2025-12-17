@@ -10895,3 +10895,83 @@ pyVmomi.VmomiSupport.vim.fault.NotAuthenticated: (vim.fault.NotAuthenticated) {
 2025-12-17 20:54:48,989 - INFO - Generated WebMKS ticket for kkkkkk-Student_1-pfSense. Ticket length: 16. URL available: True
 2025-12-17 20:54:48,990 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
 2025-12-17 20:54:48,991 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-17 20:56:15,181 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-17 20:56:22,169 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-17 20:56:22,170 - INFO - vSphere configured for real connection to 192.168.10.10
+2025-12-17 20:56:22,171 - INFO - vSphere sync set to MANUAL mode.
+2025-12-17 20:56:22,172 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-17 20:56:22,290 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-17 20:56:44,056 - INFO - Acquiring WebMKS ticket for VM kkkkkk-Student_1-pfSense (MOID: vm-5228)
+2025-12-17 20:56:44,067 - INFO - VM Power State: poweredOn
+2025-12-17 20:56:44,087 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-17 20:56:44,088 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-17 20:56:44,089 - DEBUG - Ticket.ticket value: '4bd225173bfbf19' (length: 15)
+2025-12-17 20:56:44,090 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-17 20:56:44,090 - DEBUG - Ticket.port: 443
+2025-12-17 20:56:44,091 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/kkkkkk-Student_1-pfSense/kkkkkk-Student_1-pfSense.vmx
+2025-12-17 20:56:44,092 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-17 20:56:44,093 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/4bd225173bfbf19
+2025-12-17 20:56:44,098 - INFO - Generated WebMKS ticket for kkkkkk-Student_1-pfSense. Ticket length: 15. URL available: True
+2025-12-17 20:56:44,099 - INFO - Using ticket.url for WebMKS connection (ticket length: 15)
+2025-12-17 20:56:44,100 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-17 21:00:59,476 - INFO - Acquiring WebMKS ticket for VM kkkkkk-Student_1-pfSense (MOID: vm-5228)
+2025-12-17 21:00:59,486 - INFO - VM Power State: poweredOn
+2025-12-17 21:00:59,504 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-17 21:00:59,505 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-17 21:00:59,506 - DEBUG - Ticket.ticket value: '3204a6035eb54286' (length: 16)
+2025-12-17 21:00:59,506 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-17 21:00:59,507 - DEBUG - Ticket.port: 443
+2025-12-17 21:00:59,508 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/kkkkkk-Student_1-pfSense/kkkkkk-Student_1-pfSense.vmx
+2025-12-17 21:00:59,509 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-17 21:00:59,510 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/3204a6035eb54286
+2025-12-17 21:00:59,518 - INFO - Generated WebMKS ticket for kkkkkk-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-17 21:00:59,520 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-17 21:00:59,521 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-17 21:02:29,781 - INFO - Starting VM provisioning: template_moid=vm-263, new_name=gaia-Student_1-GW-SBT-R82
+2025-12-17 21:02:29,866 - INFO - Found template VM: GW-SBT-R82
+2025-12-17 21:02:29,891 - INFO - Using template's resource pool: Resources
+2025-12-17 21:02:30,004 - INFO - Target folder ensured: SE_Training_Portal/gaia/Student 1
+2025-12-17 21:02:30,019 - INFO - Cloning GW-SBT-R82 to gaia-Student_1-GW-SBT-R82 in folder Student 1...
+2025-12-17 21:03:23,662 - INFO - Deleting folder: nnnnnn
+2025-12-17 21:05:59,150 - DEBUG - RootFolder: Datacenters
+2025-12-17 21:05:59,152 - DEBUG - Datacenters found: 2
+2025-12-17 21:06:03,586 - DEBUG - RootFolder: Datacenters
+2025-12-17 21:06:03,587 - DEBUG - Datacenters found: 2
+2025-12-17 21:08:31,665 - ERROR - Clone task failed: Could not complete network copy for file /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/GW-SBT-R82/GW-SBT-R82-000003.vmdk
+2025-12-17 22:01:49,505 - WARNING - Session NotAuthenticated in _get_obj. Reconnecting and retrying...
+2025-12-17 22:01:49,520 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-17 22:01:49,630 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-17 22:01:49,720 - INFO - Powering off VM kkkkkk-Student_1-pfSense before deletion...
+2025-12-17 22:01:50,762 - INFO - Destroying VM kkkkkk-Student_1-pfSense...
+2025-12-17 22:01:51,918 - INFO - Deleting folder: kkkkkk
+2025-12-17 22:01:56,361 - INFO - Deleting folder: gaia
+2025-12-17 22:02:24,951 - INFO - Starting VM provisioning: template_moid=vm-263, new_name=gaia_class-Student_1-GW-SBT-R82
+2025-12-17 22:02:25,057 - INFO - Found template VM: GW-SBT-R82
+2025-12-17 22:02:25,086 - INFO - Using template's resource pool: Resources
+2025-12-17 22:02:25,164 - INFO - Target folder ensured: SE_Training_Portal/gaia class/Student 1
+2025-12-17 22:02:25,182 - INFO - Cloning GW-SBT-R82 to gaia_class-Student_1-GW-SBT-R82 in folder Student 1...
+2025-12-17 22:11:31,258 - ERROR - Clone task failed: Could not complete network copy for file /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/GW-SBT-R82/GW-SBT-R82-000003.vmdk
+2025-12-17 22:15:33,446 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-17 22:15:40,867 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-17 22:15:40,869 - INFO - vSphere configured for real connection to 192.168.10.10
+2025-12-17 22:15:40,870 - INFO - vSphere sync set to MANUAL mode.
+2025-12-17 22:15:40,871 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-17 22:15:40,995 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-17 22:28:06,390 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-17 22:28:13,316 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-17 22:28:13,318 - INFO - vSphere configured for real connection to 192.168.10.10
+2025-12-17 22:28:13,320 - INFO - vSphere sync set to MANUAL mode.
+2025-12-17 22:28:13,321 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-17 22:28:13,448 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-17 22:37:42,125 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-17 22:37:50,100 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-17 22:37:50,102 - INFO - vSphere configured for real connection to 192.168.10.10
+2025-12-17 22:37:50,104 - INFO - vSphere sync set to MANUAL mode.
+2025-12-17 22:37:50,105 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-17 22:37:50,273 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-17 22:56:51,468 - INFO - vSphere Service configured (Host: 192.168.10.10)
+2025-12-17 22:56:58,968 - INFO - No vSphere settings in DB, using Environment Variables.
+2025-12-17 22:56:58,969 - INFO - vSphere configured for real connection to 192.168.10.10
+2025-12-17 22:56:58,971 - INFO - vSphere sync set to MANUAL mode.
+2025-12-17 22:56:58,972 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-17 22:56:59,153 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
