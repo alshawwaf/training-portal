@@ -19,6 +19,7 @@ const EditClass: React.FC = () => {
         passcode: '',
         start_date: '',
         end_date: '',
+        allow_multi_env: false,
     });
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const EditClass: React.FC = () => {
                 passcode: cls.passcode,
                 start_date: cls.start_date.slice(0, 16),
                 end_date: cls.end_date.slice(0, 16),
+                allow_multi_env: cls.allow_multi_env || false,
             });
         } catch {
             showToast('Failed to load class', 'error');
@@ -143,6 +145,19 @@ const EditClass: React.FC = () => {
                                 onChange={e => setFormData({...formData, passcode: e.target.value})}
                             />
                         </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 pt-2">
+                        <input 
+                            type="checkbox"
+                            id="allow_multi_env"
+                            className="w-4 h-4 rounded border-gray-700 bg-gray-800 text-blue-500 focus:ring-blue-500"
+                            checked={formData.allow_multi_env}
+                            onChange={e => setFormData({...formData, allow_multi_env: e.target.checked})}
+                        />
+                        <label htmlFor="allow_multi_env" className="text-sm text-gray-400 cursor-pointer">
+                            Allow students to have multiple environments in this class
+                        </label>
                     </div>
                 </div>
 

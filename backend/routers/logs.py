@@ -25,24 +25,10 @@ class ActionLogRead(BaseModel):
     class Config:
         from_attributes = True
 
-# Helper Function
-def log_action(db: Session, action: str, entity_name: str, level: str = "INFO", source: str = "APP", details: str = None, user_id: int = None):
-    """
-    Log a system action.
-    """
-    try:
-        new_log = ActionLog(
-            action=action,
-            entity_name=entity_name,
-            level=level,
-            source=source,
-            details=details,
-            user_id=user_id
-        )
-        db.add(new_log)
-        db.commit()
-    except Exception as e:
-        print(f"Failed to write log: {e}") 
+from services.logging_service import logging_service
+
+# Helper Function - Deprecated, using service
+# def log_action(...) 
 
 @router.get("/", response_model=List[ActionLogRead])
 def get_logs(
@@ -112,7 +98,11 @@ def get_log_stats(db: Session = Depends(get_db), current_user: User = Depends(ge
 @router.get("/app-log")
 def get_application_logs(lines: int = Query(500, le=2000), current_user: User = Depends(get_current_user)):
     """Read the last N lines from the application log file"""
-    log_file = "logs/app.log"
+    import pathlib
+    # Assuming the app runs from the backend directory (where main.py is)
+    # and logs are in backend/logs/
+    base_dir = pathlib.Path(__file__).parent.parent
+    log_file = base_dir / "logs" / "app.log"
     if not os.path.exists(log_file):
         return {"content": "Log file not found"}
         

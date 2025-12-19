@@ -12,11 +12,15 @@ import Templates from './pages/Templates';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import Logs from './pages/monitoring/Logs';
+import ActiveSessions from './pages/monitoring/ActiveSessions';
+import InstructorConsole from './pages/monitoring/InstructorConsole';
 import Register from './pages/auth/Register';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import AdminUsers from './pages/admin/Users';
 import ClassView from './pages/classes/ClassView';
-import GuestJoin from './pages/classes/GuestJoin';
+// import GuestJoin from './pages/classes/GuestJoin'; // Legacy join page
+import JoinClass from './pages/JoinClass';
+import StudentClassViewer from './pages/StudentClassViewer';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -78,13 +82,20 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/join/:classId" element={<GuestJoin />} />
+            
+            {/* Student Routes */}
+            <Route path="/join/:token" element={<JoinClass />} />
+            <Route path="/student/class" element={<StudentClassViewer />} />
+            
+            {/* Admin/Instructor Routes */}
             <Route path="/classes/:classId/view" element={<ProtectedRoute><ClassView /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
             <Route path="/monitoring/logs" element={<AdminRoute><Logs /></AdminRoute>} />
+            <Route path="/monitoring/sessions" element={<AdminRoute><ActiveSessions /></AdminRoute>} />
+            <Route path="/monitoring/console" element={<AdminRoute><InstructorConsole /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

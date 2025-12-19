@@ -113,6 +113,26 @@ async def get_proxmox_status(db: Session = Depends(get_db)):
         return {"connected": False, "error": str(e)}
 
 
+@router.post("/proxmox/sync")
+async def sync_proxmox_inventory(db: Session = Depends(get_db)):
+    """Trigger inventory sync from Proxmox to cache."""
+    try:
+        result = proxmox_service.sync_inventory()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/proxmox/inventory")
+async def get_proxmox_inventory(db: Session = Depends(get_db)):
+    """Get cached Proxmox inventory."""
+    try:
+        result = proxmox_service.get_cached_inventory()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============== vSphere Endpoints ==============
 
 @router.post("/vsphere/test")

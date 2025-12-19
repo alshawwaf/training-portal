@@ -2,6 +2,9 @@ import logging
 from proxmoxer import ProxmoxAPI
 import os
 import requests
+import json
+from datetime import datetime
+from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from db.models import SystemSetting
 
@@ -12,35 +15,16 @@ logger = logging.getLogger(__name__)
 
 class ProxmoxService:
     def __init__(self):
-        self.host = os.getenv("PROXMOX_HOST", "")
-        self.user = os.getenv("PROXMOX_USER", "root@pam")
-        self.password = os.getenv("PROXMOX_PASSWORD", "password")
-        self.port = int(os.getenv("PROXMOX_PORT", "8006"))
-        self.token_id = os.getenv("PROXMOX_TOKEN_ID")
-        self.token_secret = os.getenv("PROXMOX_TOKEN_SECRET")
-        self.node = os.getenv("PROXMOX_NODE", "")
-        self.verify_ssl = os.getenv("PROXMOX_VERIFY_SSL", "false").lower() == "true"
-        self.proxmox = None
+        self.connections = {}  # {connection_id: ProxmoxAPI}
+        self.connection_nodes = {} # {connection_id: node_name}
+        self.proxmox = None  # Legacy compatibility
         
-        # Initial connection if env vars provided
-        self._connect()
-
-    def _connect(self):
-        try:
-            if self.token_id and self.token_secret:
-                self.proxmox = ProxmoxAPI(
-                    self.host, user=self.user, token_name=self.token_id, token_value=self.token_secret, 
-                    verify_ssl=self.verify_ssl, port=self.port, timeout=5
-                )
-            else:
-                self.proxmox = ProxmoxAPI(
-                    self.host, user=self.user, password=self.password, 
-                    verify_ssl=self.verify_ssl, port=self.port, timeout=5
-                )
-        except Exception as e:
-            logger.error(f"Failed to connect to Proxmox: {e}")
-            self.proxmox = None
-
+    def load_config(self, db: Session):
+        """Load Proxmox configuration from database (legacy compatibility stub)."""
+        # This method exists for compatibility with main.py startup
+        # Actual connections are loaded on-demand via get_api()
+        logger.info("ProxmoxService: Configuration loaded (on-demand connection mode)")
+        
     def test_connection(self, host: str, user: str, password: str = None, token_id: str = None, token_secret: str = None, port: int = 8006, verify_ssl: bool = False):
         """Test connection with provided credentials without saving them."""
         try:
@@ -61,40 +45,56 @@ class ProxmoxService:
         except Exception as e:
             return {"success": False, "message": f"Connection failed: {str(e)}"}
 
-    def load_config(self, db: Session):
+    def get_api(self, connection_id: Optional[int] = None) -> (Optional[ProxmoxAPI], Optional[str]):
+        """Get API instance and default node for a connection."""
+        if not connection_id:
+            return None, None
+        
+        if connection_id in self.connections:
+            return self.connections[connection_id], self.connection_nodes.get(connection_id, "pve")
+            
+        # Load from DB
+        from db.database import SessionLocal
+        from db.models import InfrastructureConnection
+        db = SessionLocal()
         try:
-            settings = db.query(SystemSetting).filter(SystemSetting.category.in_(["general", "proxmox"])).all()
-            if not settings: return
+            conn = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+            if not conn:
+                return None, None
             
-            conf = {s.key: s.value for s in settings}
+            if conn.token_id and conn.token_secret:
+                px = ProxmoxAPI(
+                    conn.host, user=conn.user, token_name=conn.token_id, token_value=conn.token_secret, 
+                    verify_ssl=conn.verify_ssl, port=conn.port, timeout=5
+                )
+            else:
+                px = ProxmoxAPI(
+                    conn.host, user=conn.user, password=conn.password, 
+                    verify_ssl=conn.verify_ssl, port=conn.port, timeout=5
+                )
             
-            self.host = conf.get("proxmox_host", self.host)
-            self.node = conf.get("proxmox_node", self.node)
-            self.user = conf.get("proxmox_user", self.user)
-            self.password = conf.get("proxmox_password", self.password)
-            self.port = int(conf.get("proxmox_port", 8006))
-            self.token_id = conf.get("proxmox_token_id")
-            self.token_secret = conf.get("proxmox_token_secret")
-            self.verify_ssl = conf.get("proxmox_verify_ssl", "false").lower() == "true"
-            
-            self.verify_ssl = conf.get("proxmox_verify_ssl", "false").lower() == "true"
-            
-            self._connect()
-                
+            self.connections[connection_id] = px
+            self.connection_nodes[connection_id] = conn.node or "pve"
+            return px, self.connection_nodes[connection_id]
         except Exception as e:
-            logger.error(f"Failed to load Proxmox config: {e}")
+            logger.error(f"Failed to connect to Proxmox connection {connection_id}: {e}")
+            return None, None
+        finally:
+            db.close()
 
-    def get_nodes(self):
-        if not self.proxmox: return []
-        return self.proxmox.nodes.get()
+    def get_nodes(self, connection_id: Optional[int] = None):
+        px, _ = self.get_api(connection_id)
+        if not px: return []
+        return px.nodes.get()
 
-    def get_vms(self):
-
-        if not self.proxmox: return []
-        return self.proxmox.nodes(self.node).qemu.get()
+    def get_vms(self, connection_id: Optional[int] = None):
+        px, node = self.get_api(connection_id)
+        if not px or not node: return []
+        return px.nodes(node).qemu.get()
     
-    def vm_action(self, vmid: int, action: str):
-        if not self.proxmox: return {"status": "error", "message": "Proxmox not connected"}
+    def vm_action(self, vmid: int, action: str, connection_id: Optional[int] = None):
+        px, node = self.get_api(connection_id)
+        if not px or not node: return {"status": "error", "message": "Proxmox not connected"}
         
         try:
             if action == "restart":
@@ -102,25 +102,86 @@ class ProxmoxService:
             elif action == "pause":
                 action = "suspend"
             
-            resp = self.proxmox.nodes(self.node).qemu(vmid).status.post(action)
+            resp = px.nodes(node).qemu(vmid).status.post(action)
             return {"status": "success", "data": resp}
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def revert_vm(self, vmid: int, snapname: str):
-        if not self.proxmox: return {"status": "error", "message": "Proxmox not connected"}
+    def revert_vm(self, vmid: int, snapname: str, connection_id: Optional[int] = None):
+        px, node = self.get_api(connection_id)
+        if not px or not node: return {"status": "error", "message": "Proxmox not connected"}
         try:
-            resp = self.proxmox.nodes(self.node).qemu(vmid).snapshot(snapname).rollback.post()
+            resp = px.nodes(node).qemu(vmid).snapshot(snapname).rollback.post()
             return {"status": "success", "data": resp}
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def clone_vm(self, vmid: int, newid: int, newname: str):
-        if not self.proxmox: return {"status": "error", "message": "Proxmox not connected"}
+    def clone_vm(self, vmid: int, newid: int, newname: str, connection_id: Optional[int] = None):
+        px, node = self.get_api(connection_id)
+        if not px or not node: return {"status": "error", "message": "Proxmox not connected"}
         try:
-            resp = self.proxmox.nodes(self.node).qemu(vmid).clone.post(newid=newid, name=newname, full=1)
+            resp = px.nodes(node).qemu(vmid).clone.post(newid=newid, name=newname, full=1)
             return {"status": "success", "data": resp}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    def sync_inventory(self, connection_id: Optional[int] = None):
+        """Fetch all inventory and save to JSON cache."""
+        try:
+            vms = self.get_vms(connection_id)
+            data = {
+                "vms": [{
+                    "name": vm.get('name'),
+                    "moid": str(vm.get('vmid')),
+                    "guest": vm.get('type', 'qemu'),
+                    "num_cpu": vm.get('cpus', 1),
+                    "memory_mb": int(vm.get('maxmem', 1024*1024*1024)/1024/1024),
+                    "is_template": vm.get('template', 0) == 1,
+                    "power_state": vm.get('status', 'unknown')
+                } for vm in vms],
+                "last_sync": datetime.utcnow().isoformat()
+            }
+            
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+            os.makedirs(data_dir, exist_ok=True)
+            file_name = f"proxmox_inventory_{connection_id}.json" if connection_id else "proxmox_inventory.json"
+            file_path = os.path.join(data_dir, file_name)
+            
+            with open(file_path, 'w') as f:
+                json.dump(data, f)
+            
+            return {"success": True, "message": f"Synced {len(vms)} VMs", "data": data}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def get_cached_inventory(self, connection_id: Optional[int] = None) -> Dict[str, Any]:
+        """Retrieve inventory from JSON cache. If connection_id is None, aggregates all."""
+        try:
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+            
+            if connection_id:
+                file_name = f"proxmox_inventory_{connection_id}.json"
+                file_path = os.path.join(data_dir, file_name)
+                if not os.path.exists(file_path):
+                    return {"success": False, "message": "No cached inventory found", "data": None}
+                with open(file_path, 'r') as f:
+                    return {"success": True, "data": json.load(f)}
+            
+            # Aggregate all found inventories
+            all_vms = []
+            files = [f for f in os.listdir(data_dir) if f.startswith("proxmox_inventory") and f.endswith(".json")]
+            for f_name in files:
+                try:
+                    with open(os.path.join(data_dir, f_name), 'r') as f:
+                        inv = json.load(f)
+                        if inv and 'vms' in inv:
+                            all_vms.extend(inv['vms'])
+                except:
+                    continue
+            
+            return {"success": True, "data": {"vms": all_vms, "last_sync": datetime.utcnow().isoformat()}}
+
+        except Exception as e:
+            return {"success": False, "message": str(e), "data": None}
 
 proxmox_service = ProxmoxService()

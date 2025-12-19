@@ -49,13 +49,15 @@ if len(vsphere_logger.handlers) < 2:
 
 class VSphereService:
     def __init__(self):
-        self.host = os.getenv("VSPHERE_HOST", "")
-        self.user = os.getenv("VSPHERE_USER", "administrator@vsphere.local")
-        self.password = os.getenv("VSPHERE_PASSWORD", "")
-        self.port = int(os.getenv("VSPHERE_PORT", "443"))
-        self.verify_ssl = os.getenv("VSPHERE_VERIFY_SSL", "false").lower() == "true"
+        self.connections = {} # {connection_id: si}
+        self.connection = None  # Legacy compatibility - default connection
         
-        self.connection = None
+        # Configuration attributes
+        self.host = None
+        self.user = None
+        self.password = None
+        self.port = 443
+        self.verify_ssl = False
         
         # Scheduler
         self.scheduler = BackgroundScheduler()
@@ -65,87 +67,35 @@ class VSphereService:
         if not PYVMOMI_AVAILABLE:
             vsphere_logger.warning("pyvmomi not installed. vSphere integration will fail.")
         else:
-             if self.host:
-                 vsphere_logger.info(f"vSphere Service configured (Host: {self.host})")
-             else:
-                 vsphere_logger.info("vSphere Service waiting for configuration.")
-
+            vsphere_logger.info("vSphere Service initialized (DB Connections only).")
+    
     def load_config(self, db: Session):
-        """Load vSphere configuration from database settings."""
+        """Load vSphere configuration from database (legacy compatibility)."""
         try:
-            settings = db.query(SystemSetting).filter(
-                SystemSetting.category == "vsphere"
-            ).all()
+            settings = {s.key: s.value for s in db.query(SystemSetting).filter(
+                SystemSetting.category == 'vsphere'
+            ).all()}
             
-            # If settings exist, load them. Else rely on Env Vars.
-            if settings:
-                conf = {s.key: s.value for s in settings}
-
-                self.host = conf.get("vsphere_host", self.host)
-                self.user = conf.get("vsphere_user", self.user)
-                self.password = conf.get("vsphere_password", self.password)
-                self.port = int(conf.get("vsphere_port", str(self.port)))
-                self.verify_ssl = conf.get("vsphere_verify_ssl", "false").lower() == "true"
-                
-                vsphere_logger.info(f"vSphere Config Loaded from DB - Host: {self.host}")
-            else:
-                vsphere_logger.info("No vSphere settings in DB, using Environment Variables.")
-
-
-            # Log vSphere connection info
-            if PYVMOMI_AVAILABLE and self.host:
-                vsphere_logger.info(f"vSphere configured for real connection to {self.host}")
-            elif not PYVMOMI_AVAILABLE:
-                vsphere_logger.error("pyvmomi not available - cannot connect to vSphere")
-            elif not self.host:
-                vsphere_logger.warning("No vSphere host configured")
-
-            # Sync Scheduler Configuration (Defaults if not in DB)
-            sync_mode = "manual"
-            sync_interval = 60
+            self.host = settings.get('vsphere_host', '')
+            self.user = settings.get('vsphere_user', '')
+            self.password = settings.get('vsphere_password', '')
+            self.port = int(settings.get('vsphere_port', 443))
+            self.verify_ssl = settings.get('vsphere_verify_ssl', 'false').lower() == 'true'
             
-            if settings:
-                 conf = {s.key: s.value for s in settings}
-                 sync_mode = conf.get("vsphere_sync_mode", "manual")
-                 sync_interval = int(conf.get("vsphere_sync_interval", "60"))
-            
-            self.configure_scheduler(sync_mode, sync_interval)
-
+            vsphere_logger.info("VSphereService: Configuration loaded from database")
         except Exception as e:
             vsphere_logger.error(f"Failed to load vSphere config: {e}")
 
-    def configure_scheduler(self, mode: str, interval_minutes: int):
-        """Configure the sync scheduler job."""
-        try:
-            # Remove existing job if present
-            if self.scheduler.get_job(self.sync_job_id):
-                self.scheduler.remove_job(self.sync_job_id)
-            
-            if mode == "scheduled" and interval_minutes > 0:
-                vsphere_logger.info(f"Scheduling vSphere sync every {interval_minutes} minutes.")
-                self.scheduler.add_job(
-                    self.sync_inventory,
-                    trigger=IntervalTrigger(minutes=interval_minutes),
-                    id=self.sync_job_id,
-                    replace_existing=True
-                )
-            else:
-                vsphere_logger.info("vSphere sync set to MANUAL mode.")
-                
-        except Exception as e:
-            vsphere_logger.error(f"Error configuring scheduler: {e}")
-
-    def connect(self, host: str = None, user: str = None, password: str = None, 
-                port: int = None, verify_ssl: bool = None) -> Dict[str, Any]:
+    def connect(self, host: Optional[str] = None, user: Optional[str] = None, password: Optional[str] = None, 
+                port: int = 443, verify_ssl: bool = False) -> Dict[str, Any]:
         """
         Establish connection to vCenter/ESXi.
-        If parameters are provided, use them instead of stored config.
         """
         h = host or self.host
         u = user or self.user
         p = password or self.password
-        pt = port or self.port
-        vs = verify_ssl if verify_ssl is not None else self.verify_ssl
+        pt = port if port != 443 else self.port
+        vs = verify_ssl if not verify_ssl else self.verify_ssl
 
         if not h or not u or not p:
             return {"success": False, "message": "Host, user, and password are required"}
@@ -195,15 +145,87 @@ class VSphereService:
     def test_connection(self, host: str, user: str, password: str, 
                         port: int = 443, verify_ssl: bool = False) -> Dict[str, Any]:
         """Test connection without storing credentials."""
-        return self.connect(host, user, password, port, verify_ssl)
+        # Use a temporary connection for testing
+        try:
+             context = None
+             if not verify_ssl:
+                 context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                 context.check_hostname = False
+                 context.verify_mode = ssl.CERT_NONE
 
-    def get_datacenters(self) -> List[Dict[str, Any]]:
+             si = SmartConnect(
+                 host=host,
+                 user=user,
+                 pwd=password,
+                 port=port,
+                 sslContext=context
+             )
+             about = si.content.about
+             Disconnect(si)
+             return {
+                 "success": True,
+                 "message": f"Connected to {host}",
+                 "version": about.version,
+                 "fullName": about.fullName
+             }
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+    def get_session(self, connection_id: Optional[int] = None) -> Optional[vim.ServiceInstance]:
+        """Get or create session for a specific connection_id."""
+        if not connection_id:
+            return self.connection # Default legacy connection
+        
+        # Check cache
+        if connection_id in self.connections:
+            try:
+                 # Check if connection is still alive
+                 self.connections[connection_id].CurrentTime()
+                 return self.connections[connection_id]
+            except:
+                 del self.connections[connection_id]
+        
+        # Load from DB
+        from db.database import SessionLocal
+        from db.models import InfrastructureConnection
+        db = SessionLocal()
+        try:
+            conn = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+            if not conn:
+                vsphere_logger.error(f"Connection {connection_id} not found in DB")
+                return None
+            
+            # Connect
+            context = None
+            if not conn.verify_ssl:
+                context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+
+            vsphere_logger.info(f"Connecting to vSphere {conn.host} (connection_id={connection_id})")
+            si = SmartConnect(
+                host=conn.host,
+                user=conn.user,
+                pwd=conn.password,
+                port=conn.port,
+                sslContext=context
+            )
+            self.connections[connection_id] = si
+            return si
+        except Exception as e:
+            vsphere_logger.error(f"Failed to connect to vSphere {connection_id}: {e}")
+            return None
+        finally:
+            db.close()
+
+    def get_datacenters(self, connection_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get list of datacenters."""
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return []
 
         try:
-            content = self.connection.content
+            content = si.content
             container = content.viewManager.CreateContainerView(
                 content.rootFolder, [vim.Datacenter], True
             )
@@ -222,13 +244,14 @@ class VSphereService:
             vsphere_logger.error(f"Error getting datacenters: {e}", exc_info=True)
             return []
 
-    def get_clusters(self) -> List[Dict[str, Any]]:
+    def get_clusters(self, connection_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get list of clusters."""
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return []
 
         try:
-            content = self.connection.content
+            content = si.content
             container = content.viewManager.CreateContainerView(
                 content.rootFolder, [vim.ClusterComputeResource], True
             )
@@ -245,13 +268,14 @@ class VSphereService:
             vsphere_logger.error(f"Error getting clusters: {e}", exc_info=True)
             return []
 
-    def get_vms(self) -> List[Dict[str, Any]]:
+    def get_vms(self, connection_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get list of VMs."""
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return []
 
         try:
-            content = self.connection.content
+            content = si.content
             container = content.viewManager.CreateContainerView(
                 content.rootFolder, [vim.VirtualMachine], True
             )
@@ -272,13 +296,14 @@ class VSphereService:
             vsphere_logger.error(f"Error getting VMs: {e}", exc_info=True)
             return []
 
-    def get_networks(self) -> List[Dict[str, Any]]:
+    def get_networks(self, connection_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get list of networks."""
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return []
 
         try:
-            content = self.connection.content
+            content = si.content
             container = content.viewManager.CreateContainerView(
                 content.rootFolder, [vim.Network], True
             )
@@ -294,13 +319,14 @@ class VSphereService:
             vsphere_logger.error(f"Error getting networks: {e}")
             return []
 
-    def get_hosts(self) -> List[Dict[str, Any]]:
+    def get_hosts(self, connection_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """Get list of ESXi hosts."""
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return []
 
         try:
-            content = self.connection.content
+            content = si.content
             container = content.viewManager.CreateContainerView(
                 content.rootFolder, [vim.HostSystem], True
             )
@@ -318,21 +344,20 @@ class VSphereService:
             return []
 
 
-    def sync_inventory(self) -> Dict[str, Any]:
+    def sync_inventory(self, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """Fetch all inventory and save to JSON cache."""
         try:
             # Ensure connection
-            if not self.connection:
-                res = self.connect()
-                if not res["success"]:
-                    return {"success": False, "message": res["message"]}
+            si = self.get_session(connection_id)
+            if not si:
+                return {"success": False, "message": "Failed to connect to vSphere"}
 
             # Fetch data
-            datacenters = self.get_datacenters()
-            clusters = self.get_clusters()
-            hosts = self.get_hosts()
-            networks = self.get_networks()
-            vms = self.get_vms()
+            datacenters = self.get_datacenters(connection_id)
+            clusters = self.get_clusters(connection_id)
+            hosts = self.get_hosts(connection_id)
+            networks = self.get_networks(connection_id)
+            vms = self.get_vms(connection_id)
 
             inventory = {
                 "last_sync": datetime.now().isoformat(),
@@ -347,7 +372,8 @@ class VSphereService:
             data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
             os.makedirs(data_dir, exist_ok=True)
             
-            file_path = os.path.join(data_dir, "vsphere_inventory.json")
+            file_name = f"vsphere_inventory_{connection_id}.json" if connection_id else "vsphere_inventory.json"
+            file_path = os.path.join(data_dir, file_name)
             with open(file_path, 'w') as f:
                 json.dump(inventory, f, indent=2)
 
@@ -356,19 +382,32 @@ class VSphereService:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
-    def get_cached_inventory(self) -> Dict[str, Any]:
-        """Retrieve inventory from JSON cache."""
+    def get_cached_inventory(self, connection_id: Optional[int] = None) -> Dict[str, Any]:
+        """Retrieve inventory from JSON cache. If connection_id is None, aggregates all."""
         try:
             data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-            file_path = os.path.join(data_dir, "vsphere_inventory.json")
-
-            if not os.path.exists(file_path):
-                return {"success": False, "message": "No cached inventory found. Please sync first.", "data": None}
-
-            with open(file_path, 'r') as f:
-                data = json.load(f)
             
-            return {"success": True, "data": data}
+            if connection_id:
+                file_name = f"vsphere_inventory_{connection_id}.json"
+                file_path = os.path.join(data_dir, file_name)
+                if not os.path.exists(file_path):
+                    return {"success": False, "message": "No cached inventory found", "data": None}
+                with open(file_path, 'r') as f:
+                    return {"success": True, "data": json.load(f)}
+            
+            # Aggregate all found inventories
+            all_vms = []
+            files = [f for f in os.listdir(data_dir) if f.startswith("vsphere_inventory") and f.endswith(".json")]
+            for f_name in files:
+                try:
+                    with open(os.path.join(data_dir, f_name), 'r') as f:
+                        inv = json.load(f)
+                        if inv and 'vms' in inv:
+                            all_vms.extend(inv['vms'])
+                except:
+                    continue
+            
+            return {"success": True, "data": {"vms": all_vms, "last_sync": datetime.utcnow().isoformat()}}
 
         except Exception as e:
             return {"success": False, "message": str(e), "data": None}
@@ -391,19 +430,20 @@ class VSphereService:
             current = self.ensure_folder(current, name)
         return current
 
-    def provision_vm(self, vm_moid: str, new_name: str, resource_pool: str = None, folder_path: List[str] = None) -> Dict[str, Any]:
+    def provision_vm(self, vm_moid: str, new_name: str, resource_pool: str = None, folder_path: List[str] = None, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Clone a VM from a template.
         """
         # Validate we are connected
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
              vsphere_logger.error("provision_vm called but not connected to vSphere")
              return {"success": False, "message": "Not connected to vSphere"}
 
         try:
             vsphere_logger.info(f"Starting VM provisioning: template_moid={vm_moid}, new_name={new_name}")
-            content = self.connection.content
-            template_vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            content = si.content
+            template_vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
 
             if not template_vm:
                  vsphere_logger.error(f"Template VM not found: {vm_moid}")
@@ -531,13 +571,14 @@ class VSphereService:
             return {"success": False, "message": str(e)}
 
 
-    def get_vm_power_state(self, vm_moid: str) -> Dict[str, Any]:
+    def get_vm_power_state(self, vm_moid: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """Get power state of a VM."""
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
             if not vm:
                 return {"success": False, "message": "VM not found"}
 
@@ -546,16 +587,17 @@ class VSphereService:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
-    def control_vm_power(self, vm_moid: str, action: str) -> Dict[str, Any]:
+    def control_vm_power(self, vm_moid: str, action: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Control VM power state.
         Action: start, stop, restart, reset
         """
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
             if not vm:
                  return {"success": False, "message": "VM not found"}
 
@@ -594,15 +636,16 @@ class VSphereService:
         except Exception as e:
             return {"success": False, "message": str(e)}
 
-    def revert_vm(self, vm_moid: str) -> Dict[str, Any]:
+    def revert_vm(self, vm_moid: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Revert VM to the last snapshot (usually 'Initial State').
         """
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
              return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
             if not vm:
                  return {"success": False, "message": "VM not found"}
 
@@ -629,26 +672,40 @@ class VSphereService:
             return {"success": False, "message": str(e)}
 
 
-    def generate_vmrc_ticket(self, vm_moid: str) -> Dict[str, Any]:
+    def generate_vmrc_ticket(self, vm_moid: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Generate a VMRC ticket for a VM.
         Returns the ticket value and a formatted vmrc:// URI.
         """
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
             if not vm:
                 return {"success": False, "message": "VM not found"}
 
 
             # Acquire Session Clone Ticket
-            ticket = self.connection.content.sessionManager.AcquireCloneTicket()
+            ticket = si.content.sessionManager.AcquireCloneTicket()
             
+            # Use host and port from connection if available
+            host = self.host
+            port = self.port
+            if connection_id:
+                from db.database import SessionLocal
+                from db.models import InfrastructureConnection
+                db = SessionLocal()
+                conn = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+                if conn:
+                    host = conn.host
+                    port = conn.port
+                db.close()
+
             # Format URI
             # vmrc://clone:<ticket>@<vcenter_host>/?moid=<vm_moid>
-            uri = f"vmrc://clone:{ticket}@{self.host}:{self.port}/?moid={vm_moid}"
+            uri = f"vmrc://clone:{ticket}@{host}:{port}/?moid={vm_moid}"
             
             return {
                 "success": True,
@@ -659,7 +716,7 @@ class VSphereService:
             vsphere_logger.error(f"Failed to generate VMRC ticket for {vm_moid}: {e}")
             return {"success": False, "message": str(e)}
 
-    def generate_html5_console_ticket(self, vm_moid: str) -> Dict[str, Any]:
+    def generate_html5_console_ticket(self, vm_moid: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Generate an HTML5 console ticket (WebMKS) for browser-based console access.
         This works without any client installation - opens in browser.
@@ -671,11 +728,12 @@ class VSphereService:
         - ticket: One-time authentication ticket
         - cfgFile: VM config file path
         """
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
             if not vm:
                 return {"success": False, "message": "VM not found"}
 
@@ -747,21 +805,22 @@ class VSphereService:
                 "cfgFile": ticket.cfgFile,
                 "sslThumbprint": ticket.sslThumbprint if hasattr(ticket, 'sslThumbprint') else None,
                 "vm_name": vm.name,
-                "vcenter_host": self.host
+                "vcenter_host": self.host if not connection_id else si.content.about.apiType # simplistic
             }
         except Exception as e:
             vsphere_logger.error(f"Failed to generate HTML5 console ticket for {vm_moid}: {e}")
             return {"success": False, "message": str(e)}
 
-    def delete_vm(self, vm_moid: str) -> Dict[str, Any]:
+    def delete_vm(self, vm_moid: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Delete a VM from vSphere (Power off if needed, then Destroy).
         """
-        if not self.connection:
+        si = self.get_session(connection_id)
+        if not si:
             return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vm = self._get_obj([vim.VirtualMachine], vm_moid)
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
             if not vm:
                  return {"success": False, "message": "VM not found"}
 
@@ -781,25 +840,74 @@ class VSphereService:
             vsphere_logger.error(f"Error deleting VM: {e}")
             return {"success": False, "message": str(e)}
 
+    def enable_vnc(self, vm_moid: str, port: int, password: str, connection_id: Optional[int] = None) -> Dict[str, Any]:
+        """
+        Enable VNC on a VM by setting extraConfig.
+        """
+        si = self.get_session(connection_id)
+        if not si:
+            return {"success": False, "message": "Not connected to vSphere"}
+
+        try:
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
+            if not vm:
+                return {"success": False, "message": "VM not found"}
+
+            spec = vim.vm.ConfigSpec()
+            spec.extraConfig = [
+                vim.option.OptionValue(key="RemoteDisplay.vnc.enabled", value="true"),
+                vim.option.OptionValue(key="RemoteDisplay.vnc.port", value=str(port)),
+                vim.option.OptionValue(key="RemoteDisplay.vnc.password", value=password)
+            ]
+
+            task = vm.ReconfigVM_Task(spec)
+            return self._wait_for_task(task)
+
+        except Exception as e:
+            vsphere_logger.error(f"Error enabling VNC on {vm_moid}: {e}")
+            return {"success": False, "message": str(e)}
+
+    def get_vm_host_ip(self, vm_moid: str, connection_id: Optional[int] = None) -> Optional[str]:
+        """
+        Get the IP address of the ESXi host running the VM.
+        """
+        si = self.get_session(connection_id)
+        if not si: return None
+        
+        try:
+            vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
+            if vm and vm.runtime and vm.runtime.host:
+                return vm.runtime.host.name
+            return None
+        except:
+            return None
+
+
     # Helper Methods
-    def _get_obj(self, vim_type, name_or_moid):
+    def _get_obj(self, vim_type, name_or_moid, si: Optional[vim.ServiceInstance] = None):
         """
         Get a vSphere object by name or MOID.
         Attributes auto-reconnection on NotAuthenticated fault.
         """
+        si = si or self.connection
+        if not si:
+            return None
+            
         try:
-            return self._get_obj_core(vim_type, name_or_moid)
+            return self._get_obj_core(vim_type, name_or_moid, si)
         except vim.fault.NotAuthenticated:
-            vsphere_logger.warning("Session NotAuthenticated in _get_obj. Reconnecting and retrying...")
-            self.connect()
-            try:
-                return self._get_obj_core(vim_type, name_or_moid)
-            except Exception as retry_e:
-                vsphere_logger.error(f"Retry failed in _get_obj: {retry_e}")
-                raise retry_e
-
-    def _get_obj_core(self, vim_type, name_or_moid):
-        content = self.connection.content
+            if si == self.connection:
+                vsphere_logger.warning("Session NotAuthenticated in _get_obj. Reconnecting and retrying...")
+                self.connect()
+                try:
+                    return self._get_obj_core(vim_type, name_or_moid, self.connection)
+                except Exception as retry_e:
+                    vsphere_logger.error(f"Retry failed in _get_obj: {retry_e}")
+                    raise retry_e
+            raise
+    
+    def _get_obj_core(self, vim_type, name_or_moid, si: vim.ServiceInstance):
+        content = si.content
         container = content.viewManager.CreateContainerView(content.rootFolder, vim_type, True)
         
         # Try to find by MOID first (more precise)

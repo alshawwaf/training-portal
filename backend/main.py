@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from db.database import engine, Base, SessionLocal
 from db.models import User, UserRole, SystemSetting, Template
-from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, logs, guacamole, console_ws, users
+from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, infrastructure_connections, logs, guacamole, console_ws, users, student, instructor
 from services.proxmox_service import proxmox_service
 from services.email_service import email_service
 from services.vsphere_service import vsphere_service
@@ -58,9 +58,10 @@ app = FastAPI(title="SE Training Portal API", version="1.0.0")
 
 # Mount static files for WMKS SDK
 from fastapi.staticfiles import StaticFiles
-app.mount("/static", StaticFiles(directory="static"), name="static")
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 # Also mount at /api/static for frontend proxy compatibility
-app.mount("/api/static", StaticFiles(directory="static"), name="api_static")
+app.mount("/api/static", StaticFiles(directory=str(STATIC_DIR)), name="api_static")
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -101,6 +102,13 @@ async def startup_event():
             from sqlalchemy import text
             db.execute(text("ALTER TABLE templates ADD COLUMN IF NOT EXISTS provider VARCHAR(255) DEFAULT 'vSphere'"))
             db.execute(text("ALTER TABLE classes ADD COLUMN IF NOT EXISTS join_token VARCHAR(255)"))
+            db.execute(text("ALTER TABLE classes ADD COLUMN IF NOT EXISTS allow_multi_env BOOLEAN DEFAULT 0"))
+            # Migration for Student/Class Environment features
+            db.execute(text("ALTER TABLE class_environments ADD COLUMN IF NOT EXISTS student_number INTEGER"))
+            db.execute(text("ALTER TABLE class_environments ADD COLUMN IF NOT EXISTS status VARCHAR(255) DEFAULT 'ready'"))
+            db.execute(text("ALTER TABLE environment_vms ADD COLUMN IF NOT EXISTS role VARCHAR(255)"))
+            db.execute(text("ALTER TABLE environment_vms ADD COLUMN IF NOT EXISTS os_type VARCHAR(255)"))
+            db.execute(text("ALTER TABLE environment_vms ADD COLUMN IF NOT EXISTS status VARCHAR(255) DEFAULT 'poweredOff'"))
             db.commit()
             logger.info("Database migration: columns verified/added.")
         except Exception as e:
@@ -149,7 +157,13 @@ async def startup_event():
             "azure_client_secret": os.getenv("AZURE_CLIENT_SECRET", ""),
             # GCP Defaults
             "gcp_project_id": os.getenv("GCP_PROJECT_ID", ""),
-            "gcp_service_account_json": os.getenv("GCP_SERVICE_ACCOUNT_JSON", "{}")
+            "gcp_service_account_json": os.getenv("GCP_SERVICE_ACCOUNT_JSON", "{}"),
+            # vSphere Defaults
+            "vsphere_host": os.getenv("VSPHERE_HOST", ""),
+            "vsphere_port": os.getenv("VSPHERE_PORT", "443"),
+            "vsphere_user": os.getenv("VSPHERE_USER", "administrator@vsphere.local"),
+            "vsphere_password": os.getenv("VSPHERE_PASSWORD", ""),
+            "vsphere_verify_ssl": os.getenv("VSPHERE_VERIFY_SSL", "false")
         }
         
         for key, val in defaults.items():
@@ -167,6 +181,8 @@ async def startup_event():
                     category = "gcp"
                 elif key.startswith("proxmox"):
                     category = "proxmox"
+                elif key.startswith("vsphere"):
+                    category = "vsphere"
                 else:
                     category = "general"
 
@@ -195,7 +211,8 @@ async def startup_event():
             await asyncio.sleep(10)  # Wait 10 seconds after startup
             logger.info("Background: Attempting vSphere connection...")
             try:
-                vsphere_service.connect()
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(None, vsphere_service.connect)
                 logger.info("Background: vSphere connected successfully.")
             except Exception as e:
                 logger.warning(f"Background: vSphere connection failed (non-critical): {e}")
@@ -219,6 +236,9 @@ app.include_router(infrastructure.router)
 app.include_router(logs.router)
 app.include_router(guacamole.router)
 app.include_router(console_ws.router)
+app.include_router(student.router)
+app.include_router(instructor.router)
+app.include_router(infrastructure_connections.router)
 
 @app.get("/")
 def read_root():

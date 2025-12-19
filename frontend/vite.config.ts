@@ -21,13 +21,11 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/api": {
           target: backendUrl,
-          changeOrigin: true,
           ws: true,
           rewrite: (path) => path.replace(/^\/api/, ""),
         },
         "/auth": {
           target: backendUrl,
-          changeOrigin: true,
         },
       },
     },

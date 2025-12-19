@@ -332,7 +332,7 @@ const AdminUsers: React.FC = () => {
                             placeholder="Search by name or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                            className="w-full pl-11 pr-4 py-3 bg-slate-800/80 dark:bg-slate-800/80 border border-slate-700 rounded-xl text-primary text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
                         />
                     </div>
 
@@ -421,7 +421,7 @@ const AdminUsers: React.FC = () => {
                 <div className="slide-in-up">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {groups.map(group => (
-                            <div key={group.id} className="bg-slate-800 border border-slate-700 rounded-xl p-5 hover:border-emerald-500/50 transition-colors group relative flex flex-col">
+                            <div key={group.id} className="bg-secondary/30 border border-theme rounded-xl p-5 hover:border-emerald-500/50 transition-colors group relative flex flex-col">
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                                         <Shield className="w-5 h-5" />
@@ -431,8 +431,8 @@ const AdminUsers: React.FC = () => {
                                         <button onClick={() => handleDeleteGroup(group.id)} className="p-1.5 text-slate-400 hover:text-red-400 rounded hover:bg-slate-700"><Trash2 className="w-4 h-4"/></button>
                                     </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-white mb-1">{group.name}</h3>
-                                <p className="text-sm text-slate-400 leading-relaxed mb-4 flex-1">{group.description || "No description provided."}</p>
+                                <h3 className="text-lg font-bold text-primary mb-1">{group.name}</h3>
+                                <p className="text-sm text-secondary leading-relaxed mb-4 flex-1">{group.description || "No description provided."}</p>
                                 
                                 <div className="space-y-2">
                                     <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Permissions</p>
@@ -471,39 +471,39 @@ const AdminUsers: React.FC = () => {
             {/* Invite User Modal */}
             {showInviteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                    <div className="bg-primary border border-theme rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-700 bg-gradient-to-r from-violet-600/20 to-purple-600/20">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-theme bg-gradient-to-r from-violet-600/20 to-purple-600/20">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 shadow-lg shadow-purple-500/20">
                                     <UserPlus className="w-5 h-5 text-white" />
                                 </div>
-                                <h2 className="text-xl font-bold text-white">Invite User</h2>
+                                <h2 className="text-xl font-bold text-primary">Invite User</h2>
                             </div>
-                            <button onClick={() => setShowInviteModal(false)} className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setShowInviteModal(false)} className="p-2 rounded-lg text-secondary hover:text-primary hover:bg-secondary/50 transition-colors"><X className="w-5 h-5" /></button>
                         </div>
                         {/* Form */}
                         <form onSubmit={handleInvite} className="p-6 space-y-5">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">First Name</label>
-                                    <input type="text" required value={inviteFirstName} onChange={(e) => setInviteFirstName(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-slate-500" placeholder="John" />
+                                    <label className="block text-sm font-medium text-secondary mb-1.5">First Name</label>
+                                    <input type="text" required value={inviteFirstName} onChange={(e) => setInviteFirstName(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-secondary" placeholder="John" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Last Name</label>
-                                    <input type="text" required value={inviteLastName} onChange={(e) => setInviteLastName(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-slate-500" placeholder="Smith" />
+                                    <label className="block text-sm font-medium text-secondary mb-1.5">Last Name</label>
+                                    <input type="text" required value={inviteLastName} onChange={(e) => setInviteLastName(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-secondary" placeholder="Smith" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-                                <input type="email" required value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-slate-500" placeholder="user@company.com" />
+                                <label className="block text-sm font-medium text-secondary mb-1.5">Email Address</label>
+                                <input type="email" required value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-secondary" placeholder="user@company.com" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Role</label>
-                                <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50">
-                                    <option value="student" className="bg-slate-900">Student</option>
-                                    <option value="instructor" className="bg-slate-900">Instructor</option>
-                                    <option value="admin" className="bg-slate-900">Administrator</option>
+                                <label className="block text-sm font-medium text-secondary mb-1.5">Role</label>
+                                <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50">
+                                    <option value="student">Student</option>
+                                    <option value="instructor">Instructor</option>
+                                    <option value="admin">Administrator</option>
                                 </select>
                             </div>
                             <button type="submit" disabled={isSubmitting} className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
@@ -517,45 +517,45 @@ const AdminUsers: React.FC = () => {
             {/* Edit User Modal */}
             {showEditUserModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+                    <div className="bg-primary border border-theme rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-700 bg-gradient-to-r from-blue-600/20 to-cyan-600/20">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-theme bg-gradient-to-r from-blue-600/20 to-cyan-600/20">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/20">
                                     <Edit2 className="w-5 h-5 text-white" />
                                 </div>
-                                <h2 className="text-xl font-bold text-white">Edit User</h2>
+                                <h2 className="text-xl font-bold text-primary">Edit User</h2>
                             </div>
-                            <button onClick={() => setShowEditUserModal(false)} className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setShowEditUserModal(false)} className="p-2 rounded-lg text-secondary hover:text-primary hover:bg-secondary/50 transition-colors"><X className="w-5 h-5" /></button>
                         </div>
                         {/* Form - Scrollable */}
                         <form onSubmit={handleUpdateUser} className="p-6 space-y-5 overflow-y-auto flex-1">
                             {/* Name Fields */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">First Name</label>
-                                    <input type="text" required value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-500" />
+                                    <label className="block text-sm font-medium text-secondary mb-1.5">First Name</label>
+                                    <input type="text" required value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-secondary" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Last Name</label>
-                                    <input type="text" required value={editLastName} onChange={(e) => setEditLastName(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-500" />
+                                    <label className="block text-sm font-medium text-secondary mb-1.5">Last Name</label>
+                                    <input type="text" required value={editLastName} onChange={(e) => setEditLastName(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-secondary" />
                                 </div>
                             </div>
                             
                             {/* Email */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-                                <input type="email" required value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-slate-500" />
+                                <label className="block text-sm font-medium text-secondary mb-1.5">Email Address</label>
+                                <input type="email" required value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all placeholder:text-secondary" />
                             </div>
                             
                             {/* Role */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Role</label>
-                                <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                                    <option value="student" className="bg-slate-900">Student</option>
-                                    <option value="instructor" className="bg-slate-900">Instructor</option>
-                                    <option value="admin" className="bg-slate-900">Administrator</option>
-                                    <option value="super_admin" className="bg-slate-900">Super Admin (All Permissions)</option>
+                                <label className="block text-sm font-medium text-secondary mb-1.5">Role</label>
+                                <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                                    <option value="student">Student</option>
+                                    <option value="instructor">Instructor</option>
+                                    <option value="admin">Administrator</option>
+                                    <option value="super_admin">Super Admin (All Permissions)</option>
                                 </select>
                                 {editRole === 'super_admin' && (
                                     <p className="text-xs text-amber-400 mt-1.5 flex items-center gap-1"><ShieldAlert className="w-3.5 h-3.5" /> Super Admins have full access to all features and permissions.</p>
@@ -563,33 +563,33 @@ const AdminUsers: React.FC = () => {
                             </div>
 
                             {/* Password Reset Section */}
-                            <div className="p-4 bg-slate-900/50 border border-slate-700 rounded-xl space-y-4">
+                            <div className="p-4 bg-secondary/20 border border-theme rounded-xl space-y-4">
                                 <div className="flex items-center gap-2">
                                     <Key className="w-4 h-4 text-blue-400" />
                                     <label className="text-sm font-semibold text-white">Reset Password</label>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-400 mb-1">New Password</label>
-                                        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-500" placeholder="New password" />
+                                        <label className="block text-xs font-medium text-secondary mb-1">New Password</label>
+                                        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full px-4 py-2.5 bg-secondary/30 border border-theme rounded-lg text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-secondary" placeholder="New password" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-400 mb-1">Confirm Password</label>
-                                        <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-500" placeholder="Confirm password" />
+                                        <label className="block text-xs font-medium text-secondary mb-1">Confirm Password</label>
+                                        <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 py-2.5 bg-secondary/30 border border-theme rounded-lg text-primary text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-secondary" placeholder="Confirm password" />
                                     </div>
                                 </div>
                                 {newPassword && confirmPassword && newPassword !== confirmPassword && (
                                     <p className="text-xs text-red-400">Passwords do not match</p>
                                 )}
-                                <p className="text-xs text-slate-500">Leave both fields blank to keep the current password.</p>
+                                <p className="text-xs text-secondary">Leave both fields blank to keep the current password.</p>
                             </div>
 
                             {/* User Groups/Permissions */}
                             <div className="space-y-3">
-                                <label className="block text-sm font-medium text-slate-300">Groups & Permissions</label>
+                                <label className="block text-sm font-medium text-secondary">Groups & Permissions</label>
                                 <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto p-1">
                                     {groups.map(group => (
-                                        <label key={group.id} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${editGroups.includes(group.id) ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'}`}>
+                                        <label key={group.id} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all text-sm ${editGroups.includes(group.id) ? 'bg-blue-500/15 border-blue-500/40 text-blue-400' : 'bg-secondary/30 border-theme text-secondary hover:border-blue-500/30'}`}>
                                             <input 
                                                 type="checkbox" 
                                                 checked={editGroups.includes(group.id)}
@@ -597,40 +597,40 @@ const AdminUsers: React.FC = () => {
                                                     if (e.target.checked) setEditGroups([...editGroups, group.id]);
                                                     else setEditGroups(editGroups.filter(id => id !== group.id));
                                                 }}
-                                                className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500" 
+                                                className="w-4 h-4 rounded border-theme bg-secondary/30 text-blue-500 focus:ring-blue-500" 
                                             />
                                             <span className="truncate">{group.name}</span>
                                         </label>
                                     ))}
                                 </div>
                                 {groups.length === 0 && (
-                                    <p className="text-xs text-slate-500 italic">No groups available. Create groups in the Groups tab.</p>
+                                    <p className="text-xs text-secondary italic">No groups available. Create groups in the Groups tab.</p>
                                 )}
                             </div>
 
                             {/* Toggle Options */}
                             <div className="space-y-2">
-                                <label className="flex items-center gap-3 p-3 bg-slate-900 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors">
-                                    <input type="checkbox" checked={editIsActive} onChange={(e) => setEditIsActive(e.target.checked)} className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500" />
+                                <label className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl border border-theme cursor-pointer hover:bg-secondary/30 transition-colors">
+                                    <input type="checkbox" checked={editIsActive} onChange={(e) => setEditIsActive(e.target.checked)} className="w-5 h-5 rounded border-theme bg-secondary/30 text-blue-600 focus:ring-blue-500" />
                                     <div>
-                                        <div className="text-sm font-medium text-white">Account Active</div>
-                                        <div className="text-xs text-slate-500">Allow user to log in</div>
+                                        <div className="text-sm font-medium text-primary">Account Active</div>
+                                        <div className="text-xs text-secondary">Allow user to log in</div>
                                     </div>
                                 </label>
                                 
-                                <label className="flex items-center gap-3 p-3 bg-slate-900 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors">
-                                    <input type="checkbox" checked={editIsConfirmed} onChange={(e) => setEditIsConfirmed(e.target.checked)} className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500" />
+                                <label className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl border border-theme cursor-pointer hover:bg-secondary/30 transition-colors">
+                                    <input type="checkbox" checked={editIsConfirmed} onChange={(e) => setEditIsConfirmed(e.target.checked)} className="w-5 h-5 rounded border-theme bg-secondary/30 text-blue-600 focus:ring-blue-500" />
                                     <div>
-                                        <div className="text-sm font-medium text-white">Email Confirmed</div>
-                                        <div className="text-xs text-slate-500">Bypass email verification</div>
+                                        <div className="text-sm font-medium text-primary">Email Confirmed</div>
+                                        <div className="text-xs text-secondary">Bypass email verification</div>
                                     </div>
                                 </label>
 
-                                <label className="flex items-center gap-3 p-3 bg-slate-900 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors">
-                                    <input type="checkbox" checked={editMustChangePass} onChange={(e) => setEditMustChangePass(e.target.checked)} className="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-600 focus:ring-blue-500" />
+                                <label className="flex items-center gap-3 p-3 bg-secondary/20 rounded-xl border border-theme cursor-pointer hover:bg-secondary/30 transition-colors">
+                                    <input type="checkbox" checked={editMustChangePass} onChange={(e) => setEditMustChangePass(e.target.checked)} className="w-5 h-5 rounded border-theme bg-secondary/30 text-blue-600 focus:ring-blue-500" />
                                     <div>
-                                        <div className="text-sm font-medium text-white">Require Password Reset</div>
-                                        <div className="text-xs text-slate-500">Force password change on next login</div>
+                                        <div className="text-sm font-medium text-primary">Require Password Reset</div>
+                                        <div className="text-xs text-secondary">Force password change on next login</div>
                                     </div>
                                 </label>
                             </div>
@@ -653,32 +653,32 @@ const AdminUsers: React.FC = () => {
             {/* Group Modal */}
             {showGroupModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-hidden">
+                    <div className="bg-primary border border-theme rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-hidden">
                         {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-700 bg-gradient-to-r from-emerald-600/20 to-teal-600/20">
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-theme bg-gradient-to-r from-emerald-600/20 to-teal-600/20">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20">
                                     <Layers className="w-5 h-5 text-white" />
                                 </div>
-                                <h2 className="text-xl font-bold text-white">{editingGroup ? 'Edit Group' : 'Create Group'}</h2>
+                                <h2 className="text-xl font-bold text-primary">{editingGroup ? 'Edit Group' : 'Create Group'}</h2>
                             </div>
-                            <button onClick={() => setShowGroupModal(false)} className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"><X className="w-5 h-5" /></button>
+                            <button onClick={() => setShowGroupModal(false)} className="p-2 rounded-lg text-secondary hover:text-primary hover:bg-secondary/50 transition-colors"><X className="w-5 h-5" /></button>
                         </div>
                         <form onSubmit={handleSaveGroup} className="p-6 space-y-5 overflow-y-auto max-h-[calc(90vh-100px)]">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Group Name</label>
-                                <input type="text" required value={groupName} onChange={(e) => setGroupName(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder:text-slate-500" placeholder="e.g. Instructors" />
+                                <label className="block text-sm font-medium text-secondary mb-1.5">Group Name</label>
+                                <input type="text" required value={groupName} onChange={(e) => setGroupName(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder:text-secondary" placeholder="e.g. Instructors" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Description</label>
-                                <textarea required value={groupDesc} onChange={(e) => setGroupDesc(e.target.value)} className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all h-24 resize-none placeholder:text-slate-500" placeholder="Brief description of this group..." />
+                                <label className="block text-sm font-medium text-secondary mb-1.5">Description</label>
+                                <textarea required value={groupDesc} onChange={(e) => setGroupDesc(e.target.value)} className="w-full px-4 py-3 bg-secondary/30 border border-theme rounded-xl text-primary text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all h-24 resize-none placeholder:text-secondary" placeholder="Brief description of this group..." />
                             </div>
 
                             <div className="space-y-3">
-                                <label className="block text-sm font-medium text-slate-300">Permissions</label>
+                                <label className="block text-sm font-medium text-secondary">Permissions</label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1">
                                     {permissions.map(perm => (
-                                        <label key={perm.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${groupPermissions.includes(perm.id) ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-slate-900 border-slate-700 hover:border-slate-600'}`}>
+                                        <label key={perm.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${groupPermissions.includes(perm.id) ? 'bg-emerald-500/15 border-emerald-500/40' : 'bg-secondary/30 border-theme hover:border-emerald-500/30'}`}>
                                             <input 
                                                 type="checkbox" 
                                                 checked={groupPermissions.includes(perm.id)}
@@ -686,11 +686,11 @@ const AdminUsers: React.FC = () => {
                                                     if (e.target.checked) setGroupPermissions([...groupPermissions, perm.id]);
                                                     else setGroupPermissions(groupPermissions.filter(id => id !== perm.id));
                                                 }}
-                                                className="mt-0.5 w-4 h-4 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 shrink-0" 
+                                                className="mt-0.5 w-4 h-4 rounded border-theme bg-secondary/30 text-emerald-500 focus:ring-emerald-500 shrink-0" 
                                             />
                                             <div>
-                                                <div className={`text-sm font-semibold ${groupPermissions.includes(perm.id) ? 'text-emerald-400' : 'text-white'}`}>{perm.name}</div>
-                                                <div className="text-xs text-slate-500">{perm.description}</div>
+                                                <div className={`text-sm font-semibold ${groupPermissions.includes(perm.id) ? 'text-emerald-400' : 'text-primary'}`}>{perm.name}</div>
+                                                <div className="text-xs text-secondary">{perm.description}</div>
                                             </div>
                                         </label>
                                     ))}

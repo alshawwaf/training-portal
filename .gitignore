@@ -46,3 +46,7 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+backend/logs/
+backend/se_portal.db
+backend/data/vsphere_inventory_*.json
+backend/data/backups/

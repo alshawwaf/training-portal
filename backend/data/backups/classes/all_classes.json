@@ -2,20 +2,20 @@
   "classes": [
     {
       "id": 1,
-      "name": "SBTR82",
+      "name": "class34",
       "instructor_id": 1,
       "blueprint_id": "1",
       "template_id": 1,
       "max_users": 1,
       "passcode": "Cpwins!1",
-      "start_date": "2025-12-19T00:28:02.183000",
-      "end_date": "2025-12-26T00:28:02.183000",
-      "status": "draft",
+      "start_date": "2025-12-20T04:07:25.982000",
+      "end_date": "2025-12-27T04:07:25.982000",
+      "status": "active",
       "description": "",
-      "created_at": "2025-12-19T00:28:38.297442",
-      "updated_at": "2025-12-19T00:28:38.297449"
+      "created_at": "2025-12-19T23:07:44.296289",
+      "updated_at": "2025-12-19T23:09:47.620661"
     }
   ],
-  "backup_timestamp": "2025-12-19T00:28:38.362631",
+  "backup_timestamp": "2025-12-19T23:09:47.655889",
   "total_count": 1
 }

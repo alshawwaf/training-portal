@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import { 
     Plus, Search, Server, Trash2, Edit, Check, Clock, Monitor, HardDrive, Cpu, 
-    Layout as LayoutTemplate, RefreshCw, Layers
+    Layout as LayoutTemplate, RefreshCw, Layers, ChevronDown
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
+import ProviderSelectionModal from '../components/templates/ProviderSelectionModal';
 import { getProviderIcon } from '../components/ProviderIcons';
 import clsx from 'clsx';
 
@@ -30,6 +31,7 @@ interface TemplateModel {
     provider: string;
     is_active: boolean;
     vms: TemplateVM[];
+    connection_id: number | null;
     created_at: string | null;
     updated_at: string | null;
 }
@@ -57,6 +59,7 @@ const Templates: React.FC = () => {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [vmSelectorOpen, setVmSelectorOpen] = useState(false);
+    const [providerModalOpen, setProviderModalOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<TemplateModel | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -70,13 +73,25 @@ const Templates: React.FC = () => {
         name: '',
         description: '',
         provider: 'vSphere',
+        connection_id: null as number | null,
         is_active: true,
     });
+    const [connections, setConnections] = useState<any[]>([]);
     const [selectedVMs, setSelectedVMs] = useState<TemplateVM[]>([]);
 
     useEffect(() => {
         fetchTemplates();
+        fetchConnections();
     }, []);
+
+    const fetchConnections = async () => {
+        try {
+            const res = await api.get('/infrastructure-connections/');
+            setConnections(Array.isArray(res.data) ? res.data : []);
+        } catch (e) {
+            console.error('Failed to fetch connections:', e);
+        }
+    };
 
     const fetchTemplates = async () => {
         setIsLoading(true);
@@ -96,7 +111,24 @@ const Templates: React.FC = () => {
         setLoadingInventory(true);
         try {
             if (form.provider === 'vSphere') {
-                const res = await api.get('/infrastructure/vsphere/inventory');
+                if (!form.connection_id) {
+                    showToast(`Please select a ${form.provider} connection`, 'warning');
+                    setInventory(null);
+                    return;
+                }
+                const url = `/infrastructure-connections/${form.connection_id}/inventory`;
+                const res = await api.get(url);
+                if (res.data.success) {
+                    setInventory(res.data.data);
+                }
+            } else if (form.provider === 'Proxmox') {
+                if (!form.connection_id) {
+                    showToast(`Please select a ${form.provider} connection`, 'warning');
+                    setInventory(null);
+                    return;
+                }
+                const url = `/infrastructure-connections/${form.connection_id}/inventory`;
+                const res = await api.get(url);
                 if (res.data.success) {
                     setInventory(res.data.data);
                 }
@@ -111,14 +143,19 @@ const Templates: React.FC = () => {
     };
 
     const syncInventory = async () => {
-        if (form.provider !== 'vSphere') {
+        if (form.provider !== 'vSphere' && form.provider !== 'Proxmox') {
             showToast(`Sync for ${form.provider} not implemented yet`, 'info');
             return;
         }
 
         setLoadingInventory(true);
         try {
-            const res = await api.post('/infrastructure/vsphere/sync');
+            if (!form.connection_id) {
+                showToast(`Please select a ${form.provider} connection`, 'warning');
+                return;
+            }
+            const url = `/infrastructure-connections/${form.connection_id}/sync`;
+            const res = await api.post(url);
             if (res.data.success) {
                 showToast('Inventory synced!', 'success');
                 await fetchInventory();
@@ -137,6 +174,7 @@ const Templates: React.FC = () => {
             name: '',
             description: '',
             provider: 'vSphere',
+            connection_id: null,
             is_active: true,
         });
         setSelectedVMs([]);
@@ -239,6 +277,7 @@ const Templates: React.FC = () => {
             name: tpl.name,
             description: tpl.description || '',
             provider: tpl.provider || 'vSphere',
+            connection_id: tpl.connection_id || null,
             is_active: tpl.is_active,
         });
         setSelectedVMs(tpl.vms || []);
@@ -326,7 +365,10 @@ const Templates: React.FC = () => {
                         />
                     </div>
                     <button
-                        onClick={() => { resetForm(); setCreateModalOpen(true); }}
+                        onClick={() => { 
+                            resetForm(); 
+                            setProviderModalOpen(true); 
+                        }}
                         className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
                         <Plus className="w-5 h-5" />
@@ -364,7 +406,10 @@ const Templates: React.FC = () => {
                     </p>
                     {!searchTerm && (
                         <button
-                            onClick={() => { resetForm(); setCreateModalOpen(true); }}
+                            onClick={() => { 
+                                resetForm(); 
+                                setProviderModalOpen(true); 
+                            }}
                             className="btn-primary"
                         >
                             <Plus className="w-5 h-5" />
@@ -390,67 +435,87 @@ const Templates: React.FC = () => {
                 isOpen={createModalOpen || editModalOpen}
                 onClose={() => { setCreateModalOpen(false); setEditModalOpen(false); }}
                 title={createModalOpen ? "New Blueprint" : "Refine Blueprint"}
-                icon={<LayoutTemplate className="w-6 h-6 text-blue-500" />}
-                maxWidth="xl"
+                icon={<LayoutTemplate className="w-5 h-5 text-purple-500" />}
+                maxWidth="lg"
             >
-                <div className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-secondary uppercase tracking-widest pl-1">Name</label>
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                        <div className="md:col-span-8 space-y-1.5">
+                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Blueprint Name</label>
                             <input
                                 type="text"
-                                className="input bg-secondary/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-primary font-medium"
-                                placeholder="e.g., Enterprise Lab"
+                                className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 text-primary font-bold transition-all"
+                                placeholder="Enterprise Lab v3"
                                 value={form.name}
                                 onChange={e => setForm({...form, name: e.target.value})}
                             />
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-secondary uppercase tracking-widest pl-1">Platform</label>
-                            <select
-                                className="input bg-secondary/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-primary font-medium appearance-none"
-                                value={form.provider}
-                                onChange={e => {
-                                    setForm({...form, provider: e.target.value});
-                                    setSelectedVMs([]);
-                                    setInventory(null);
-                                }}
-                            >
-                                {providerOptions.map(opt => (
-                                    <option key={opt} value={opt}>{opt}</option>
-                                ))}
-                            </select>
+                        <div className="md:col-span-4 space-y-1.5">
+                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Environment Status</label>
+                            <div className="flex items-center gap-3 p-2 bg-secondary/10 rounded-xl border border-theme h-[46px]">
+                                <span className="flex-1 text-xs font-bold pl-2 text-secondary">{form.is_active ? 'Active' : 'Draft'}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setForm({...form, is_active: !form.is_active})}
+                                    className={clsx(
+                                        "relative w-10 h-6 rounded-full transition-all duration-300 flex items-center px-0.5",
+                                        form.is_active ? "bg-emerald-500" : "bg-slate-400"
+                                    )}
+                                >
+                                    <div className={clsx(
+                                        "w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300",
+                                        form.is_active ? "translate-x-4" : "translate-x-0"
+                                    )} />
+                                </button>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-secondary uppercase tracking-widest pl-1">Description</label>
-                        <textarea
-                            className="input bg-secondary/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-primary font-medium min-h-[100px]"
-                            placeholder="Describe the environment's purpose..."
-                            value={form.description}
-                            onChange={e => setForm({...form, description: e.target.value})}
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-between p-6 bg-secondary/20 rounded-[1.5rem] border border-theme">
-                        <div>
-                            <p className="text-sm font-bold text-primary">Blueprint Status</p>
-                            <p className="text-xs text-secondary font-medium">Toggle availability for deployments</p>
+                        
+                        <div className="md:col-span-4 space-y-1.5">
+                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Cloud Platform</label>
+                            <div className="relative">
+                                <select
+                                    className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 pr-10 text-primary font-bold appearance-none cursor-not-allowed"
+                                    value={form.provider}
+                                    disabled
+                                >
+                                    {providerOptions.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setForm({...form, is_active: !form.is_active})}
-                            className={clsx(
-                                "relative w-14 h-8 rounded-full transition-all duration-300 flex items-center px-1 shadow-inner",
-                                form.is_active ? "bg-emerald-500 shadow-emerald-500/20" : "bg-secondary"
-                            )}
-                        >
-                            <div className={clsx(
-                                "w-6 h-6 rounded-full bg-white shadow-xl transition-transform duration-300",
-                                form.is_active ? "translate-x-6" : "translate-x-0"
-                            )} />
-                        </button>
+
+                        <div className="md:col-span-8 space-y-1.5">
+                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Infrastructure Connection</label>
+                            <div className="relative">
+                                <select
+                                    className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 pr-10 text-primary font-bold appearance-none"
+                                    value={form.connection_id || ''}
+                                    onChange={e => {
+                                        setForm({...form, connection_id: e.target.value ? parseInt(e.target.value) : null});
+                                        setSelectedVMs([]);
+                                        setInventory(null);
+                                    }}
+                                >
+                                    <option value="" disabled>Select Connection</option>
+                                    {connections.filter(c => c.provider === form.provider).map(c => (
+                                        <option key={c.id} value={c.id}>{c.name} ({c.host})</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+                        </div>
+
+                        <div className="md:col-span-12 space-y-1.5">
+                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Design Brief (Description)</label>
+                            <textarea
+                                className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 text-primary font-medium min-h-[80px] text-sm"
+                                placeholder="Purpose and specifications of this training lab..."
+                                value={form.description}
+                                onChange={e => setForm({...form, description: e.target.value})}
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-4">
@@ -486,18 +551,18 @@ const Templates: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
+                    <div className="flex gap-4">
                         <button 
                             onClick={createModalOpen ? handleCreate : handleEdit}
-                            disabled={isSubmitting}
-                            className="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-blue-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                            disabled={isSubmitting || !form.name || !form.connection_id || selectedVMs.length === 0}
+                            className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:grayscale"
                         >
                             {isSubmitting ? (
-                                <RefreshCw className="w-6 h-6 animate-spin" />
+                                <RefreshCw className="w-5 h-5 animate-spin" />
                             ) : (
                                 <>
                                     <Check className="w-5 h-5 font-bold" />
-                                    <span>{createModalOpen ? "Commit Blueprint" : "Save Changes"}</span>
+                                    <span>{createModalOpen ? "Deploy Design" : "Update Specifications"}</span>
                                 </>
                             )}
                         </button>
@@ -514,7 +579,7 @@ const Templates: React.FC = () => {
                 maxWidth="3xl"
             >
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between gap-4 p-4 bg-secondary/20 rounded-2xl border border-theme">
+                    <div className="flex items-center justify-between gap-4 p-4 bg-secondary/10 dark:bg-black/20 rounded-2xl border border-theme">
                         <div className="relative flex-1">
                             <Search className="w-4 h-4 text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
                             <input 
@@ -528,7 +593,7 @@ const Templates: React.FC = () => {
                         <button 
                             onClick={syncInventory}
                             disabled={loadingInventory}
-                            className="flex items-center gap-2 px-4 py-2 bg-secondary/50 hover:bg-theme-hover rounded-xl text-xs font-bold transition-all border border-theme"
+                            className="flex items-center gap-2 px-4 py-2 bg-secondary/20 dark:bg-white/5 hover:bg-theme-hover rounded-xl text-xs font-bold transition-all border border-theme"
                         >
                             <RefreshCw className={clsx("w-4 h-4", loadingInventory && "animate-spin")} />
                             Sync Source
@@ -552,7 +617,7 @@ const Templates: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between p-6 bg-secondary/20 border-t border-theme rounded-b-[2rem] -mx-8 -mb-8">
+                    <div className="flex items-center justify-between p-6 bg-secondary/10 dark:bg-black/20 border-t border-theme rounded-b-[2rem] -mx-8 -mb-8">
                         <span className="text-sm font-bold text-primary">{selectedVMs.length} entities staged</span>
                         <button 
                             onClick={() => setVmSelectorOpen(false)}
@@ -587,25 +652,38 @@ const Templates: React.FC = () => {
                     </div>
                 </div>
             </Modal>
+            
+            {/* Provider Selection Modal */}
+            <ProviderSelectionModal 
+                isOpen={providerModalOpen}
+                onClose={() => setProviderModalOpen(false)}
+                onSelect={(providerId) => {
+                    setProviderModalOpen(false);
+                    setForm({ ...form, provider: providerId });
+                    setCreateModalOpen(true);
+                }}
+            />
         </div>
     );
 };
 
 // --- MODERN SUB-COMPONENTS ---
 
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+);
+
+const ChevronRightIcon = ({ className }: { className?: string }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+);
+
 const TemplateCard: React.FC<{ tpl: TemplateModel; onEdit: () => void; onDelete: () => void }> = ({ tpl, onEdit, onDelete }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const ProviderIcon = getProviderIcon(tpl.provider);
-    const ChevronDown = ({ className }: { className?: string }) => (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-    );
-    const ChevronRight = ({ className }: { className?: string }) => (
-        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-    );
     
     return (
         <div className="glass-light rounded-2xl border border-white/10 hover:border-purple-500/40 transition-all duration-300 relative group shadow-xl bg-white/5 dark:bg-gray-900/40 overflow-hidden">
@@ -616,7 +694,7 @@ const TemplateCard: React.FC<{ tpl: TemplateModel; onEdit: () => void; onDelete:
             >
                 {/* Expand Icon */}
                 <div className="text-secondary">
-                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    {isExpanded ? <ChevronDownIcon className="w-4 h-4" /> : <ChevronRightIcon className="w-4 h-4" />}
                 </div>
 
                 {/* Provider Icon */}
@@ -813,7 +891,7 @@ const InventoryVMRow: React.FC<{ vm: InventoryVM; isSelected: boolean; onToggle:
             "group relative flex items-center justify-between p-5 rounded-[1.75rem] cursor-pointer transition-all border overflow-hidden",
             isSelected 
                 ? "bg-purple-600/10 border-purple-500/50 shadow-[0_10px_30px_-10px_rgba(168,85,247,0.2)]" 
-                : "bg-secondary/30 border-white/5 hover:bg-secondary/50 hover:border-purple-500/30 shadow-md"
+                : "bg-secondary/10 dark:bg-black/20 border-white/5 hover:bg-secondary/30 dark:hover:bg-black/40 hover:border-purple-500/30 shadow-md"
         )}
     >
         <div className="flex items-center gap-5 relative z-10">

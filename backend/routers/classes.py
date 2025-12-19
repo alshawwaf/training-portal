@@ -4,7 +4,7 @@ from db.database import get_db
 from db.models import Class, ClassStatus, ClassEnvironment, EnvironmentVM, Template, TemplateVM
 from services.vsphere_service import vsphere_service
 from services.guacamole_service import guacamole_service
-from .logs import log_action
+from services.logging_service import logging_service
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
@@ -136,7 +136,7 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: 
     db.refresh(db_class)
     
     # Log Action
-    log_action(db, "CREATE_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Created class with template {cls.template_id}", user_id=current_user.id)
+    logging_service.log_action(db, "CREATE_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Created class with template {cls.template_id}", user_id=current_user.id)
 
     # Save JSON backup
     save_backup(db_class)
@@ -234,7 +234,7 @@ async def delete_class(class_id: int, db: Session = Depends(get_db)):
                 yield json.dumps({"status": "error", "message": "Class not found during execution"}) + "\n"
                 return
 
-            log_action(session, "DELETE_CLASS", f"Class: {class_name}", "STARTED", "Started deletion process")
+            logging_service.log_action(session, "DELETE_CLASS", f"Class: {class_name}", "STARTED", "Started deletion process")
             yield json.dumps({"status": "info", "message": f"Starting deletion for {class_name}..."}) + "\n"
             
             # Archive backup
@@ -258,7 +258,9 @@ async def delete_class(class_id: int, db: Session = Depends(get_db)):
                 for vm in env.vms:
                     yield json.dumps({"status": "detail", "message": f"  - Deleting VM: {vm.vm_name}..."}) + "\n"
                     try:
-                        vsphere_service.delete_vm(vm.vm_moid)
+                        # Get connection_id from template
+                        connection_id = current_class.template.connection_id if current_class.template else None
+                        vsphere_service.delete_vm(vm.vm_moid, connection_id=connection_id)
                     except Exception as e:
                         print(f"Failed to delete VM {vm.vm_name}: {e}")
                         yield json.dumps({"status": "warning", "message": f"    Failed to delete VM {vm.vm_name} from vSphere"}) + "\n"
@@ -270,7 +272,9 @@ async def delete_class(class_id: int, db: Session = Depends(get_db)):
             # Delete Folder
             yield json.dumps({"status": "progress", "message": "Cleaning up vSphere resources...", "percent": 80}) + "\n"
             try:
-                vsphere_service.delete_folder(class_name)
+                # Get connection_id from template
+                connection_id = current_class.template.connection_id if current_class.template else None
+                vsphere_service.delete_folder(class_name, connection_id=connection_id)
             except Exception as e:
                 print(f"Failed to delete folder {class_name}: {e}")
                 yield json.dumps({"status": "warning", "message": f"Failed to delete vSphere folder"}) + "\n"
@@ -287,11 +291,11 @@ async def delete_class(class_id: int, db: Session = Depends(get_db)):
             if backup_file.exists():
                 backup_file.unlink()
 
-            log_action(session, "DELETE_CLASS", f"Class: {class_name}", "SUCCESS", "Deleted class and associated resources")
+            logging_service.log_action(session, "DELETE_CLASS", f"Class: {class_name}", "SUCCESS", "Deleted class and associated resources")
             yield json.dumps({"status": "completed", "message": "Class and all associated resources deleted successfully", "percent": 100}) + "\n"
             
         except Exception as e:
-            log_action(session, "DELETE_CLASS", f"Class: {class_name}", "ERROR", f"Deletion failed: {str(e)}")
+            logging_service.log_action(session, "DELETE_CLASS", f"Class: {class_name}", "ERROR", f"Deletion failed: {str(e)}")
             yield json.dumps({"status": "error", "message": f"Critical Failure: {str(e)}"}) + "\n"
         finally:
             session.close()
@@ -374,7 +378,7 @@ async def provision_class(class_id: int, db: Session = Depends(get_db)):
             class_name = current_class.name
             
             # Log Start
-            log_action(session, "PROVISION_CLASS", f"Class: {class_name}", "STARTED", f"Started provisioning for {max_users} students")
+            logging_service.log_action(session, "PROVISION_CLASS", f"Class: {class_name}", "STARTED", f"Started provisioning for {max_users} students")
             yield json.dumps({"status": "info", "message": f"Starting provisioning for {class_name}..."}) + "\n"
 
             # 1. Create all ClassEnvironment records first
@@ -411,7 +415,8 @@ async def provision_class(class_id: int, db: Session = Depends(get_db)):
                     return vsphere_service.provision_vm(
                         vm_moid=tmpl_vm.vm_moid,
                         new_name=vm_name,
-                        folder_path=folder_path
+                        folder_path=folder_path,
+                        connection_id=current_template.connection_id
                     )
 
                 if provisioning_mode == "parallel":
@@ -510,14 +515,14 @@ async def provision_class(class_id: int, db: Session = Depends(get_db)):
                     yield json.dumps({"status": "progress", "message": f"Provisioning... ({completed_count}/{len(tasks)})", "percent": percent}) + "\n"
 
             if errors:
-                log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "WARNING", f"Completed with {len(errors)} errors: {', '.join(errors)}")
+                logging_service.log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "WARNING", f"Completed with {len(errors)} errors: {', '.join(errors)}")
                 yield json.dumps({"status": "completed_with_errors", "message": f"Completed with {len(errors)} errors.", "errors": errors, "percent": 100}) + "\n"
             else:
-                log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Successfully provisioned {completed_count} VMs")
+                logging_service.log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Successfully provisioned {completed_count} VMs")
                 yield json.dumps({"status": "completed", "message": "All environments provisioned successfully!", "percent": 100}) + "\n"
                 
         except Exception as e:
-            log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "ERROR", f"Critical Failure: {str(e)}")
+            logging_service.log_action(session, "PROVISION_CLASS", f"Class: {db_class.name}", "ERROR", f"Critical Failure: {str(e)}")
             yield json.dumps({"status": "error", "message": f"Critical Failure: {str(e)}"}) + "\n"
         finally:
             session.close()
@@ -539,8 +544,10 @@ def get_class_environments(class_id: int, db: Session = Depends(get_db)):
         vms = db.query(EnvironmentVM).filter(EnvironmentVM.env_id == env.id).all()
         vm_list = []
         for vm in vms:
+            # Get connection_id from template
+            connection_id = db_class.template.connection_id if db_class.template else None
             # Fetch latest state from vSphere (mock or real)
-            state_info = vsphere_service.get_vm_power_state(vm.vm_moid)
+            state_info = vsphere_service.get_vm_power_state(vm.vm_moid, connection_id=connection_id)
             vm_list.append({
                 "id": vm.id,
                 "name": vm.vm_name,
@@ -579,7 +586,9 @@ def control_vm_power(class_id: int, vm_id: int, body: VMPowerAction, db: Session
     if not env or env.class_id != class_id:
         raise HTTPException(status_code=403, detail="VM does not belong to this class")
 
-    result = vsphere_service.control_vm_power(vm.vm_moid, body.action)
+    # Get connection_id from template
+    connection_id = env.class_.template.connection_id if env and env.class_ and env.class_.template else None
+    result = vsphere_service.control_vm_power(vm.vm_moid, body.action, connection_id=connection_id)
     
     if not result["success"]:
         raise HTTPException(status_code=500, detail=result["message"])
@@ -599,7 +608,8 @@ def delete_vm(class_id: int, vm_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="VM does not belong to this class")
 
     # Call service to delete from vSphere
-    result = vsphere_service.delete_vm(vm.vm_moid)
+    connection_id = env.class_.template.connection_id if env and env.class_ and env.class_.template else None
+    result = vsphere_service.delete_vm(vm.vm_moid, connection_id=connection_id)
     
     if not result["success"]:
         # If VM not found in vSphere, we still want to delete from DB to clean up "zombies"
@@ -636,7 +646,8 @@ def get_vmrc_console(class_id: int, vm_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="VM does not have a vSphere MOID")
 
     # Generate VMRC ticket via vSphere API
-    result = vsphere_service.generate_vmrc_ticket(vm.vm_moid)
+    connection_id = env.class_.template.connection_id if env and env.class_ and env.class_.template else None
+    result = vsphere_service.generate_vmrc_ticket(vm.vm_moid, connection_id=connection_id)
     
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("message", "Failed to generate VMRC ticket"))
@@ -742,12 +753,12 @@ def control_environment_power(env_id: int, body: VMPowerAction, db: Session = De
     if not env:
         raise HTTPException(status_code=404, detail="Environment not found")
         
-    success_count = 0
-    errors = []
+    # Get connection_id from template
+    connection_id = env.class_.template.connection_id if env.class_ and env.class_.template else None
     
     for vm in env.vms:
         try:
-            result = vsphere_service.control_vm_power(vm.vm_moid, body.action)
+            result = vsphere_service.control_vm_power(vm.vm_moid, body.action, connection_id=connection_id)
             if result["success"]:
                 success_count += 1
                 # Update DB state if returned
@@ -777,12 +788,12 @@ def revert_environment(env_id: int, db: Session = Depends(get_db)):
     if not env:
         raise HTTPException(status_code=404, detail="Environment not found")
         
-    success_count = 0
-    errors = []
+    # Get connection_id from template
+    connection_id = env.class_.template.connection_id if env.class_ and env.class_.template else None
     
     for vm in env.vms:
         try:
-            result = vsphere_service.revert_vm(vm.vm_moid)
+            result = vsphere_service.revert_vm(vm.vm_moid, connection_id=connection_id)
             if result["success"]:
                 success_count += 1
             else:
@@ -809,10 +820,13 @@ def delete_environment_by_id(env_id: int, db: Session = Depends(get_db)):
     # Create list of VMs to delete to avoid modification during iteration issues
     vms_to_delete = list(env.vms)
     
+    # Get connection_id from template
+    connection_id = env.class_.template.connection_id if env.class_ and env.class_.template else None
+    
     for vm in vms_to_delete:
         try:
             # Delete from vSphere
-            result = vsphere_service.delete_vm(vm.vm_moid)
+            result = vsphere_service.delete_vm(vm.vm_moid, connection_id=connection_id)
             if not result["success"] and "not found" not in str(result.get("message", "")).lower():
                  errors.append(f"{vm.name}: {result.get('message', 'Unknown error')}")
             
@@ -844,11 +858,12 @@ def suspend_all_vms(class_id: int, db: Session = Depends(get_db)):
     
     success_count = 0
     errors = []
+    connection_id = db_class.template.connection_id if db_class.template else None
     
     for env in environments:
         for vm in env.vms:
             try:
-                result = vsphere_service.control_vm_power(vm.vm_moid, "suspend")
+                result = vsphere_service.control_vm_power(vm.vm_moid, "suspend", connection_id=connection_id)
                 if result["success"]:
                     success_count += 1
                 else:
@@ -874,11 +889,12 @@ def revert_all_vms(class_id: int, db: Session = Depends(get_db)):
     
     success_count = 0
     errors = []
+    connection_id = db_class.template.connection_id if db_class.template else None
     
     for env in environments:
         for vm in env.vms:
             try:
-                result = vsphere_service.revert_vm(vm.vm_moid)
+                result = vsphere_service.revert_vm(vm.vm_moid, connection_id=connection_id)
                 if result["success"]:
                     success_count += 1
                 else:
@@ -904,11 +920,12 @@ def delete_all_environments(class_id: int, db: Session = Depends(get_db)):
     
     success_count = 0
     errors = []
+    connection_id = db_class.template.connection_id if db_class.template else None
     
     for env in environments:
         for vm in env.vms:
             try:
-                result = vsphere_service.delete_vm(vm.vm_moid)
+                result = vsphere_service.delete_vm(vm.vm_moid, connection_id=connection_id)
                 if result["success"]:
                     success_count += 1
                 else:

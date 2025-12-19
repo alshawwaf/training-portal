@@ -108,6 +108,7 @@ class Class(Base):
     status = Column(String, default=ClassStatus.DRAFT)
     description = Column(Text, nullable=True)
     join_token = Column(String, unique=True, index=True, nullable=True)  # UUID for shareable join link
+    allow_multi_env = Column(Boolean, default=False) # Allow same student to have multiple environments
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
@@ -134,6 +135,45 @@ class Class(Base):
         }
 
 
+class InfrastructureConnection(Base):
+    __tablename__ = "infrastructure_connections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    provider = Column(String)  # vSphere, Proxmox
+    host = Column(String)
+    port = Column(Integer)
+    user = Column(String)
+    password = Column(String)
+    token_id = Column(String, nullable=True) # For Proxmox
+    token_secret = Column(String, nullable=True) # For Proxmox
+    node = Column(String, nullable=True) # For Proxmox
+    verify_ssl = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    templates = relationship("Template", back_populates="connection")
+
+    def to_dict(self, mask_password=True):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "provider": self.provider,
+            "host": self.host,
+            "port": self.port,
+            "user": self.user,
+            "password": "********" if mask_password and self.password else self.password,
+            "token_id": self.token_id,
+            "token_secret": "********" if mask_password and self.token_secret else self.token_secret,
+            "node": self.node,
+            "verify_ssl": self.verify_ssl,
+            "is_active": self.is_active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
 class Template(Base):
     __tablename__ = "templates"
 
@@ -142,12 +182,14 @@ class Template(Base):
     description = Column(Text, nullable=True)
     icon = Column(String, default="🖥️")
     provider = Column(String, default="vSphere")  # vSphere, Proxmox
+    connection_id = Column(Integer, ForeignKey("infrastructure_connections.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     
     # Relationships
     vms = relationship("TemplateVM", back_populates="template", cascade="all, delete-orphan")
+    connection = relationship("InfrastructureConnection", back_populates="templates")
 
     def to_dict(self):
         return {
@@ -156,6 +198,7 @@ class Template(Base):
             "description": self.description,
             "icon": self.icon,
             "provider": self.provider,
+            "connection_id": self.connection_id,
             "is_active": self.is_active,
             "vms": [vm.to_dict() for vm in self.vms] if self.vms else [],
             "created_at": self.created_at.isoformat() if self.created_at else None,
@@ -206,6 +249,8 @@ class ClassEnvironment(Base):
     class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"))
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True) # User who claimed environment
     name = Column(String) # e.g., "Student 1"
+    student_number = Column(Integer) # Environment index/number
+    status = Column(String, default="ready") # ready, claimed
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships
@@ -227,6 +272,9 @@ class EnvironmentVM(Base):
     guest_os = Column(String, nullable=True)  # Guest OS type (e.g., "Windows 10", "Linux")
     access_protocol = Column(String, nullable=True)  # ssh, rdp (from template)
     access_port = Column(Integer, nullable=True)  # 22, 3389 (from template)
+    role = Column(String, nullable=True) # e.g. "Primary", "Database"
+    os_type = Column(String, nullable=True) # e.g. "windows", "linux"
+    status = Column(String, default="poweredOff") # poweredOn, poweredOff
     
     environment = relationship("ClassEnvironment", back_populates="vms")
 
@@ -245,3 +293,20 @@ class ActionLog(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     user = relationship("User")
+
+
+class ClassStudent(Base):
+    """Students who join classes (no real account required)"""
+    __tablename__ = "class_students"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, index=True)
+    name = Column(String, nullable=True)  # Optional display name
+    class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), index=True)
+    environment_id = Column(Integer, ForeignKey("class_environments.id", ondelete="CASCADE"), nullable=True)
+    session_token = Column(String, unique=True, index=True)  # For authentication
+    joined_at = Column(DateTime, default=datetime.datetime.utcnow)
+    last_active = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    class_ = relationship("Class")
+    environment = relationship("ClassEnvironment")

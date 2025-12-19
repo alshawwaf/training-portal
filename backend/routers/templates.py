@@ -40,6 +40,7 @@ class TemplateCreate(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = "🖥️"
     provider: Optional[str] = "vSphere"
+    connection_id: Optional[int] = None
     is_active: Optional[bool] = True
     vms: Optional[List[TemplateVMCreate]] = []
 
@@ -49,6 +50,7 @@ class TemplateUpdate(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
     provider: Optional[str] = None
+    connection_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 
@@ -72,6 +74,7 @@ def create_template(template: TemplateCreate, db: Session = Depends(get_db), cur
         description=template.description,
         icon=template.icon,
         provider=template.provider,
+        connection_id=template.connection_id,
         is_active=template.is_active
     )
     db.add(new_template)
@@ -123,6 +126,8 @@ def update_template(template_id: int, update: TemplateUpdate, db: Session = Depe
         template.icon = update.icon
     if update.provider is not None:
         template.provider = update.provider
+    if update.connection_id is not None:
+        template.connection_id = update.connection_id
     if update.is_active is not None:
         template.is_active = update.is_active
     

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { LogOut, User, LayoutDashboard, Settings, BookOpen, Layers, Moon, Sun, Activity } from 'lucide-react';
+import { LogOut, User, LayoutDashboard, Settings, BookOpen, Layers, Moon, Sun, Activity, Monitor } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -17,6 +17,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   ];
 
   const monitoringItems = [
+    { label: 'Instructor Console', path: '/monitoring/console', icon: Monitor },
+    { label: 'Active Sessions', path: '/monitoring/sessions', icon: User },
     { label: 'Logs', path: '/monitoring/logs', icon: Activity },
   ];
 

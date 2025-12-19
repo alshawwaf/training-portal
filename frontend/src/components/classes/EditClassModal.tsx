@@ -137,7 +137,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({ isOpen, onClose, onSucc
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">Enrollment Key</p>
-                                        <p className="text-sm font-mono font-black text-purple-600 dark:text-purple-400 uppercase">{form.passcode || 'UNTITLED'}</p>
+                                        <p className="text-sm font-mono font-black text-purple-600 dark:text-purple-400">{form.passcode || '—'}</p>
                                     </div>
                                 </div>
                             </div>

@@ -1,0 +1,258 @@
+{
+  "last_sync": "2025-12-19T13:57:02.726872",
+  "datacenters": [
+    {
+      "name": "vCenter-Datacenter",
+      "status": "gray"
+    },
+    {
+      "name": "alshawwaf",
+      "status": "gray"
+    }
+  ],
+  "clusters": [],
+  "hosts": [
+    {
+      "name": "192.168.10.11",
+      "state": "connected",
+      "status": "red"
+    },
+    {
+      "name": "192.168.10.9",
+      "state": "connected",
+      "status": "red"
+    }
+  ],
+  "networks": [
+    {
+      "name": "VLAN_31_10_20_1_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_21_10_10_1_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_6_198_51_100_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "intel_10gb_dvs-DVUplinks-199",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_34_10_20_4_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_12_10_1_2_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_5_203_0_113_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_33_10_20_3_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_15_1_1_1_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_11_10_1_1_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_13_10_1_3_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_14_10_1_4_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_7_192_0_2_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_22_10_10_2_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_24_10_10_4_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_8_10_0_0_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_32_10_20_2_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "VLAN_23_10_10_3_0_24",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "vCenter_mgmt",
+      "type": "vim.Network"
+    },
+    {
+      "name": "vcenter-10gb-portgroup",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    },
+    {
+      "name": "vCenter-DSwitch-DVUplinks-234",
+      "type": "vim.dvs.DistributedVirtualPortgroup"
+    }
+  ],
+  "vms": [
+    {
+      "name": "SBT-CLass-Student_1-pfSense",
+      "moid": "vm-5285",
+      "power_state": "poweredOn",
+      "guest_os": "FreeBSD 12 or later versions (64-bit)",
+      "cpu": 2,
+      "memory_mb": 4096,
+      "is_template": false
+    },
+    {
+      "name": "Proxmox",
+      "moid": "vm-5230",
+      "power_state": "suspended",
+      "guest_os": "Debian GNU/Linux 11 (64-bit)",
+      "cpu": 32,
+      "memory_mb": 65536,
+      "is_template": false
+    },
+    {
+      "name": "pfSense",
+      "moid": "vm-2015",
+      "power_state": "poweredOff",
+      "guest_os": "FreeBSD 12 or later versions (64-bit)",
+      "cpu": 2,
+      "memory_mb": 4096,
+      "is_template": true
+    },
+    {
+      "name": "windows_sase_client",
+      "moid": "vm-1011",
+      "power_state": "suspended",
+      "guest_os": "Microsoft Windows 10 (64-bit)",
+      "cpu": 4,
+      "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "Windows Server-SBT-R82",
+      "moid": "vm-261",
+      "power_state": "poweredOn",
+      "guest_os": "Microsoft Windows Server 2008 R2 (64-bit)",
+      "cpu": 4,
+      "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "windows_harmony_ep",
+      "moid": "vm-4013",
+      "power_state": "suspended",
+      "guest_os": "Microsoft Windows 10 (64-bit)",
+      "cpu": 4,
+      "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "GW-SBT-R82",
+      "moid": "vm-263",
+      "power_state": "poweredOn",
+      "guest_os": "Other (32-bit)",
+      "cpu": 8,
+      "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "Spark",
+      "moid": "vm-2012",
+      "power_state": "poweredOff",
+      "guest_os": "Other 4.x or later Linux (64-bit)",
+      "cpu": 4,
+      "memory_mb": 4096,
+      "is_template": true
+    },
+    {
+      "name": "client-r8210",
+      "moid": "vm-2004",
+      "power_state": "poweredOff",
+      "guest_os": "Microsoft Windows 10 (64-bit)",
+      "cpu": 4,
+      "memory_mb": 16384,
+      "is_template": true
+    },
+    {
+      "name": "Windows Client-SBT-R82",
+      "moid": "vm-266",
+      "power_state": "poweredOn",
+      "guest_os": "Microsoft Windows 10 (64-bit)",
+      "cpu": 4,
+      "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "Jump Server-SBT-R82",
+      "moid": "vm-264",
+      "power_state": "poweredOn",
+      "guest_os": "Microsoft Windows 10 (64-bit)",
+      "cpu": 16,
+      "memory_mb": 32768,
+      "is_template": false
+    },
+    {
+      "name": "SMS-SBT-R82",
+      "moid": "vm-265",
+      "power_state": "poweredOn",
+      "guest_os": "Other (32-bit)",
+      "cpu": 4,
+      "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "Android-harmony-mobile",
+      "moid": "vm-4015",
+      "power_state": "suspended",
+      "guest_os": "Other 3.x Linux (64-bit)",
+      "cpu": 2,
+      "memory_mb": 6144,
+      "is_template": false
+    },
+    {
+      "name": "ubuntu-25",
+      "moid": "vm-2001",
+      "power_state": "poweredOn",
+      "guest_os": "Ubuntu Linux (64-bit)",
+      "cpu": 32,
+      "memory_mb": 65536,
+      "is_template": false
+    },
+    {
+      "name": "Kali Linux-SBT-R82",
+      "moid": "vm-262",
+      "power_state": "poweredOn",
+      "guest_os": "Debian GNU/Linux 10 (64-bit)",
+      "cpu": 4,
+      "memory_mb": 12288,
+      "is_template": false
+    },
+    {
+      "name": "VMware vCenter Server 8.0.3",
+      "moid": "vm-232",
+      "power_state": "poweredOn",
+      "guest_os": "Other 3.x or later Linux (64-bit)",
+      "cpu": 12,
+      "memory_mb": 32768,
+      "is_template": false
+    }
+  ]
+}

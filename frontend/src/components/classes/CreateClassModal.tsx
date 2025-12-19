@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, Users, Key, ChevronDown, Check, Calendar, Sparkles, BookOpen, Info } from 'lucide-react';
+import { Layers, Users, Key, ChevronDown, Check, Calendar, Sparkles, BookOpen, Info, Zap } from 'lucide-react';
 import Modal from '../Modal';
 import DatePicker from '../DatePicker';
 import { getProviderIcon } from '../ProviderIcons';
@@ -31,6 +31,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
         end_date: new Date(Date.now() + 7*24*60*60*1000), // +7 days
         status: 'draft',
         description: '',
+        allow_multi_env: false,
     };
 
     const [form, setForm] = useState(defaultForm);
@@ -64,8 +65,26 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                 template_id: Number(form.template_id)
             };
 
-            await api.post('/classes/', payload);
-            showToast('Class created successfully', 'success');
+            const res = await api.post('/classes/', payload);
+            
+            // If active (Provision Now), trigger provisioning
+            if (form.status === 'active') {
+                try {
+                    // Trigger provisioning (fire and forget or basic await)
+                    // Note: provisioning endpoint streams, but axios will wait for connection closing or we skip await if we want async
+                    // Best transparency: Let it start and confirm.
+                    api.post(`/classes/${res.data.id}/provision`).catch(err => {
+                        console.error("Provisioning trigger error (background):", err);
+                    });
+                    showToast('Class created & provisioning started', 'success');
+                } catch (provError) {
+                    console.error("Provisioning failed to start:", provError);
+                    showToast('Class created, but provisioning failed to start', 'warning');
+                }
+            } else {
+                showToast('Class draft created successfully', 'success');
+            }
+
             onSuccess();
             onClose();
         } catch (error) {
@@ -86,12 +105,12 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
             onClose={onClose}
             title="Create New Class"
             icon={<Sparkles className="w-6 h-6 text-blue-400" />}
-            maxWidth="3xl"
+            maxWidth="2xl"
         >
-            <form onSubmit={handleCreate} className="space-y-8">
+            <form onSubmit={handleCreate} className="space-y-6">
                  {/* Header Information Card */}
-                 <div className="glass-light p-6 rounded-[2rem] border border-white/10 bg-gradient-to-br from-blue-500/5 to-purple-500/5">
-                    <div className="flex flex-col md:flex-row gap-6">
+                 <div className="glass-light p-5 rounded-2xl border border-white/10 dark:border-white/5 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-blue-500/10 dark:to-purple-500/10">
+                    <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 space-y-4">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] pl-1">Name & Description</label>
@@ -101,7 +120,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                         type="text"
                                         value={form.name}
                                         onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                        className="input pl-12 bg-secondary/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-primary font-bold placeholder:text-secondary/40"
+                                        className="input pl-12 bg-secondary/10 dark:bg-black/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-primary font-bold placeholder:text-secondary/40"
                                         placeholder="e.g. Advanced Cybersecurity Workshop 2025"
                                         required
                                         autoFocus
@@ -111,7 +130,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                     type="text"
                                     value={form.description}
                                     onChange={(e) => setForm({ ...form, description: e.target.value })}
-                                    className="input bg-secondary/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-sm text-primary placeholder:text-secondary/40"
+                                    className="input bg-secondary/10 dark:bg-black/20 border-theme/40 focus:border-blue-500 rounded-2xl p-4 text-sm text-primary placeholder:text-secondary/40"
                                     placeholder="Optional brief description..."
                                 />
                             </div>
@@ -120,7 +139,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                         <div className="w-full md:w-64 space-y-4">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] pl-1">Access Control</label>
-                                <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between group-focus-within:border-blue-500/50 transition-colors">
+                                <div className="p-4 rounded-2xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 flex items-center justify-between group-focus-within:border-blue-500/50 transition-colors">
                                     <div className="flex items-center gap-3 w-full">
                                         <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
                                             <Key className="w-5 h-5" />
@@ -131,7 +150,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                                 type="text"
                                                 value={form.passcode}
                                                 onChange={(e) => setForm({...form, passcode: e.target.value})}
-                                                className="w-full bg-transparent border-none text-sm font-mono font-black text-blue-600 dark:text-blue-400 uppercase p-0 focus:ring-0 placeholder-blue-500/30"
+                                                className="w-full bg-transparent border-none text-sm font-mono font-black text-blue-600 dark:text-blue-400 p-0 focus:ring-0 placeholder-blue-500/30"
                                                 placeholder="CODE"
                                                 required
                                             />
@@ -143,9 +162,9 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left Column: Logistics */}
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         <div className="flex items-center gap-2 mb-2">
                             <Calendar className="w-4 h-4 text-purple-500" />
                             <h3 className="text-[11px] font-black text-primary uppercase tracking-[0.25em]">Schedule</h3>
@@ -175,27 +194,29 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                             </div>
                         </div>
 
-                        <div className="p-6 rounded-[2rem] bg-secondary/10 border border-theme flex items-center justify-between">
+                        <div className="p-4 rounded-2xl bg-secondary/10 border border-theme flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                                    <Users className="w-6 h-6 text-purple-500" />
+                                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                                    <Layers className="w-6 h-6 text-blue-500" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-black text-primary uppercase tracking-tight">Capacity</p>
-                                    <p className="text-xs text-secondary font-medium">Max concurrent students</p>
+                                    <p className="text-sm font-black text-primary uppercase tracking-tight">Multiple Envs</p>
+                                    <p className="text-xs text-secondary font-medium">Allow same user multi-env</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 bg-secondary/20 p-2 rounded-xl border border-theme">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="200"
-                                    value={form.max_users}
-                                    onChange={(e) => setForm({ ...form, max_users: parseInt(e.target.value) })}
-                                    className="w-16 bg-transparent text-center text-lg font-black text-primary focus:outline-none"
-                                />
-                                <span className="text-[10px] font-black text-secondary uppercase pr-2">Users</span>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setForm({ ...form, allow_multi_env: !form.allow_multi_env })}
+                                className={clsx(
+                                    "relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none",
+                                    form.allow_multi_env ? "bg-blue-600" : "bg-secondary/40"
+                                )}
+                            >
+                                <div className={clsx(
+                                    "absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 shadow-sm",
+                                    form.allow_multi_env ? "translate-x-6" : "translate-x-0"
+                                )} />
+                            </button>
                         </div>
                     </div>
 
@@ -215,8 +236,8 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                 className={clsx(
                                     "w-full flex items-center justify-between p-4 rounded-[2rem] border transition-all duration-300",
                                     isTemplateDropdownOpen 
-                                        ? "bg-secondary border-blue-500/50 shadow-2xl ring-4 ring-blue-500/10 z-50" 
-                                        : "bg-secondary/30 border-theme hover:border-blue-500/30 hover:bg-secondary/50 shadow-lg"
+                                        ? "bg-secondary dark:bg-secondary-bg border-blue-500/50 shadow-2xl ring-4 ring-blue-500/10 z-50" 
+                                        : "bg-secondary/10 dark:bg-black/20 border-theme hover:border-blue-500/30 hover:bg-secondary/20 shadow-lg"
                                 )}
                             >
                                 <div className="flex items-center gap-5">
@@ -241,7 +262,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                             </button>
 
                             {isTemplateDropdownOpen && (
-                                <div className="absolute top-full left-0 right-0 mt-3 p-2 bg-primary border border-theme rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] z-[60] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                                <div className="absolute top-full left-0 right-0 mt-3 p-2 bg-secondary border border-theme/50 rounded-[2rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] z-[60] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
                                     <div className="max-h-[300px] overflow-y-auto custom-scrollbar pr-2 space-y-2">
                                         {templates.map(template => {
                                             const ItemIcon = getProviderIcon(template.provider);
@@ -311,30 +332,51 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
 
                 {/* Footer */}
                 <div className="flex items-center gap-4 pt-6 mt-4 border-t border-theme">
-                     <button
+                    <button
                         type="button"
                         onClick={onClose}
-                        className="px-8 py-4 bg-secondary/30 text-secondary hover:text-primary hover:bg-secondary/50 rounded-2xl font-bold transition-all border border-transparent hover:border-theme"
+                        className="px-6 py-3 bg-secondary/30 text-secondary hover:text-primary hover:bg-secondary/50 rounded-xl font-bold transition-all border border-transparent hover:border-theme"
                     >
                         Cancel
                     </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-blue-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 tracking-widest uppercase italic"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Initializing...
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles className="w-5 h-5" />
-                                Provision Class
-                            </>
-                        )}
-                    </button>
+                    
+                    <div className="flex-1 flex items-center justify-end gap-3">
+                        {/* Provisioning Option Dropdown */}
+                        <div className="relative">
+                            <select
+                                value={form.status === 'active' ? 'now' : 'later'}
+                                onChange={(e) => setForm({ ...form, status: e.target.value === 'now' ? 'active' : 'draft' })}
+                                className="appearance-none pl-10 pr-10 py-3 bg-secondary dark:bg-gray-800 border border-theme/50 hover:border-blue-500/50 rounded-xl text-sm font-bold text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer transition-all min-w-[200px]"
+                            >
+                                <option value="now" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Provision Now (Active)</option>
+                                <option value="later" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Provision Later (Draft)</option>
+                            </select>
+                            {form.status === 'active' ? (
+                                <Zap className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                            ) : (
+                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                            )}
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary pointer-events-none" />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Creating...
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="w-4 h-4" />
+                                    Create Class
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </form>
         </Modal>
