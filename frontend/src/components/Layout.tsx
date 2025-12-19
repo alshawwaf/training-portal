@@ -82,33 +82,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 ))}</div>
             </div>
 
-            {isAdmin && (
-                <div className="pt-2">
-                  <p className="px-4 mb-3 text-[10px] font-bold text-purple-400/80 uppercase tracking-[0.2em]">Monitoring</p>
-                  <div className="space-y-1.5">{monitoringItems.map(item => (
-                    <Link
-                        key={item.path}
-                        to={item.path}
-                        className={clsx(
-                            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group relative overflow-hidden",
-                            location.pathname === item.path
-                                ? "text-white"
-                                : "text-secondary hover:text-primary hover:bg-secondary/40"
-                        )}
-                    >
-                        {location.pathname === item.path && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 shadow-[0_4px_12px_rgba(147,51,234,0.3)]" />
-                        )}
-                        <item.icon className={clsx(
-                            "w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110",
-                            location.pathname === item.path ? "text-white" : "text-purple-500/70 group-hover:text-purple-500"
-                        )} />
-                        <span className="relative z-10">{item.label}</span>
-                    </Link>
-                  ))}</div>
-                </div>
-            )}
-
             <div className="pt-2">
                 <p className="px-4 mb-3 text-[10px] font-bold text-emerald-400/80 uppercase tracking-[0.2em]">Workspace</p>
                 <div className="space-y-1.5">{workspaceItems.map(item => (
@@ -134,7 +107,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 ))}</div>
             </div>
 
-            {/* Management section - Admin only, placed just above Settings */}
+            {/* Management section - Admin only */}
             {isAdmin && (
                 <div className="pt-2">
                   <p className="px-4 mb-3 text-[10px] font-bold text-blue-400/80 uppercase tracking-[0.2em]">Management</p>
@@ -162,6 +135,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </div>
             )}
 
+            {/* Settings */}
             <div className="pt-2">
                 <div className="space-y-1.5">
                     <Link
@@ -184,6 +158,34 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     </Link>
                 </div>
             </div>
+
+            {/* Monitoring section - Admin only, placed below Settings */}
+            {isAdmin && (
+                <div className="pt-2">
+                  <p className="px-4 mb-3 text-[10px] font-bold text-purple-400/80 uppercase tracking-[0.2em]">Monitoring</p>
+                  <div className="space-y-1.5">{monitoringItems.map(item => (
+                    <Link
+                        key={item.path}
+                        to={item.path}
+                        className={clsx(
+                            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group relative overflow-hidden",
+                            location.pathname === item.path
+                                ? "text-white"
+                                : "text-secondary hover:text-primary hover:bg-secondary/40"
+                        )}
+                    >
+                        {location.pathname === item.path && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 shadow-[0_4px_12px_rgba(147,51,234,0.3)]" />
+                        )}
+                        <item.icon className={clsx(
+                            "w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110",
+                            location.pathname === item.path ? "text-white" : "text-purple-500/70 group-hover:text-purple-500"
+                        )} />
+                        <span className="relative z-10">{item.label}</span>
+                    </Link>
+                  ))}</div>
+                </div>
+            )}
         </nav>
 
         <div className="p-4 mt-auto">

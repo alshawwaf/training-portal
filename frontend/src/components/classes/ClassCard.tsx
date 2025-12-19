@@ -285,21 +285,54 @@ const ClassCard: React.FC<ClassCardProps> = ({
                   {cls.passcode || '—'}
                 </div>
               </div>
-              {/* Join Link */}
-              {joinUrl && (
-                <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
-                  <div className="flex items-center gap-2 text-xs text-emerald-500 mb-1">
-                    <Link2 className="w-3 h-3" /> Join Link
-                  </div>
-                  <button
-                    onClick={copyJoinLink}
-                    className="flex items-center gap-1 text-sm font-medium text-emerald-500 hover:text-emerald-400 transition-colors"
-                  >
-                    <Copy className="w-3 h-3" /> Copy Link
-                  </button>
-                </div>
-              )}
             </div>
+
+            {/* Student Access Section - Prominent and Copiable */}
+            {joinUrl && (
+              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 p-4 rounded-xl border border-emerald-500/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-emerald-500/20 rounded-lg">
+                    <Link2 className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <span className="text-sm font-bold text-emerald-400">Student Access</span>
+                </div>
+                
+                {/* Join Link */}
+                <div className="space-y-2 mb-3">
+                  <label className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-wide">Join Link</label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      readOnly 
+                      value={joinUrl} 
+                      className="flex-1 px-3 py-2 bg-slate-900 border border-emerald-500/30 rounded-lg text-sm text-white font-mono text-xs truncate"
+                    />
+                    <button
+                      onClick={copyJoinLink}
+                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition-colors shrink-0"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Copy
+                    </button>
+                  </div>
+                </div>
+
+                {/* Access Info Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-slate-900/50 rounded-lg p-2.5 border border-white/5">
+                    <div className="text-[10px] font-bold text-secondary uppercase tracking-wide mb-0.5">Passcode</div>
+                    <div className="text-sm font-mono font-bold text-white">{cls.passcode}</div>
+                  </div>
+                  <div className="bg-slate-900/50 rounded-lg p-2.5 border border-white/5">
+                    <div className="text-[10px] font-bold text-secondary uppercase tracking-wide mb-0.5">Max Students</div>
+                    <div className="text-sm font-bold text-white">{cls.max_users}</div>
+                  </div>
+                </div>
+                
+                <p className="text-[10px] text-emerald-500/60 mt-2">
+                  Share this link with students. They'll use the passcode to access their class environment.
+                </p>
+              </div>
+            )}
 
             {/* Power Operations */}
             <div className="flex items-center gap-2">
