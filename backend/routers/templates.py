@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from db.database import get_db
+from .auth import get_current_user
+from db.models import User, Template, TemplateVM
 from db.database import SessionLocal
 from db.models import Template, TemplateVM
 from pydantic import BaseModel
@@ -11,12 +14,6 @@ logger = logging.getLogger("se_portal")
 router = APIRouter(prefix="/templates", tags=["templates"])
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # Pydantic Schemas
@@ -57,14 +54,18 @@ class TemplateUpdate(BaseModel):
 
 # Routes
 @router.get("/")
-def list_templates(db: Session = Depends(get_db)):
-    """List all templates with their VMs"""
+def list_templates(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """List all templates with their VMs - role-based filtering"""
+    # Students don't see templates (they only access their assigned VMs)
+    if current_user.role not in ['admin', 'super_admin', 'administrator', 'instructor']:
+        return []
+    
     templates = db.query(Template).order_by(Template.name).all()
     return [t.to_dict() for t in templates]
 
 
 @router.post("/")
-def create_template(template: TemplateCreate, db: Session = Depends(get_db)):
+def create_template(template: TemplateCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Create a new template with optional VMs"""
     new_template = Template(
         name=template.name,
@@ -99,7 +100,7 @@ def create_template(template: TemplateCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{template_id}")
-def get_template(template_id: int, db: Session = Depends(get_db)):
+def get_template(template_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get a single template by ID with all its VMs"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:

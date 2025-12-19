@@ -58,7 +58,7 @@ const MyClasses: React.FC = () => {
                         Refresh
                     </button>
                     <Link
-                        to="/classes/new"
+                        to="/classes"
                         className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                         <Plus className="w-4 h-4" />
@@ -76,7 +76,7 @@ const MyClasses: React.FC = () => {
                     <div className="text-center py-16">
                         <BookOpen className="w-12 h-12 text-secondary mx-auto mb-3" />
                         <p className="text-secondary mb-4">You haven't created any classes yet</p>
-                        <Link to="/classes/new" className="text-blue-500 hover:text-blue-400 font-medium">
+                        <Link to="/classes" className="text-blue-500 hover:text-blue-400 font-medium">
                             Create your first class →
                         </Link>
                     </div>
@@ -94,7 +94,6 @@ const MyClasses: React.FC = () => {
                                 // If I pass empty functions, the buttons in ClassCard will just close the menu and do nothing.
                                 // Let's leave them as no-op for now to get the visual consistency.
                                 onEdit={() => {}}
-                                onDelete={() => {}}
                                 onRefresh={fetchClasses} // This is useful
                             />
                         ))}

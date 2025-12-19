@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
-import { User, Mail, Lock, Save, ChevronRight, Eye, EyeOff, Edit3 } from 'lucide-react';
+import { Lock, Save, ChevronRight, Eye, EyeOff, Edit3 } from 'lucide-react';
 import Modal from '../components/Modal';
 
 const Profile: React.FC = () => {

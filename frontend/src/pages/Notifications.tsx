@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
-import { Bell, Mail, Globe, Send, Check, ChevronRight, Eye, EyeOff, Settings, Smartphone } from 'lucide-react';
+import { Mail, Globe, Send, Check, ChevronRight, Eye, EyeOff, Settings } from 'lucide-react';
 import Modal from '../components/Modal';
 
 interface NotificationChannel {

@@ -11,11 +11,16 @@ from typing import List, Optional
 import json
 import base64
 import os
+import uuid
 from pathlib import Path
 
 import logging
 router = APIRouter(prefix="/classes", tags=["classes"])
 logger = logging.getLogger("classes")
+
+# Import auth dependency
+from .auth import get_current_user
+from db.models import User
 
 # JSON backup directory
 BACKUP_DIR = Path("data/backups/classes")
@@ -30,7 +35,7 @@ class ClassCreate(BaseModel):
     blueprint_id: Optional[str] = None # Legacy Proxmox
     template_id: Optional[int] = None # vSphere Template ID
     max_users: int
-    passcode: str
+    passcode: str = "Cpwins!1"  # Default password
     start_date: datetime
     end_date: datetime
     status: Optional[str] = "draft"
@@ -70,6 +75,7 @@ class ClassRead(BaseModel):
     instructor_id: int
     status: str
     description: Optional[str] = None
+    join_token: Optional[str] = None  # Shareable link token
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     
@@ -100,7 +106,7 @@ def save_all_backups(db: Session):
 
 # CREATE
 @router.post("/", response_model=ClassRead)
-def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
+def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Validate status
     status = cls.status if cls.status in VALID_STATUSES else "draft"
     
@@ -108,6 +114,9 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
     existing_class = db.query(Class).filter(Class.name == cls.name).first()
     if existing_class:
         raise HTTPException(status_code=400, detail="Class name already exists")
+    
+    # Generate unique join token for shareable link
+    join_token = str(uuid.uuid4())[:8]  # Short 8-char token
     
     db_class = Class(
         name=cls.name,
@@ -119,14 +128,15 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
         end_date=cls.end_date,
         status=status,
         description=cls.description,
-        instructor_id=1  # Mock instructor
+        instructor_id=current_user.id,  # Set to current user
+        join_token=join_token
     )
     db.add(db_class)
     db.commit()
     db.refresh(db_class)
     
     # Log Action
-    log_action(db, "CREATE_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Created class with template {cls.template_id}")
+    log_action(db, "CREATE_CLASS", f"Class: {db_class.name}", "SUCCESS", f"Created class with template {cls.template_id}", user_id=current_user.id)
 
     # Save JSON backup
     save_backup(db_class)
@@ -134,14 +144,30 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db)):
     
     return db_class
 
-# READ ALL
+# READ ALL - Role-based filtering
 @router.get("/", response_model=List[ClassRead])
-def list_classes(status: Optional[str] = None, db: Session = Depends(get_db)):
+def list_classes(status: Optional[str] = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     from sqlalchemy.orm import joinedload
     
     query = db.query(Class).options(joinedload(Class.template))
+    
+    # Role-based filtering
+    is_admin = current_user.role in ['admin', 'super_admin', 'administrator']
+    
+    if not is_admin:
+        if current_user.role == 'instructor':
+            # Instructors see only their own classes
+            query = query.filter(Class.instructor_id == current_user.id)
+        else:
+            # Students see only classes they're enrolled in (have an environment)
+            enrolled_class_ids = db.query(ClassEnvironment.class_id).filter(
+                ClassEnvironment.user_id == current_user.id
+            ).subquery()
+            query = query.filter(Class.id.in_(enrolled_class_ids))
+    
     if status and status in VALID_STATUSES:
         query = query.filter(Class.status == status)
+    
     return query.all()
 
 # READ ONE

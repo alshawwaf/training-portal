@@ -10,6 +10,18 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Also check for guest tokens in session storage
+  // URL pattern: /classes/{classId}/...
+  const classMatch = config.url?.match(/\/classes\/(\d+)/);
+  if (classMatch) {
+    const classId = classMatch[1];
+    const guestToken = sessionStorage.getItem(`guest_token_${classId}`);
+    if (guestToken) {
+      config.headers['X-Guest-Token'] = guestToken;
+    }
+  }
+  
   return config;
 });
 

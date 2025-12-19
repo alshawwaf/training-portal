@@ -16,6 +16,7 @@ export interface ClassModel {
     instructor_id: number;
     status: string;
     description?: string;
+    join_token?: string;  // Shareable link token
     created_at?: string;
     updated_at?: string;
 }

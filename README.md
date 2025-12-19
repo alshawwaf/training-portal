@@ -16,6 +16,8 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 
 | Feature | Description |
 |---------|-------------|
+| **User Registration** | Self-service signup with mandatory domain validation and email verification |
+| **RBAC** | Granular permission system with default roles (Admin, Instructor, Student) |
 | **Class Management** | Create, configure, and manage training classes with customizable parameters |
 | **Templates Management** | Define multi-provider environments (Proxmox, AWS, Azure, etc.) for labs |
 | **Virtual Environments** | Automated provisioning of environments for each student (Proxmox & vSphere) |
@@ -24,8 +26,7 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 | **Monitoring Dashboard** | Admin-level oversight of all active classes and environments |
 | **Environment Control** | Start, stop, revert, and access VMs with one click |
 | **Modern Dark UI** | Premium dark-themed interface with Check Point branding |
-| **Dual Authentication** | Azure AD SSO or local Superadmin login |
-| **Real-time Notifications** | Toast notifications for all user actions |
+| **Invitation System** | Secure user invitation with mandatory first-login password changes |
 | **Docker Ready** | Full Docker Compose setup for easy deployment |
 
 ---
@@ -113,25 +114,18 @@ Access the portal at **http://localhost:9999**
 
 ---
 
-## Authentication
+### User Registration System
 
-### Local Superadmin Login (Default)
+The portal supports self-service registration constrained by email domain.
+- **Verification**: 6-digit codes sent via SMTP.
+- **On-boarding**: New users are assigned to the default **Student** group.
 
-Use these credentials to log in without Azure AD:
+### Administration
 
-| Field | Value |
-|-------|-------|
-| Email | `admin@cpdemo.com` |
-| Password | `Cpwins!1` |
-
-### Azure AD SSO
-
-Configure in `.env`:
-```env
-AZURE_CLIENT_ID=your-client-id
-AZURE_CLIENT_SECRET=your-client-secret
-AZURE_TENANT_ID=your-tenant-id
-```
+Global administrators can manage:
+- **Users**: Invite, disable, or modify user roles.
+- **Groups**: Define custom clusters of permissions.
+- **Activity Logs**: Dual-tab logging for operational tracking and application exceptions.
 
 ---
 

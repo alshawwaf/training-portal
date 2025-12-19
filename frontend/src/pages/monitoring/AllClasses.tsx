@@ -1,35 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { useToast } from '../../context/ToastContext';
-// import { Link } from 'react-router-dom'; // No longer needed
 import { 
     BookOpen, Users, Eye, Edit, Server, 
-    RefreshCw, Download
+    RefreshCw, Download, Search, Filter, Calendar,
+    TrendingUp
 } from 'lucide-react';
 
 // Import Shared Components
-import ClassInfoModal from '../../components/classes/ClassInfoModal';
+import ClassDetailsModal from '../../components/classes/ClassDetailsModal';
 import EditClassModal from '../../components/classes/EditClassModal';
-// import { ProviderIcon } from '../../components/ProviderIcon'; // Removed unused import
 
 // Import Types
 import type { ClassModel, Template } from '../../types/class';
 
-// Status Config (could be imported from types/class if exported, otherwise keep local map or move to shared config)
-const statusColors: Record<string, string> = {
-    draft: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-    active: 'bg-green-500/10 text-green-400 border-green-500/20',
-    completed: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
+// Status Config
+const statusColors: Record<string, { bg: string; text: string; dot: string }> = {
+    draft: { bg: 'bg-gray-500/10', text: 'text-gray-400', dot: 'bg-gray-500' },
+    active: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-500' },
+    completed: { bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500' },
+    cancelled: { bg: 'bg-rose-500/10', text: 'text-rose-400', dot: 'bg-rose-500' },
 };
 
 const AllClasses: React.FC = () => {
     const { showToast } = useToast();
     const [classes, setClasses] = useState<ClassModel[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // Templates (Needed for Edit Modal)
     const [templates, setTemplates] = useState<Template[]>([]);
+
+    // Filters
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
 
     // Modal State
     const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -71,7 +72,7 @@ const AllClasses: React.FC = () => {
 
     const handleExportCSV = () => {
         const headers = ['ID', 'Name', 'Status', 'Max Users', 'Start Date', 'End Date'];
-        const rows = classes.map(cls => [
+        const rows = filteredClasses.map(cls => [
             cls.id, cls.name, cls.status, cls.max_users, cls.start_date, cls.end_date
         ]);
         const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -81,6 +82,7 @@ const AllClasses: React.FC = () => {
         a.href = url;
         a.download = 'all_classes.csv';
         a.click();
+        showToast('CSV exported successfully', 'success');
     };
 
     // Modal Handlers
@@ -94,24 +96,20 @@ const AllClasses: React.FC = () => {
         setEditModalOpen(true);
     };
 
-     const handleProvision = async (cls: ClassModel) => {
-        if (cls.status !== 'active') return;
-        
-        try {
-            await api.post(`/classes/${cls.id}/provision`);
-            showToast(`Provisioning started for ${cls.name}`, 'success');
-            fetchClasses(); // Refresh to update status if needed
-        } catch (error: any) {
-            console.error('Provisioning failed:', error);
-            showToast(error.response?.data?.detail || 'Failed to start provisioning', 'error');
-        }
-    };
+    // Filter Logic
+    const filteredClasses = classes.filter(cls => {
+        const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              cls.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || cls.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
-    const activeCount = (Array.isArray(classes) ? classes : []).filter(c => c.status === 'active').length;
-    const totalCapacity = (Array.isArray(classes) ? classes : []).reduce((sum, c) => sum + c.max_users, 0);
+    const activeCount = classes.filter(c => c.status === 'active').length;
+    const totalCapacity = classes.reduce((sum, c) => sum + c.max_users, 0);
 
     return (
         <div className="space-y-6">
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-primary flex items-center gap-3">
@@ -120,7 +118,7 @@ const AllClasses: React.FC = () => {
                         </div>
                         All Classes
                     </h1>
-                    <p className="text-secondary mt-1">Admin view - all classes in the system</p>
+                    <p className="text-secondary mt-1">Admin view - manage all training classes</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
@@ -128,11 +126,11 @@ const AllClasses: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2.5 bg-secondary/50 border border-theme rounded-lg text-sm text-primary hover:bg-secondary transition-colors"
                     >
                         <Download className="w-4 h-4" />
-                        Export CSV
+                        Export
                     </button>
                     <button
                         onClick={() => fetchClasses()}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-secondary/50 border border-theme rounded-lg text-sm text-primary hover:bg-secondary transition-colors"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm transition-colors shadow-lg shadow-blue-500/20"
                     >
                         <RefreshCw className="w-4 h-4" />
                         Refresh
@@ -140,8 +138,8 @@ const AllClasses: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* Stats Row */}
+            <div className="grid grid-cols-4 gap-4">
                 <div className="card p-4 flex items-center gap-4">
                     <div className="p-3 bg-purple-500/10 rounded-xl">
                         <BookOpen className="w-5 h-5 text-purple-500" />
@@ -152,12 +150,12 @@ const AllClasses: React.FC = () => {
                     </div>
                 </div>
                 <div className="card p-4 flex items-center gap-4">
-                    <div className="p-3 bg-green-500/10 rounded-xl">
-                        <Server className="w-5 h-5 text-green-500" />
+                    <div className="p-3 bg-emerald-500/10 rounded-xl">
+                        <TrendingUp className="w-5 h-5 text-emerald-500" />
                     </div>
                     <div>
                         <p className="text-2xl font-bold text-primary">{activeCount}</p>
-                        <p className="text-xs text-secondary">Active</p>
+                        <p className="text-xs text-secondary">Active Now</p>
                     </div>
                 </div>
                 <div className="card p-4 flex items-center gap-4">
@@ -169,6 +167,51 @@ const AllClasses: React.FC = () => {
                         <p className="text-xs text-secondary">Total Capacity</p>
                     </div>
                 </div>
+                <div className="card p-4 flex items-center gap-4">
+                    <div className="p-3 bg-amber-500/10 rounded-xl">
+                        <Server className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div>
+                        <p className="text-2xl font-bold text-primary">{filteredClasses.length}</p>
+                        <p className="text-xs text-secondary">Showing</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters Bar */}
+            <div className="flex items-center gap-4 p-4 bg-secondary/30 rounded-xl border border-theme">
+                <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-2.5 w-5 h-5 text-secondary" />
+                    <input
+                        type="text"
+                        placeholder="Search classes..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="input pl-10 w-full"
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-secondary" />
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="input cursor-pointer"
+                    >
+                        <option value="all">All Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                {(searchTerm || statusFilter !== 'all') && (
+                    <button
+                        onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+                        className="text-sm text-blue-400 hover:text-blue-300"
+                    >
+                        Clear filters
+                    </button>
+                )}
             </div>
 
             {/* Table */}
@@ -177,76 +220,96 @@ const AllClasses: React.FC = () => {
                     <div className="flex items-center justify-center py-16">
                         <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
                     </div>
-                ) : classes.length === 0 ? (
+                ) : filteredClasses.length === 0 ? (
                     <div className="text-center py-16">
                         <BookOpen className="w-12 h-12 text-secondary mx-auto mb-3" />
-                        <p className="text-secondary">No classes found</p>
+                        <p className="text-secondary mb-2">No classes match your filters</p>
+                        <button
+                            onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                        >
+                            Clear filters
+                        </button>
                     </div>
                 ) : (
                     <table className="w-full text-left">
                         <thead className="bg-secondary/50 border-b border-theme">
                             <tr>
-                                <th className="p-4 text-xs text-secondary font-medium uppercase">Class</th>
-                                <th className="p-4 text-xs text-secondary font-medium uppercase">Status</th>
-                                <th className="p-4 text-xs text-secondary font-medium uppercase">Capacity</th>
-                                <th className="p-4 text-xs text-secondary font-medium uppercase">Schedule</th>
-                                <th className="p-4 text-xs text-secondary font-medium uppercase text-right">Actions</th>
+                                <th className="p-4 text-xs text-secondary font-medium uppercase tracking-wider">Class</th>
+                                <th className="p-4 text-xs text-secondary font-medium uppercase tracking-wider">Status</th>
+                                <th className="p-4 text-xs text-secondary font-medium uppercase tracking-wider">Capacity</th>
+                                <th className="p-4 text-xs text-secondary font-medium uppercase tracking-wider">Schedule</th>
+                                <th className="p-4 text-xs text-secondary font-medium uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y border-theme">
-                            {classes.map(cls => (
-                                <tr key={cls.id} className="hover:bg-secondary/30 transition-colors">
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm">
-                                                {cls.name.charAt(0)}
+                            {filteredClasses.map(cls => {
+                                const statusStyle = statusColors[cls.status] || statusColors.draft;
+                                return (
+                                    <tr key={cls.id} className="hover:bg-secondary/30 transition-colors group">
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                                    {cls.name.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-primary group-hover:text-blue-400 transition-colors cursor-pointer" onClick={() => openViewModal(cls)}>
+                                                        {cls.name}
+                                                    </p>
+                                                    <p className="text-xs text-secondary font-mono">Passcode: {cls.passcode}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-medium text-primary">{cls.name}</p>
-                                                <p className="text-xs text-secondary">Passcode: {cls.passcode}</p>
+                                        </td>
+                                        <td className="p-4">
+                                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
+                                                {cls.status.charAt(0).toUpperCase() + cls.status.slice(1)}
+                                            </span>
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-2">
+                                                <Users className="w-4 h-4 text-secondary" />
+                                                <span className="text-primary font-medium">{cls.max_users}</span>
+                                                <span className="text-secondary text-xs">seats</span>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-medium border ${statusColors[cls.status] || statusColors.draft}`}>
-                                            {cls.status.charAt(0).toUpperCase() + cls.status.slice(1)}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className="text-primary font-medium">{cls.max_users}</span>
-                                        <span className="text-secondary ml-1">students</span>
-                                    </td>
-                                    <td className="p-4">
-                                        <p className="text-sm text-primary">{formatDate(cls.start_date)}</p>
-                                        <p className="text-xs text-secondary">to {formatDate(cls.end_date)}</p>
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <button
-                                                onClick={() => openViewModal(cls)}
-                                                className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
-                                                title="View"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => openEditModal(cls)}
-                                                className="p-2 text-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-2">
+                                                <Calendar className="w-4 h-4 text-secondary" />
+                                                <div>
+                                                    <p className="text-sm text-primary">{formatDate(cls.start_date)}</p>
+                                                    <p className="text-xs text-secondary">to {formatDate(cls.end_date)}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button
+                                                    onClick={() => openViewModal(cls)}
+                                                    className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                    title="View Details"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => openEditModal(cls)}
+                                                    className="p-2 text-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
+                                                    title="Edit Class"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 )}
             </div>
 
             {/* Modals */}
-            <ClassInfoModal 
+            <ClassDetailsModal 
                 isOpen={viewModalOpen}
                 onClose={() => setViewModalOpen(false)}
                 classData={selectedClass}
@@ -255,7 +318,7 @@ const AllClasses: React.FC = () => {
             <EditClassModal 
                 isOpen={editModalOpen}
                 onClose={() => setEditModalOpen(false)}
-                onSuccess={fetchClasses} // Refresh list after edit
+                onSuccess={fetchClasses}
                 classData={selectedClass}
                 templates={templates}
             />

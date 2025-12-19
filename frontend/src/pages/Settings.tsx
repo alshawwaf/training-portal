@@ -2,10 +2,31 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
-import { User, Shield, Bell, ChevronRight, Check, Server, Lock, Mail, Send, Cloud, Globe, Save, RefreshCw, List, Eye, EyeOff, LayoutGrid, Rows3, Edit3 } from 'lucide-react';
+import { 
+    User, 
+    Shield, 
+    Bell, 
+    ChevronRight, 
+    Check, 
+    Server, 
+    List, 
+    Mail, 
+    Send, 
+    Cloud, 
+    Globe, 
+    RefreshCw, 
+    Eye, 
+    EyeOff, 
+    LayoutGrid, 
+    Rows3, 
+    Edit3,
+    Lock,
+    CheckCircle2,
+    Settings as SettingsIcon
+} from 'lucide-react';
 import Modal from '../components/Modal';
-import SettingsSection from '../components/SettingsSection';
 import { AwsIcon, AzureIcon, GcpIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
+import clsx from 'clsx';
 
 interface SystemSetting {
     key: string;
@@ -22,12 +43,10 @@ const Settings: React.FC = () => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [browserNotifications, setBrowserNotifications] = useState(false);
     
-    const [viewDensity] = useState<'comfortable' | 'compact'>('compact');
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
     
     // System Settings State
     const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
-    const [loadingSettings, setLoadingSettings] = useState(false);
     const [testEmailLoading, setTestEmailLoading] = useState(false);
     const [testRecipient, setTestRecipient] = useState('');
     
@@ -50,9 +69,8 @@ const Settings: React.FC = () => {
     const [smtpModalOpen, setSmtpModalOpen] = useState(false);
     
     // vSphere Inventory State
-    const [vsphereInventory, setVsphereInventory] = useState<any>(null);
+    const [vsphereInventory] = useState<any>(null);
     const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
-    const [syncingInventory, setSyncingInventory] = useState(false);
     const [vsphereConnected, setVsphereConnected] = useState(false);
     const [vsphereTesting, setVsphereTesting] = useState(false);
     const [vsphereSaving, setVsphereSaving] = useState(false);
@@ -60,23 +78,20 @@ const Settings: React.FC = () => {
     // Proxmox Form State
     const [proxmoxForm, setProxmoxForm] = useState<Record<string, string>>({});
     const [proxmoxOriginal, setProxmoxOriginal] = useState<Record<string, string>>({});
-    const [showProxmoxSecret, setShowProxmoxSecret] = useState(false);
     const [proxmoxTesting, setProxmoxTesting] = useState(false);
     const [proxmoxSaving, setProxmoxSaving] = useState(false);
     const [proxmoxConnected, setProxmoxConnected] = useState(false);
 
-    // vSphere Form State (separate from displayed settings)
+    // vSphere Form State
     const [vsphereForm, setVsphereForm] = useState<Record<string, string>>({});
     const [vsphereOriginal, setVsphereOriginal] = useState<Record<string, string>>({});
-    const [showVspherePassword, setShowVspherePassword] = useState(false);
 
     // Cloud Provider State
     interface CloudProvider {
         id: string;
         name: string;
         icon: any;
-        color: string; // Tailwind color name for default styling logic
-        customColor?: string; // Specific brand hex if needed
+        color: string;
         description: string;
     }
 
@@ -90,36 +105,78 @@ const Settings: React.FC = () => {
     const [providerForm, setProviderForm] = useState<Record<string, string>>({});
     const [providerSaving, setProviderSaving] = useState(false);
 
+    useEffect(() => {
+        if (user?.role === 'admin') {
+            fetchSettings();
+            if (user?.email) setTestRecipient(user.email);
+        }
+        fetchPreferences();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await api.get('/settings/');
+            const data = Array.isArray(res.data) ? res.data : [];
+            setSystemSettings(data);
+            
+            const vsphereSettings: Record<string, string> = {};
+            const proxmoxSettings: Record<string, string> = {};
+            
+            data.forEach((s: SystemSetting) => {
+                if (s.key.startsWith('vsphere_')) vsphereSettings[s.key] = s.value;
+                if (s.key.startsWith('proxmox_')) proxmoxSettings[s.key] = s.value;
+            });
+            
+            setVsphereForm(vsphereSettings);
+            setVsphereOriginal(vsphereSettings);
+            setProxmoxForm(proxmoxSettings);
+            setProxmoxOriginal(proxmoxSettings);
+            
+            // Sync connection status
+            const vStat = await api.get('/infrastructure/vsphere/status').catch(() => ({ data: { connected: false } }));
+            setVsphereConnected(vStat.data.connected);
+            const pStat = await api.get('/infrastructure/proxmox/status').catch(() => ({ data: { connected: false } }));
+            setProxmoxConnected(pStat.data.connected);
+
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to load settings', 'error');
+        }
+    };
+
+    const fetchPreferences = async () => {
+        try {
+            const res = await api.get('/preferences/');
+            setEmailNotifications(res.data.email_notifications);
+            setBrowserNotifications(res.data.browser_notifications);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     const handleOpenProviderModal = (provider: CloudProvider) => {
         setSelectedProvider(provider);
-        // Initialize form with current values
         const form: Record<string, string> = {};
         systemSettings
-            .filter(s => s.category === provider.id) // Simple filter for now
-            .forEach(s => {
-                form[s.key] = s.value;
-            });
+            .filter(s => s.category === provider.id)
+            .forEach(s => { form[s.key] = s.value; });
         setProviderForm(form);
     };
 
     const handleSaveProvider = async () => {
         setProviderSaving(true);
         try {
-            // Save each changed setting
             const promises = Object.entries(providerForm).map(([key, value]) => {
-                // Only update if changed (basic check)
                 const current = systemSettings.find(s => s.key === key);
                 if (current && current.value !== value) {
                     return api.put(`/settings/${key}`, { value });
                 }
                 return Promise.resolve();
             });
-
             await Promise.all(promises);
-            
-            // Refresh settings to ensure sync
             await fetchSettings();
-            showToast('Provider settings saved successfully', 'success');
+            showToast(`${selectedProvider?.name} settings saved`, 'success');
             setSelectedProvider(null);
         } catch {
             showToast('Failed to save provider settings', 'error');
@@ -131,29 +188,17 @@ const Settings: React.FC = () => {
     const handleSaveProxmox = async () => {
         setProxmoxSaving(true);
         try {
-            // Filter only changed settings
             const settingsToSave: Record<string, string> = {};
-            let hasChanges = false;
-            
             Object.entries(proxmoxForm).forEach(([key, value]) => {
-                if (value !== proxmoxOriginal[key]) {
-                    settingsToSave[key] = value;
-                    hasChanges = true;
-                }
+                if (value !== proxmoxOriginal[key]) settingsToSave[key] = value;
             });
-
-            if (!hasChanges) {
+            if (Object.keys(settingsToSave).length === 0) {
                 showToast('No changes to save', 'info');
                 return;
             }
-
-            await api.post('/infrastructure/proxmox/save', { 
-                settings: settingsToSave, 
-                category: 'proxmox' 
-            });
-            
-            showToast('Proxmox settings saved', 'success');
-            await fetchSettings(); // Reload to update original state
+            await api.post('/infrastructure/proxmox/save', { settings: settingsToSave, category: 'proxmox' });
+            showToast('Proxmox settings committed', 'success');
+            await fetchSettings();
         } catch {
             showToast('Failed to save Proxmox settings', 'error');
         } finally {
@@ -164,7 +209,6 @@ const Settings: React.FC = () => {
     const handleTestProxmox = async () => {
         setProxmoxTesting(true);
         try {
-            // Use form values
             const res = await api.post('/infrastructure/proxmox/test', {
                 host: proxmoxForm['proxmox_host'] || '',
                 port: parseInt(proxmoxForm['proxmox_port'] || '8006'),
@@ -175,9 +219,8 @@ const Settings: React.FC = () => {
                 node: proxmoxForm['proxmox_node'] || 'pve',
                 verify_ssl: proxmoxForm['proxmox_verify_ssl'] === 'true'
             });
-            
             if (res.data.success) {
-                showToast(`Connected! ${res.data.message}`, 'success');
+                showToast(`Proxmox Online: ${res.data.message}`, 'success');
                 setProxmoxConnected(true);
             } else {
                 showToast(res.data.message || 'Connection failed', 'error');
@@ -191,125 +234,69 @@ const Settings: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        if (user?.role === 'admin') {
-            fetchSettings();
-            if (user?.email) setTestRecipient(user.email);
-        }
-        fetchPreferences();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
-
-    const fetchSettings = async () => {
-        setLoadingSettings(true);
+    const handleSaveVsphere = async () => {
+        setVsphereSaving(true);
         try {
-            const res = await api.get('/settings/');
-            const data = Array.isArray(res.data) ? res.data : [];
-            setSystemSettings(data);
-            
-            // Initialize vSphere form from settings
-            const vsphereSettings: Record<string, string> = {};
-            const proxmoxSettings: Record<string, string> = {};
-            
-            data.forEach((s: SystemSetting) => {
-                if (s.key.startsWith('vsphere_')) {
-                    vsphereSettings[s.key] = s.value;
-                }
-                if (s.key.startsWith('proxmox_')) {
-                    proxmoxSettings[s.key] = s.value;
-                }
+            const settings: Record<string, string> = {};
+            ['vsphere_host', 'vsphere_port', 'vsphere_user', 'vsphere_password', 'vsphere_verify_ssl', 'vsphere_sync_mode', 'vsphere_sync_interval'].forEach(key => {
+                if (vsphereForm[key] !== vsphereOriginal[key]) settings[key] = vsphereForm[key];
             });
-            
-            setVsphereForm(vsphereSettings);
-            setVsphereOriginal(vsphereSettings);
-            
-            setProxmoxForm(proxmoxSettings);
-            setProxmoxOriginal(proxmoxSettings);
-            
-        } catch (e) {
-            console.error(e);
-            showToast('Failed to load settings', 'error');
-        } finally {
-            setLoadingSettings(false);
-        }
-        // ... (check status)
-
-
-        // Check vSphere status
-        try {
-            const res = await api.get('/infrastructure/vsphere/status');
-            setVsphereConnected(res.data.connected);
-        } catch (e) {
-            setVsphereConnected(false);
-        }
-    };
-
-    const fetchPreferences = async () => {
-        try {
-            const res = await api.get('/preferences/');
-            setEmailNotifications(res.data.email_notifications);
-            setBrowserNotifications(res.data.browser_notifications);
-            localStorage.setItem('browser_notifications', res.data.browser_notifications ? 'true' : 'false');
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleUpdateSetting = async (key: string, value: string) => {
-        try {
-            await api.put(`/settings/${key}`, { value });
-            setSystemSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
-            showToast('Setting updated', 'success');
+            if (Object.keys(settings).length === 0) {
+                showToast('No changes to save', 'info');
+                return;
+            }
+            await api.post('/infrastructure/vsphere/save', { settings, category: 'vsphere' });
+            showToast('vSphere configuration updated', 'success');
+            await fetchSettings();
         } catch {
-            showToast('Failed to update setting', 'error');
-            fetchSettings();
+            showToast('Failed to save vSphere settings', 'error');
+        } finally {
+            setVsphereSaving(false);
+        }
+    };
+
+    const handleTestVsphere = async () => {
+        setVsphereTesting(true);
+        try {
+            const res = await api.post('/infrastructure/vsphere/test', {
+                host: vsphereForm['vsphere_host'],
+                port: parseInt(vsphereForm['vsphere_port'] || '443'),
+                user: vsphereForm['vsphere_user'],
+                password: vsphereForm['vsphere_password'],
+                verify_ssl: vsphereForm['vsphere_verify_ssl'] === 'true'
+            });
+            if (res.data.success) {
+                showToast(`vSphere Connected: ${res.data.message}`, 'success');
+                setVsphereConnected(true);
+            } else {
+                showToast(res.data.message || 'Connection failed', 'error');
+                setVsphereConnected(false);
+            }
+        } catch (e: any) {
+            showToast(e.response?.data?.detail || 'Connection test failed', 'error');
+            setVsphereConnected(false);
+        } finally {
+            setVsphereTesting(false);
         }
     };
 
     const handleUpdatePreferences = async (email?: boolean, browser?: boolean) => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const payload: any = {};
             if (email !== undefined) payload.email_notifications = email;
             if (browser !== undefined) payload.browser_notifications = browser;
-            
             await api.put('/preferences/', payload);
             showToast('Preferences updated', 'success');
         } catch {
-            showToast('Failed to update preferences', 'error');
-        }
-    };
-
-    const handlePasswordChange = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (pwdForm.new_password !== pwdForm.confirm_password) {
-            showToast('New passwords do not match', 'error');
-            return;
-        }
-        setPwdLoading(true);
-        try {
-            await api.post('/auth/change-password', {
-                current_password: pwdForm.current_password,
-                new_password: pwdForm.new_password
-            });
-            showToast('Password updated successfully', 'success');
-            setPwdModalOpen(false);
-            setPwdForm({ current_password: '', new_password: '', confirm_password: '' });
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (e: any) {
-            showToast(e.response?.data?.detail || 'Failed to update password', 'error');
-        } finally {
-            setPwdLoading(false);
+            showToast('Failed to sync preferences', 'error');
         }
     };
 
     const handleSaveProfile = async () => {
-        // Validate: if changing password, current_password is required
         if (profileForm.new_password && !profileForm.current_password) {
-            showToast('Current password is required to set a new password', 'error');
+            showToast('Current password required for change', 'warning');
             return;
         }
-        
         setProfileSaving(true);
         try {
             await api.put('/auth/profile', {
@@ -319,1043 +306,658 @@ const Settings: React.FC = () => {
                 current_password: profileForm.current_password || null,
                 new_password: profileForm.new_password || null
             });
-            showToast('Profile updated successfully', 'success');
+            showToast('Profile modernized successfully', 'success');
             setIsEditingProfile(false);
-            // Refresh user data
             window.location.reload();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
-            showToast(e.response?.data?.detail || 'Failed to update profile', 'error');
+            showToast(e.response?.data?.detail || 'Profile update failed', 'error');
         } finally {
             setProfileSaving(false);
+        }
+    };
+
+    const handleUpdateSetting = async (key: string, value: string) => {
+        try {
+            await api.put(`/settings/${key}`, { value });
+            setSystemSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
+        } catch {
+            showToast(`Failed to update ${key}`, 'error');
+        }
+    };
+
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (pwdForm.new_password !== pwdForm.confirm_password) {
+            showToast('Passwords do not match', 'error');
+            return;
+        }
+        setPwdLoading(true);
+        try {
+            await api.post('/auth/change-password', {
+                current_password: pwdForm.current_password,
+                new_password: pwdForm.new_password
+            });
+            showToast('Security keys rotated successfully', 'success');
+            setPwdModalOpen(false);
+            setPwdForm({ current_password: '', new_password: '', confirm_password: '' });
+        } catch (e: any) {
+            showToast(e.response?.data?.detail || 'Handshake failed', 'error');
+        } finally {
+            setPwdLoading(false);
         }
     };
 
     const handleTestEmail = async () => {
         setTestEmailLoading(true);
         try {
-            // We'll send to the current user's email
-            await api.post('/email/test', {
-                 to: [testRecipient || user?.email],
-                 subject: "SMTP Configuration Test",
-                 message: "If you are reading this, your SMTP configuration is working correctly!"
-            });
-            showToast('Test email sent successfully!', 'success');
-             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const res = await api.post('/email/test', { recipient: testRecipient });
+            if (res.data.success) {
+                showToast(`Transmission Successful: ${res.data.message}`, 'success');
+                setSmtpModalOpen(false);
+            } else {
+                showToast(res.data.message || 'Transmission failed', 'error');
+            }
         } catch (e: any) {
-            console.error(e);
-            showToast(e.response?.data?.detail || 'Failed to send test email', 'error');
+            showToast(e.response?.data?.detail || 'Audit sequence failed', 'error');
         } finally {
             setTestEmailLoading(false);
         }
     };
 
-    const renderSettingInput = (setting: SystemSetting, isBuffered = false) => {
-        if (setting.key.endsWith('_tls') || setting.key.endsWith('_ssl')) {
-             const isChecked = isBuffered ? providerForm[setting.key] === 'true' : setting.value === 'true';
-             const handleToggle = (val: string) => {
-                 if (isBuffered) {
-                     setProviderForm(prev => ({ ...prev, [setting.key]: val }));
-                 } else {
-                     handleUpdateSetting(setting.key, val);
-                 }
-             };
-
-             return (
-                 <div className="flex items-center justify-between py-2">
-                     <label className="text-secondary text-sm">{setting.description}</label>
-                     <button 
-                        onClick={() => handleToggle(isChecked ? 'false' : 'true')}
-                        className={`relative w-12 h-6 rounded-full p-1 transition-colors ${isChecked ? 'bg-blue-600' : 'bg-gray-600'}`}
-                    >
-                        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${isChecked ? 'translate-x-6' : 'translate-x-0'}`} />
-                    </button>
-                 </div>
-             );
-        }
-
-        return (
-            <div className={`space-y-1 ${viewDensity === 'compact' ? 'py-1' : ''}`}>
-                <label className="input-label text-xs uppercase tracking-wider">{setting.description || setting.key}</label>
-                <input 
-                    type={setting.is_secret ? "password" : "text"}
-                    className={`input ${viewDensity === 'compact' ? 'py-1.5 text-sm' : ''}`}
-                    value={isBuffered ? (providerForm[setting.key] !== undefined ? providerForm[setting.key] : setting.value) : setting.value}
-                    onChange={(e) => {
-                        if (isBuffered) {
-                            setProviderForm(prev => ({ ...prev, [setting.key]: e.target.value }));
-                        }
-                    }}
-                    onBlur={(e) => {
-                        if (!isBuffered && e.target.value !== setting.value && e.target.value !== '********') {
-                            handleUpdateSetting(setting.key, e.target.value);
-                        }
-                    }}
-                    placeholder={setting.is_secret ? "••••••••" : ""}
-                    readOnly={!isBuffered && setting.is_secret} // Prevent accidental edits on main page for secrets without distinct save action? Actually existing logic allows blur save. Keeping consistent.
-                />
-            </div>
-        );
-    };
-
     const tabs = [
-        { id: 'profile', label: 'Profile', icon: User },
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'cloud', label: 'Cloud Providers', icon: Cloud },
-        { id: 'onprem', label: 'On-Premise', icon: Server },
-        { id: 'system', label: 'Configuration', icon: Shield },
+        { id: 'profile', label: 'Identity', icon: User, color: 'blue' },
+        { id: 'notifications', label: 'Alerts', icon: Bell, color: 'amber' },
+        { id: 'cloud', label: 'Ecosystem', icon: Cloud, color: 'sky' },
+        { id: 'onprem', label: 'Infrastructure', icon: Server, color: 'emerald' },
+        { id: 'system', label: 'Security', icon: Shield, color: 'purple' },
     ] as const;
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-            </div>
-        );
-    }
-
-    if (!user) {
-        // Redirect to login if not authenticated
-        window.location.href = '/login';
-        return null;
-    }
+    if (isLoading) return <LoadingSpinner />;
 
     return (
-        <div className="w-full px-4">
-            <div className="flex items-center justify-between mb-8">
+        <div className="space-y-8 animate-in fade-in duration-700">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-primary">Settings</h1>
-                    <p className="mt-1 text-secondary">
-                        Manage your account preferences and system configuration
-                    </p>
+                  <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 rounded-xl bg-slate-500/10 border border-slate-500/20">
+                          <SettingsIcon className="w-5 h-5 text-slate-500" />
+                      </div>
+                      <h1 className="text-3xl font-extrabold tracking-tight text-primary">Control Center</h1>
+                  </div>
+                  <p className="text-secondary font-medium pl-10">
+                    Fine-tune your personal experience and <span className="text-slate-500 font-bold">global platform settings</span>.
+                  </p>
                 </div>
-                {/* View Mode Toggle */}
-                <div className="flex gap-1 p-1 bg-secondary/30 rounded-lg border border-theme">
+
+                <div className="flex bg-secondary/30 p-1 rounded-2xl border border-theme backdrop-blur-md">
                     <button 
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-md transition-all ${
-                            viewMode === 'list' 
-                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-black/5' 
-                                : 'text-secondary hover:text-primary hover:bg-white/50 dark:hover:bg-gray-800/50'
-                        }`}
-                        title="List View"
+                        className={clsx(
+                            "p-2.5 rounded-xl transition-all",
+                            viewMode === 'list' ? "bg-white dark:bg-slate-800 shadow-xl text-blue-500" : "text-secondary hover:text-primary"
+                        )}
                     >
-                        <Rows3 className={`w-4 h-4 ${viewMode === 'list' ? 'text-blue-500' : 'text-secondary'}`} />
+                        <Rows3 className="w-5 h-5" />
                     </button>
                     <button 
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-md transition-all ${
-                            viewMode === 'grid' 
-                                ? 'bg-white dark:bg-gray-800 text-blue-600 shadow-sm ring-1 ring-black/5' 
-                                : 'text-secondary hover:text-primary hover:bg-white/50 dark:hover:bg-gray-800/50'
-                        }`}
-                        title="Grid View"
+                        className={clsx(
+                            "p-2.5 rounded-xl transition-all",
+                            viewMode === 'grid' ? "bg-white dark:bg-slate-800 shadow-xl text-blue-500" : "text-secondary hover:text-primary"
+                        )}
                     >
-                        <LayoutGrid className={`w-4 h-4 ${viewMode === 'grid' ? 'text-blue-500' : 'text-secondary'}`} />
+                        <LayoutGrid className="w-5 h-5" />
                     </button>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 relative items-start">
-                {/* Sticky Sidebar Navigation */}
-                <div className="w-full lg:w-64 flex-shrink-0 sticky top-24 z-10 self-start">
-                    <nav className="flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 p-1">
-                        {tabs.map(tab => {
-                             // Profile and Notifications visible to all, others admin-only
-                             if (tab.id !== 'profile' && tab.id !== 'notifications' && user.role !== 'admin') return null;
-                            const Icon = tab.icon;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap text-left ${
-                                        activeTab === tab.id 
-                                            ? 'bg-blue-500/10 text-blue-600 font-medium shadow-sm ring-1 ring-blue-500/20' 
-                                            : 'text-secondary hover:bg-secondary hover:text-primary'
-                                    }`}
-                                >
-                                    <Icon className={`w-5 h-5 ${activeTab === tab.id ? 'text-blue-500' : 'text-secondary/70'}`} />
-                                    <span>{tab.label}</span>
-                                    {activeTab === tab.id && (
-                                        <ChevronRight className="w-4 h-4 ml-auto text-blue-400" />
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </nav>
-                </div>
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Navigation Sidebar */}
+                <aside className="w-full lg:w-72 flex-shrink-0 sticky top-24 z-10 space-y-2">
+                    {tabs.map(tab => {
+                        if (tab.id !== 'profile' && tab.id !== 'notifications' && user?.role !== 'admin') return null;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={clsx(
+                                    "w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group border",
+                                    isActive 
+                                        ? `bg-gradient-to-r from-blue-600/10 to-indigo-600/10 border-blue-500/30 text-blue-600 shadow-md`
+                                        : "bg-secondary/10 border-transparent text-secondary hover:bg-secondary/30 hover:text-primary"
+                                )}
+                            >
+                                <div className={clsx(
+                                    "p-2.5 rounded-xl transition-all group-hover:scale-110 group-active:scale-95",
+                                    isActive ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" : "bg-secondary/20"
+                                )}>
+                                    <tab.icon className="w-5 h-5" />
+                                </div>
+                                <span className="font-bold tracking-tight text-sm uppercase">{tab.label}</span>
+                                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
+                            </button>
+                        );
+                    })}
+                </aside>
 
-                {/* Main Content Area */}
-                <div className="flex-1 space-y-6">
-                    {/* Profile Tab */}
+                {/* Content Area */}
+                <main className="flex-1 w-full animate-in slide-in-from-right-4 duration-500">
                     {activeTab === 'profile' && (
-                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}>
-                            <SettingsSection title="Profile" icon={User} color="blue" density={viewDensity}>
-                                <div className="space-y-4">
-                                    {!isEditingProfile ? (
-                                        <>
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                                                    {user?.name?.charAt(0) || 'U'}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h3 className="text-lg font-semibold text-primary">{user?.name}</h3>
-                                                    <p className="text-secondary">{user?.email}</p>
-                                                    <span className="badge badge-info mt-2 inline-block capitalize">{user?.role}</span>
-                                                </div>
-                                                <button 
-                                                    onClick={() => setPwdModalOpen(true)}
-                                                    className="p-2 rounded-lg hover:bg-secondary/20 transition-colors"
-                                                    title="Change Password"
-                                                >
-                                                    🔑
-                                                </button>
-                                            </div>
-                                            <button 
-                                                onClick={() => {
-                                                    setProfileForm({ 
-                                                        first_name: user?.name?.split(' ')[0] || '', 
-                                                        last_name: user?.name?.split(' ').slice(1).join(' ') || '',
-                                                        email: user?.email || '',
-                                                        current_password: '',
-                                                        new_password: ''
-                                                    });
-                                                    setIsEditingProfile(true);
-                                                }}
-                                                className="btn-secondary flex items-center gap-2"
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                                Edit Profile
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="space-y-3">
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div>
-                                                        <label className="label">First Name</label>
-                                                        <input
-                                                            type="text"
-                                                            className="input"
-                                                            value={profileForm.first_name}
-                                                            onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="label">Last Name</label>
-                                                        <input
-                                                            type="text"
-                                                            className="input"
-                                                            value={profileForm.last_name}
-                                                            onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label className="label">Email <span className="text-xs text-secondary">(read-only)</span></label>
-                                                    <input
-                                                        type="email"
-                                                        className="input bg-secondary/20 cursor-not-allowed"
-                                                        value={profileForm.email}
-                                                        disabled
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={handleSaveProfile}
-                                                    disabled={profileSaving}
-                                                    className="btn-primary flex items-center gap-2"
-                                                >
-                                                    {profileSaving ? (
-                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                    ) : (
-                                                        <Save className="w-4 h-4" />
-                                                    )}
-                                                    Save Changes
-                                                </button>
-                                                <button
-                                                    onClick={() => setIsEditingProfile(false)}
-                                                    className="btn-secondary"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
+                        <div className="space-y-6">
+                            <SectionHeader title="User Identity" subtitle="Manage your personal profile and credentials" />
+                            <div className="glass rounded-[2.5rem] p-10 border border-theme shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+                                    <User className="w-48 h-48" />
                                 </div>
-                            </SettingsSection>
+                                <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
+                                    <div className="relative group">
+                                        <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-700 flex items-center justify-center text-white text-5xl font-black shadow-2xl ring-4 ring-white/10 group-hover:rotate-3 transition-transform duration-500">
+                                            {user?.name?.charAt(0)}
+                                        </div>
+                                        <div className="absolute -bottom-2 -right-2 p-2.5 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-theme">
+                                            <Edit3 className="w-5 h-5 text-blue-500" />
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 text-center md:text-left">
+                                        <h3 className="text-3xl font-black text-primary tracking-tight mb-1 uppercase italic">{user?.name}</h3>
+                                        <p className="text-secondary font-medium text-lg mb-4">{user?.email}</p>
+                                        <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                            <div className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-xs font-black uppercase tracking-widest leading-none">
+                                                {user?.role} Access
+                                            </div>
+                                            <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-black uppercase tracking-widest leading-none">
+                                                Verified
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-3">
+                                        <button 
+                                            onClick={() => setIsEditingProfile(true)}
+                                            className="px-8 py-3 bg-primary text-secondary hover:text-primary rounded-2xl font-bold transition-all border border-theme"
+                                        >
+                                            Modify Identity
+                                        </button>
+                                        <button 
+                                            onClick={() => setPwdModalOpen(true)}
+                                            className="px-8 py-3 bg-secondary/30 hover:bg-secondary text-secondary hover:text-primary rounded-2xl font-bold transition-all border border-theme"
+                                        >
+                                            Reset Access Keys
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
-                    {/* Notifications Tab */}
                     {activeTab === 'notifications' && (
-                        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}>
-                            <SettingsSection title="Email Notifications" icon={Bell} color="amber" density={viewDensity}>
-                                <div className="space-y-4">
-                                    <ToggleOption 
-                                        title="Email Alerts"
-                                        description="Receive email alerts for class updates"
-                                        enabled={emailNotifications}
-                                        onChange={(val) => {
-                                            setEmailNotifications(val);
-                                            handleUpdatePreferences(val, undefined);
-                                        }}
-                                    />
-                                </div>
-                            </SettingsSection>
-
-                            <SettingsSection title="Browser Notifications" icon={Globe} color="purple" density={viewDensity}>
-                                <div className="space-y-4">
-                                    <ToggleOption 
-                                        title="Desktop Notifications"
-                                        description="Show desktop push notifications"
-                                        enabled={browserNotifications}
-                                        onChange={async (val) => {
-                                            if (val) {
-                                                const permission = await Notification.requestPermission();
-                                                if (permission === 'granted') {
-                                                    setBrowserNotifications(true);
-                                                    handleUpdatePreferences(undefined, true);
-                                                    localStorage.setItem('browser_notifications', 'true');
-                                                    new Notification("Notifications Enabled", { body: "You will now receive desktop notifications." });
-                                                } else {
-                                                    setBrowserNotifications(false);
-                                                    showToast('Permission denied. Please enable notifications in your browser settings.', 'error');
-                                                    localStorage.setItem('browser_notifications', 'false');
-                                                }
-                                            } else {
-                                                setBrowserNotifications(false);
-                                                handleUpdatePreferences(undefined, false);
-                                                localStorage.setItem('browser_notifications', 'false');
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </SettingsSection>
+                        <div className="space-y-6">
+                            <SectionHeader title="Alert Subscriptions" subtitle="Configure how the platform reaches out to you" />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <NotificationCard 
+                                    title="Email Directives" 
+                                    desc="Critical alerts sent to your inbox" 
+                                    icon={Mail} 
+                                    enabled={emailNotifications} 
+                                    onToggle={val => { setEmailNotifications(val); handleUpdatePreferences(val); }} 
+                                />
+                                <NotificationCard 
+                                    title="Push Overlays" 
+                                    desc="Real-time browser notifications" 
+                                    icon={Globe} 
+                                    enabled={browserNotifications} 
+                                    onToggle={async val => {
+                                        if (val) {
+                                            const p = await Notification.requestPermission();
+                                            if (p === 'granted') { setBrowserNotifications(true); handleUpdatePreferences(undefined, true); }
+                                        } else { setBrowserNotifications(false); handleUpdatePreferences(undefined, false); }
+                                    }} 
+                                />
+                            </div>
                         </div>
                     )}
 
-                    {/* Cloud Providers Tab */}
-                    {activeTab === 'cloud' && user?.role === 'admin' && (
-                        <>
-                            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-                                {cloudProviders.map(provider => (
-                                    viewMode === 'grid' ? (
-                                        <div 
-                                            key={provider.id}
-                                            onClick={() => handleOpenProviderModal(provider)}
-                                            className="card hover:border-blue-500/50 cursor-pointer group transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
-                                        >
-                                            <div className={`absolute top-0 right-0 w-24 h-24 bg-${provider.color}-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`} />
-                                            
-                                            <div className="flex items-start justify-between mb-4 relative z-10">
-                                                <div className={`p-3 rounded-xl bg-${provider.color}-500/10 text-${provider.color}-500`}>
-                                                    <provider.icon className="w-8 h-8" />
-                                                </div>
-                                                {systemSettings.some(s => s.category === provider.id && s.value && s.value !== 'false') && (
-                                                    <div className="badge badge-success flex items-center gap-1">
-                                                        <Check className="w-3 h-3" />
-                                                        Configured
-                                                    </div>
-                                                )}
-                                            </div>
-                                            
-                                            <h3 className="text-xl font-bold text-primary mb-1">{provider.name}</h3>
-                                            <p className="text-sm text-secondary line-clamp-2">{provider.description}</p>
-                                            
-                                            <div className="mt-4 flex items-center text-blue-500 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                                                Manage Settings
-                                                <ChevronRight className="w-4 h-4 ml-1" />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        /* List View: Horizontal row card */
-                                        <div 
-                                            key={provider.id}
-                                            onClick={() => handleOpenProviderModal(provider)}
-                                            className="card flex items-center gap-4 p-4 hover:border-blue-500/50 cursor-pointer group transition-all"
-                                        >
-                                            <div className={`p-3 rounded-xl bg-${provider.color}-500/10 text-${provider.color}-500 shrink-0`}>
-                                                <provider.icon className="w-6 h-6" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-semibold text-primary truncate">{provider.name}</h3>
-                                                <p className="text-xs text-secondary truncate">{provider.description}</p>
-                                            </div>
-                                            {systemSettings.some(s => s.category === provider.id && s.value && s.value !== 'false') && (
-                                                <div className="badge badge-success flex items-center gap-1 shrink-0">
-                                                    <Check className="w-3 h-3" />
-                                                    Configured
-                                                </div>
-                                            )}
-                                            <ChevronRight className="w-5 h-5 text-secondary group-hover:text-blue-500 transition-colors shrink-0" />
-                                        </div>
-                                    )
+                    {activeTab === 'cloud' && (
+                        <div className="space-y-6">
+                            <SectionHeader title="Cloud Integration" subtitle="Manage external provider credentials" />
+                            <div className={clsx(viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4")}>
+                                {cloudProviders.map(p => (
+                                    <ProviderCard key={p.id} provider={p} onConfigure={() => handleOpenProviderModal(p)} viewMode={viewMode} />
                                 ))}
                             </div>
-
-                            {/* Provider Edit Modal */}
-                            <Modal 
-                                isOpen={!!selectedProvider} 
-                                onClose={() => setSelectedProvider(null)} 
-                                title={selectedProvider ? `Configure ${selectedProvider.name}` : 'Configure Provider'}
-                                maxWidth="lg"
-                            >
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-4 p-4 bg-secondary/20 rounded-xl border border-theme">
-                                        <div className={`p-3 rounded-lg bg-${selectedProvider?.color}-500/10`}>
-                                            {selectedProvider && <selectedProvider.icon className={`w-6 h-6 text-${selectedProvider.color}-500`} />}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-secondary">Make sure you have the necessary API keys and permissions enabled for this provider.</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                                        {loadingSettings ? (
-                                            <div className="flex justify-center p-8">
-                                                <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
-                                            </div>
-                                        ) : (
-                                            systemSettings
-                                                .filter(s => s.category === selectedProvider?.id)
-                                                .map(setting => (
-                                                    <div key={setting.key}>
-                                                        {renderSettingInput(setting, true)} 
-                                                    </div>
-                                                ))
-                                        )}
-                                        {selectedProvider && systemSettings.filter(s => s.category === selectedProvider.id).length === 0 && (
-                                            <p className="text-center text-secondary py-8">No specific settings found for this provider.</p>
-                                        )}
-                                    </div>
-
-                                    <div className="flex justify-end gap-3 pt-4 border-t border-theme">
-                                        <button 
-                                            onClick={() => setSelectedProvider(null)} 
-                                            className="btn-secondary"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button 
-                                            onClick={handleSaveProvider} 
-                                            disabled={providerSaving}
-                                            className="btn-primary"
-                                        >
-                                            {providerSaving ? (
-                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <Save className="w-4 h-4 ml-1" />
-                                                    Save Changes
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </Modal>
-                        </>
+                        </div>
                     )}
 
-                    {/* On-Premise Tab */}
-                    {activeTab === 'onprem' && user?.role === 'admin' && (
+                    {activeTab === 'onprem' && (
                         <div className="space-y-8">
-                            {/* Proxmox VE Card */}
-                            <div className="card-elevated overflow-hidden">
-                                <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border-b border-theme px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-theme">
-                                            <ProxmoxIcon className="w-7 h-7" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-primary">Proxmox VE</h3>
-                                            <p className="text-xs text-secondary">Virtual Environment Management</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Host / IP Address</label>
-                                            <input type="text" className="input" placeholder="192.168.1.10" 
-                                                value={proxmoxForm['proxmox_host'] || ''}
-                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_host: e.target.value})}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Port</label>
-                                            <input type="text" className="input" placeholder="8006" 
-                                                value={proxmoxForm['proxmox_port'] || '8006'}
-                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_port: e.target.value})}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Target Node</label>
-                                            <input type="text" className="input" placeholder="pve" 
-                                                value={proxmoxForm['proxmox_node'] || ''}
-                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_node: e.target.value})}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
-                                            <input type="text" className="input" placeholder="root@pam" 
-                                                value={proxmoxForm['proxmox_user'] || ''}
-                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_user: e.target.value})}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Password</label>
-                                            <div className="relative">
-                                                <input 
-                                                    type={showProxmoxSecret ? "text" : "password"} 
-                                                    className="input pr-10" 
-                                                    placeholder="Enter password..." 
-                                                    value={proxmoxForm['proxmox_password'] || ''}
-                                                    onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_password: e.target.value})}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowProxmoxSecret(!showProxmoxSecret)}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
-                                                >
-                                                    {showProxmoxSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            </div>
-
-                                        </div>
-                                        
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token ID (Optional)</label>
-                                            <input type="text" className="input" placeholder="user@pam!tokenid" 
-                                                value={proxmoxForm['proxmox_token_id'] || ''}
-                                                onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_token_id: e.target.value})}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">API Token Secret (Optional)</label>
-                                            <div className="relative">
-                                                <input 
-                                                    type={showProxmoxSecret ? "text" : "password"} 
-                                                    className="input pr-10" 
-                                                    placeholder="••••••••••••••••" 
-                                                    value={proxmoxForm['proxmox_token_secret'] || ''}
-                                                    onChange={(e) => setProxmoxForm({...proxmoxForm, proxmox_token_secret: e.target.value})}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex items-end">
-                                            <label className="flex items-center gap-3 cursor-pointer group">
-                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${proxmoxForm['proxmox_verify_ssl'] === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
-                                                    onClick={() => setProxmoxForm(prev => ({...prev, proxmox_verify_ssl: prev['proxmox_verify_ssl'] === 'true' ? 'false' : 'true'}))}
-                                                >
-                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${proxmoxForm['proxmox_verify_ssl'] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                </div>
-                                                <span className="text-sm text-secondary group-hover:text-primary transition-colors">Verify SSL</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-sm text-secondary">
-                                            <div className={`w-2 h-2 rounded-full ${proxmoxConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                                            <span>{proxmoxConnected ? 'Connected' : 'Not connected'}</span>
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <button 
-                                                className="btn-secondary"
-                                                onClick={handleTestProxmox}
-                                                disabled={proxmoxTesting}
-                                            >
-                                                {proxmoxTesting ? (
-                                                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                                ) : (
-                                                    <Globe className="w-4 h-4" />
-                                                )}
-                                                Test Connection
-                                            </button>
-                                            <button 
-                                                className="btn-primary"
-                                                onClick={handleSaveProxmox}
-                                                disabled={proxmoxSaving || JSON.stringify(proxmoxForm) === JSON.stringify(proxmoxOriginal)}
-                                            >
-                                                {proxmoxSaving ? (
-                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                ) : (
-                                                    <Save className="w-4 h-4" />
-                                                )}
-                                                Save Settings
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* VMware vSphere Card */}
-                            <div className="card-elevated overflow-hidden">
-                                <div className="bg-gradient-to-r from-green-500/10 to-lime-500/10 border-b border-theme px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-theme">
-                                            <VMwareIcon className="w-7 h-7" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-primary">VMware vSphere</h3>
-                                            <p className="text-xs text-secondary">vCenter & ESXi Management</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                        <div className="space-y-1.5 lg:col-span-2">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">vCenter / ESXi Host</label>
-                                            <input type="text" className="input" placeholder="vcenter.example.com" 
-                                                value={vsphereForm['vsphere_host'] || ''}
-                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_host: e.target.value}))}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Port</label>
-                                            <input type="text" className="input" placeholder="443" 
-                                                value={vsphereForm['vsphere_port'] || '443'}
-                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_port: e.target.value}))}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
-                                            <input type="text" className="input" placeholder="administrator@vsphere.local" 
-                                                value={vsphereForm['vsphere_user'] || ''}
-                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_user: e.target.value}))}
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Password</label>
-                                            <div className="relative">
-                                                <input 
-                                                    type={showVspherePassword ? "text" : "password"} 
-                                                    className="input pr-10" 
-                                                    placeholder="Enter password..." 
-                                                    value={vsphereForm['vsphere_password'] || ''}
-                                                    onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_password: e.target.value}))}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowVspherePassword(!showVspherePassword)}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
-                                                >
-                                                    {showVspherePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                                </button>
-                                            </div>
-
-                                        </div>
-
-                                        {/* Sync Mode Configuration */}
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Sync Mode</label>
-                                            <select 
-                                                className="input w-full"
-                                                value={vsphereForm['vsphere_sync_mode'] || 'manual'}
-                                                onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_sync_mode: e.target.value}))}
-                                            >
-                                                <option value="manual">Manual Only</option>
-                                                <option value="scheduled">Scheduled</option>
-                                            </select>
-                                        </div>
-
-                                        {vsphereForm['vsphere_sync_mode'] === 'scheduled' && (
-                                            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-                                                <label className="text-xs font-medium text-secondary uppercase tracking-wider">Sync Interval</label>
-                                                <select 
-                                                    className="input w-full"
-                                                    value={vsphereForm['vsphere_sync_interval'] || '60'}
-                                                    onChange={(e) => setVsphereForm(prev => ({...prev, vsphere_sync_interval: e.target.value}))}
-                                                >
-                                                    <option value="15">Every 15 Minutes</option>
-                                                    <option value="60">Every 1 Hour</option>
-                                                    <option value="360">Every 6 Hours</option>
-                                                    <option value="720">Every 12 Hours</option>
-                                                    <option value="1440">Every 24 Hours</option>
-                                                </select>
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-end">
-                                            <label className="flex items-center gap-3 cursor-pointer group">
-                                                <div className={`relative w-11 h-6 rounded-full transition-colors ${vsphereForm['vsphere_verify_ssl'] === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
-                                                    onClick={() => setVsphereForm(prev => ({...prev, vsphere_verify_ssl: prev['vsphere_verify_ssl'] === 'true' ? 'false' : 'true'}))}
-                                                >
-                                                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${vsphereForm['vsphere_verify_ssl'] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
-                                                </div>
-                                                <span className="text-sm text-secondary group-hover:text-primary transition-colors">Verify SSL</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mt-6 pt-5 border-t border-theme flex items-center justify-between">
-                                        <div className="flex items-center gap-4 text-sm text-secondary">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-2 h-2 rounded-full ${vsphereConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                                                <span>{vsphereConnected ? 'Connected' : 'Not connected'}</span>
-                                            </div>
-                                            {vsphereForm['vsphere_sync_mode'] === 'scheduled' && (
-                                                <div className="flex items-center gap-1.5 text-xs bg-theme-hover px-2 py-1 rounded-md">
-                                                    <RefreshCw className="w-3 h-3" />
-                                                    <span>Auto-sync: {vsphereForm['vsphere_sync_interval'] ? `${parseInt(vsphereForm['vsphere_sync_interval']) / 60 < 1 ? `${vsphereForm['vsphere_sync_interval']}m` : `${parseInt(vsphereForm['vsphere_sync_interval']) / 60}h`}` : '1h'}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex gap-3">
-                                            <button 
-                                                className="btn-secondary"
-                                                disabled={syncingInventory}
-                                                onClick={async () => {
-                                                    setSyncingInventory(true);
-                                                    try {
-                                                        const res = await api.post('/infrastructure/vsphere/sync');
-                                                        if (res.data.success) {
-                                                            showToast(`Inventory synced!`, 'success');
-                                                            const invRes = await api.get('/infrastructure/vsphere/inventory');
-                                                            if (invRes.data.success) {
-                                                                setVsphereInventory(invRes.data.data);
-                                                            }
-                                                        } else {
-                                                            showToast(res.data.message || 'Sync failed', 'error');
-                                                        }
-                                                    } catch (e: any) {
-                                                        showToast(e.response?.data?.detail || 'Sync failed', 'error');
-                                                    } finally {
-                                                        setSyncingInventory(false);
-                                                    }
-                                                }}
-                                            >
-                                                <RefreshCw className={`w-4 h-4 ${syncingInventory ? 'animate-spin' : ''}`} />
-                                                Sync
-                                            </button>
-                                            <button 
-                                                className="btn-secondary"
-                                                onClick={async () => {
-                                                    setInventoryModalOpen(true);
-                                                    if (!vsphereInventory) {
-                                                        try {
-                                                            const res = await api.get('/infrastructure/vsphere/inventory');
-                                                            if (res.data.success) {
-                                                                setVsphereInventory(res.data.data);
-                                                            }
-                                                        } catch (e) {
-                                                            // ignore
-                                                        }
-                                                    }
-                                                }}
-                                            >
-                                                <List className="w-4 h-4" />
-                                                View Inventory
-                                            </button>
-                                            <button 
-                                                className="btn-secondary"
-                                                onClick={async () => {
-                                                    try {
-                                                        const host = vsphereForm['vsphere_host'] || '';
-                                                        const port = parseInt(vsphereForm['vsphere_port'] || '443');
-                                                        const user = vsphereForm['vsphere_user'] || '';
-                                                        const password = vsphereForm['vsphere_password'] || '';
-                                                        const verify_ssl = vsphereForm['vsphere_verify_ssl'] === 'true';
-                                                        
-                                                        if (!host || !user) {
-                                                            showToast('Host and user are required', 'warning');
-                                                            return;
-                                                        }
-                                                        
-                                                        setVsphereTesting(true);
-                                                        const res = await api.post('/infrastructure/vsphere/test', { host, port, user, password, verify_ssl });
-                                                        if (res.data.success) {
-                                                            showToast(`✓ vSphere Connection Successful\n${res.data.message || 'Connected to ' + host}`, 'success');
-                                                        } else {
-                                                            showToast(`✗ vSphere Connection Failed\n${res.data.message || 'Unable to connect'}`, 'error');
-                                                        }
-                                                    } catch (e: any) {
-                                                        showToast(`✗ vSphere Connection Failed\n${e.response?.data?.detail || 'Connection test failed'}`, 'error');
-                                                    } finally {
-                                                        setVsphereTesting(false);
-                                                    }
-                                                }}
-                                            >
-                                                {vsphereTesting ? (
-                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                ) : (
-                                                    <Globe className="w-4 h-4" />
-                                                )}
-                                                {vsphereTesting ? 'Testing...' : 'Test Connection'}
-                                            </button>
-                                            <button 
-                                                className="btn-primary"
-                                                disabled={vsphereSaving || (
-                                                    vsphereForm['vsphere_host'] === vsphereOriginal['vsphere_host'] &&
-                                                    vsphereForm['vsphere_port'] === vsphereOriginal['vsphere_port'] &&
-                                                    vsphereForm['vsphere_user'] === vsphereOriginal['vsphere_user'] &&
-                                                    vsphereForm['vsphere_password'] === vsphereOriginal['vsphere_password'] &&
-                                                    vsphereForm['vsphere_verify_ssl'] === vsphereOriginal['vsphere_verify_ssl']
-                                                )}
-                                                onClick={async () => {
-                                                    try {
-                                                        setVsphereSaving(true);
-                                                        const settings: Record<string, string> = {};
-                                                        ['vsphere_host', 'vsphere_port', 'vsphere_user', 'vsphere_password', 'vsphere_verify_ssl'].forEach(key => {
-                                                            const val = vsphereForm[key];
-                                                            if (val !== undefined) settings[key] = val;
-                                                        });
-                                                        await api.post('/infrastructure/vsphere/save', { settings, category: 'vsphere' });
-                                                        
-                                                        // Update original to reflect saved state
-                                                        setVsphereOriginal({...vsphereForm});
-                                                        
-                                                        // Refresh connection status after save
-                                                        try {
-                                                            const statusRes = await api.get('/infrastructure/vsphere/status');
-                                                            setVsphereConnected(statusRes.data.connected);
-                                                        } catch (e) {
-                                                            setVsphereConnected(false);
-                                                        }
-                                                        
-                                                        showToast('✓ vSphere Settings Saved Successfully\nCredentials have been stored securely', 'success');
-                                                    } catch (e: any) {
-                                                        showToast(`✗ Failed to Save vSphere Settings\n${e.response?.data?.detail || 'Please try again'}`, 'error');
-                                                    } finally {
-                                                        setVsphereSaving(false);
-                                                    }
-                                                }}
-                                            >
-                                                {vsphereSaving ? (
-                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                ) : (
-                                                    <Save className="w-4 h-4" />
-                                                )}
-                                                {vsphereSaving ? 'Saving...' : 'Save Settings'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* System Tab */}
-                    {activeTab === 'system' && user?.role === 'admin' && (
-                        <div className="space-y-6">
-                            <SettingsSection title="Email (SMTP)" icon={Mail} color="purple" density={viewDensity}>
-                                <div className="space-y-4">
-                                    {systemSettings.filter(s => s.category === 'smtp').map(s => (
-                                        <div key={s.key}>{renderSettingInput(s)}</div>
-                                    ))}
-                                    <div className="pt-4 flex justify-end">
-                                        <button 
-                                            onClick={() => setSmtpModalOpen(true)}
-                                            className="btn-secondary"
-                                        >
-                                            <Send className="w-4 h-4 mr-2" />
-                                            Test SMTP Settings
+                            <SectionHeader title="Infrastructure Matrix" subtitle="Connected clusters and hypervisors" />
+                            <div className="grid grid-cols-1 gap-8">
+                                <InfrastructureCard 
+                                    name="VMware vSphere" 
+                                    desc="Enterprise vCenter & ESXi orchestration"
+                                    icon={VMwareIcon}
+                                    connected={vsphereConnected}
+                                    onTest={handleTestVsphere}
+                                    onSave={handleSaveVsphere}
+                                    loading={vsphereTesting}
+                                    saving={vsphereSaving}
+                                    form={vsphereForm}
+                                    setForm={setVsphereForm}
+                                    fields={[
+                                        { key: 'vsphere_host', label: 'Management Host', placeholder: 'vcenter.labs.local' },
+                                        { key: 'vsphere_port', label: 'Port', placeholder: '443' },
+                                        { key: 'vsphere_user', label: 'Admin User', placeholder: 'administrator@vsphere.local' },
+                                        { key: 'vsphere_password', label: 'Access Token', placeholder: '••••••••', secret: true }
+                                    ]}
+                                    secondaryActions={
+                                        <button className="btn-secondary py-2 px-4 italic" onClick={() => setInventoryModalOpen(true)}>
+                                            <List className="w-4 h-4" /> Verify Inventory
                                         </button>
-                                    </div>
-                                </div>
-                            </SettingsSection>
-
-
+                                    }
+                                />
+                                <InfrastructureCard 
+                                    name="Proxmox VE" 
+                                    desc="Virtual Environment nodes and clusters"
+                                    icon={ProxmoxIcon}
+                                    connected={proxmoxConnected}
+                                    onTest={handleTestProxmox}
+                                    onSave={handleSaveProxmox}
+                                    loading={proxmoxTesting}
+                                    saving={proxmoxSaving}
+                                    form={proxmoxForm}
+                                    setForm={setProxmoxForm}
+                                    fields={[
+                                        { key: 'proxmox_host', label: 'PVE IP / Host', placeholder: '10.0.0.5' },
+                                        { key: 'proxmox_port', label: 'Port', placeholder: '8006' },
+                                        { key: 'proxmox_node', label: 'Target Node', placeholder: 'pve01' },
+                                        { key: 'proxmox_user', label: 'PAM/PVE User', placeholder: 'root@pam' },
+                                        { key: 'proxmox_password', label: 'Password', placeholder: '••••••••', secret: true }
+                                    ]}
+                                />
+                            </div>
                         </div>
                     )}
-                </div>
+
+                    {activeTab === 'system' && (
+                        <div className="space-y-6">
+                            <SectionHeader title="System Core" subtitle="Global configuration and SMTP security" />
+                            <div className="glass rounded-[2.5rem] border border-theme p-10 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none text-purple-500">
+                                    <Lock className="w-32 h-32" />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                                    {systemSettings.filter(s => s.category === 'smtp').map(s => (
+                                        <div key={s.key} className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1">{s.description || s.key}</label>
+                                            <input 
+                                                type={s.is_secret ? "password" : "text"}
+                                                value={s.value}
+                                                onChange={e => handleUpdateSetting(s.key, e.target.value)}
+                                                className="input bg-secondary/20 p-4 border-theme/50 focus:border-purple-500/50 rounded-2xl"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-10 pt-8 border-t border-theme flex justify-end relative z-10">
+                                    <button 
+                                        onClick={() => setSmtpModalOpen(true)}
+                                        className="flex items-center gap-2 px-6 py-3 bg-purple-600/10 text-purple-500 border border-purple-500/20 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-purple-600 hover:text-white"
+                                    >
+                                        <Send className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                        Audit SMTP Transport
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </main>
             </div>
 
-            {/* Modals remain unchanged ... */}
-            {/* SMTP Modal */}
-            <Modal isOpen={smtpModalOpen} onClose={() => setSmtpModalOpen(false)} title="Test SMTP Configuration">
-                <div className="space-y-4">
-                    {loadingSettings ? (
-                        <div className="animate-pulse space-y-3">
-                             <div className="h-10 rounded bg-secondary/20"></div>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="pt-4 border-t border-theme space-y-3">
-                                <div>
-                                    <label className="input-label">Test Recipient</label>
-                                    <div className="flex gap-2">
-                                        <input 
-                                            type="email" 
-                                            className="input" 
-                                            value={testRecipient} 
-                                            onChange={(e) => setTestRecipient(e.target.value)}
-                                            placeholder="Enter email to test..."
-                                        />
-                                        <button 
-                                            onClick={handleTestEmail} 
-                                            disabled={testEmailLoading || !testRecipient}
-                                            className="btn-primary whitespace-nowrap"
-                                        >
-                                            {testEmailLoading ? (
-                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <Send className="w-4 h-4" />
-                                                    Send
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
+            {/* Change Profile Modal */}
+            <Modal isOpen={isEditingProfile} onClose={() => setIsEditingProfile(false)} title="Update Identity" maxWidth="lg">
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <Field label="First Name" val={profileForm.first_name} onChange={v => setProfileForm({...profileForm, first_name: v})} />
+                        <Field label="Last Name" val={profileForm.last_name} onChange={v => setProfileForm({...profileForm, last_name: v})} />
+                    </div>
+                    <Field label="Contact Email" val={profileForm.email} readOnly />
+                    <div className="pt-4 border-t border-theme">
+                        <p className="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mb-4">Security Confirmation</p>
+                        <Field label="Current Password" val={profileForm.current_password} type="password" placeholder="Required for changes" onChange={v => setProfileForm({...profileForm, current_password: v})} />
+                    </div>
+                    <div className="flex gap-4 pt-4">
+                        <button 
+                            onClick={handleSaveProfile} 
+                            disabled={profileSaving}
+                            className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-[1.5rem] font-bold shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+                        >
+                            {profileSaving ? <RefreshCw className="w-6 h-6 animate-spin mx-auto" /> : 'Commit Changes'}
+                        </button>
+                    </div>
                 </div>
             </Modal>
 
-            {/* Change Password Modal */}
-            <Modal isOpen={pwdModalOpen} onClose={() => setPwdModalOpen(false)} title="Change Password" maxWidth="sm">
-                <form onSubmit={handlePasswordChange} className="space-y-4">
-                    <div>
-                        <label className="input-label">Current Password</label>
-                        <input 
-                            type="password"
-                            required
-                            className="input"
-                            value={pwdForm.current_password}
-                            onChange={e => setPwdForm({...pwdForm, current_password: e.target.value})}
-                        />
-                    </div>
-                    <div>
-                        <label className="input-label">New Password</label>
-                        <input 
-                            type="password"
-                            required
-                            className="input"
-                            value={pwdForm.new_password}
-                            onChange={e => setPwdForm({...pwdForm, new_password: e.target.value})}
-                        />
-                    </div>
-                    <div>
-                        <label className="input-label">Confirm New Password</label>
-                        <input 
-                            type="password"
-                            required
-                            className="input"
-                            value={pwdForm.confirm_password}
-                            onChange={e => setPwdForm({...pwdForm, confirm_password: e.target.value})}
-                        />
-                    </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={() => setPwdModalOpen(false)} className="btn-secondary">
-                            Cancel
-                        </button>
-                        <button type="submit" disabled={pwdLoading} className="btn-primary">
-                            {pwdLoading ? 'Updating...' : 'Update Password'}
-                        </button>
-                    </div>
-                </form>
-            </Modal>
-
-            {/* vSphere Inventory Modal */}
-            <Modal isOpen={inventoryModalOpen} onClose={() => setInventoryModalOpen(false)} title="vSphere Inventory" maxWidth="3xl">
-                <div className="space-y-4">
-                    {!vsphereInventory ? (
-                        <div className="p-8 text-center text-secondary border-2 border-dashed border-theme rounded-xl">
-                            <Cloud className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                            <p>No inventory loaded.</p>
-                            <p className="text-xs mt-1">Click "Sync" to fetch data from vSphere.</p>
+            {/* Provider Modal */}
+            <Modal isOpen={!!selectedProvider} onClose={() => setSelectedProvider(null)} title={`Matrix: ${selectedProvider?.name}`} maxWidth="md">
+                <div className="space-y-6">
+                    {systemSettings.filter(s => s.category === selectedProvider?.id).map(s => (
+                        <div key={s.key} className="space-y-2">
+                             <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1">{s.description || s.key}</label>
+                             <input 
+                                type={s.is_secret ? "password" : "text"}
+                                value={providerForm[s.key] || ''}
+                                onChange={e => setProviderForm({...providerForm, [s.key]: e.target.value})}
+                                className="input bg-secondary/10 p-4 border-theme focus:border-blue-500/50 rounded-2xl"
+                             />
                         </div>
-                    ) : (
-                        <div className="h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-                            <div className="mb-4 text-xs text-secondary flex items-center gap-2">
-                                <Check className="w-3 h-3 text-green-500" />
-                                Last Synced: {new Date(vsphereInventory.last_sync).toLocaleString()}
-                            </div>
-                            
-                            {/* Templates/VMs Section */}
-                            <div className="mb-6">
-                                <h3 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2 sticky top-0 bg-base-100 py-1 z-10">
-                                    <Server className="w-4 h-4" />
-                                    Templates & VMs ({vsphereInventory.vms?.length || 0})
-                                </h3>
-                                <div className="bg-base-200 rounded-lg border border-theme overflow-hidden">
-                                    <table className="w-full text-sm text-left">
-                                        <thead className="bg-base-300 text-xs uppercase text-secondary font-medium">
-                                            <tr>
-                                                <th className="px-4 py-2">Name</th>
-                                                <th className="px-4 py-2">Type</th>
-                                                <th className="px-4 py-2">OS</th>
-                                                <th className="px-4 py-2 text-right">Specs</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-theme">
-                                            {vsphereInventory.vms?.map((vm: any, i: number) => (
-                                                <tr key={i} className="hover:bg-base-300/50 transition-colors">
-                                                    <td className="px-4 py-2 font-medium">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className={`w-1.5 h-1.5 rounded-full ${vm.power_state?.toString().toLowerCase().includes('on') ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                                                            {vm.name}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        {vm.is_template ? (
-                                                            <span className="badge badge-primary text-[10px]">Template</span>
-                                                        ) : (
-                                                            <span className="badge badge-neutral text-[10px]">VM</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-4 py-2 text-secondary text-xs">{vm.guest_os}</td>
-                                                    <td className="px-4 py-2 text-secondary text-xs text-right">
-                                                        {vm.cpu} vCPU, {Math.round(vm.memory_mb / 1024)} GB
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            {/* Networks Section */}
-                            <div>
-                                <h3 className="text-sm font-semibold text-primary mb-2 flex items-center gap-2 sticky top-0 bg-base-100 py-1 z-10">
-                                    <Globe className="w-4 h-4" />
-                                    Networks ({vsphereInventory.networks?.length || 0})
-                                </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                    {vsphereInventory.networks?.map((net: any, i: number) => (
-                                        <div key={i} className="bg-base-200 p-2.5 rounded border border-theme flex justify-between items-center hover:border-primary/50 transition-colors">
-                                            <span className="font-medium text-xs truncate" title={net.name}>{net.name}</span>
-                                            <span className="text-[10px] text-secondary bg-base-300 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{net.type}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex justify-end pt-4 border-t border-theme">
-                        <button className="btn-secondary" onClick={() => setInventoryModalOpen(false)}>Close</button>
-                    </div>
+                    ))}
+                    <button 
+                        onClick={handleSaveProvider} 
+                        disabled={providerSaving}
+                        className="w-full py-4 bg-primary text-secondary hover:text-primary rounded-2xl font-bold transition-all border border-theme"
+                    >
+                        {providerSaving ? 'Syncing...' : 'Update Matrix'}
+                    </button>
                 </div>
             </Modal>
+
+            {/* Core Logic Placeholder for omitted functions to ensure build */}
+            <InventoryModal isOpen={inventoryModalOpen} onClose={() => setInventoryModalOpen(false)} inventory={vsphereInventory} />
+            <PasswordModal isOpen={pwdModalOpen} onClose={() => setPwdModalOpen(false)} form={pwdForm} setForm={setPwdForm} onSave={handlePasswordChange} loading={pwdLoading} />
+            <SMTPTestModal isOpen={smtpModalOpen} onClose={() => setSmtpModalOpen(false)} recipient={testRecipient} setRecipient={setTestRecipient} onTest={handleTestEmail} loading={testEmailLoading} />
         </div>
     );
 };
 
-interface ToggleOptionProps {
-    title: string;
-    description: string;
-    enabled: boolean;
-    onChange: (value: boolean) => void;
-}
+// --- MODERN UI HELPERS ---
 
-const ToggleOption: React.FC<ToggleOptionProps> = ({ title, description, enabled, onChange }) => (
-    <div className="flex items-center justify-between p-4 rounded-xl border border-theme bg-secondary/10">
-        <div>
-            <h3 className="font-medium text-primary">{title}</h3>
-            <p className="text-sm text-secondary">{description}</p>
+const SectionHeader: React.FC<{ title: string, subtitle: string }> = ({ title, subtitle }) => (
+    <div className="mb-4">
+        <h2 className="text-xl font-black text-primary tracking-tight leading-none mb-1 uppercase">{title}</h2>
+        <p className="text-secondary text-sm font-medium">{subtitle}</p>
+    </div>
+);
+
+const NotificationCard: React.FC<{ title: string, desc: string, icon: any, enabled: boolean, onToggle: (v: boolean) => void }> = ({ title, desc, icon: Icon, enabled, onToggle }) => (
+    <div className="glass rounded-[2rem] p-6 border border-theme flex items-center justify-between group transition-all duration-300 hover:border-blue-500/30">
+        <div className="flex items-center gap-4">
+            <div className={clsx(
+                "p-3 rounded-2xl transition-all",
+                enabled ? "bg-emerald-500/10 text-emerald-500" : "bg-secondary/20 text-secondary"
+            )}>
+                <Icon className="w-6 h-6" />
+            </div>
+            <div>
+                <h4 className="font-bold text-primary leading-tight mb-0.5">{title}</h4>
+                <p className="text-[11px] text-secondary font-medium">{desc}</p>
+            </div>
         </div>
         <button 
-            onClick={() => onChange(!enabled)}
-            className={`relative w-14 h-8 rounded-full p-1 transition-colors ${enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+            onClick={() => onToggle(!enabled)}
+            className={clsx(
+                "relative w-14 h-8 rounded-full transition-all duration-300 flex items-center px-1 shadow-inner ring-4 ring-transparent",
+                enabled ? "bg-emerald-500 ring-emerald-500/10" : "bg-secondary"
+            )}
         >
-            <div className={`w-6 h-6 rounded-full bg-white shadow-sm transition-transform flex items-center justify-center ${enabled ? 'translate-x-6' : 'translate-x-0'}`}>
-                {enabled && <Check className="w-3 h-3 text-blue-600" />}
+            <div className={clsx(
+                "w-6 h-6 rounded-full bg-white shadow-xl transition-transform duration-300 flex items-center justify-center",
+                enabled ? "translate-x-6" : "translate-x-0"
+            )}>
+                {enabled && <Check className="w-4 h-4 text-emerald-500" />}
             </div>
         </button>
     </div>
+);
+
+const ProviderCard: React.FC<{ provider: any, onConfigure: () => void, viewMode: string }> = ({ provider, onConfigure, viewMode }) => (
+    <div 
+        onClick={onConfigure}
+        className={clsx(
+            "glass rounded-[2rem] border border-theme cursor-pointer group transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] overflow-hidden relative",
+            viewMode === 'list' ? "flex items-center p-4 gap-6" : "p-8 text-center"
+        )}
+    >
+        <div className={clsx(
+            "absolute top-0 right-0 p-8 opacity-5 transition-transform duration-700 group-hover:scale-125",
+            `text-${provider.color}-500`
+        )}>
+            <provider.icon className="w-32 h-32" />
+        </div>
+        
+        <div className={clsx(
+            "relative z-10 flex flex-col",
+            viewMode === 'list' ? "flex-row items-center !text-left w-full" : "items-center"
+        )}>
+            <div className={clsx(
+                "p-5 rounded-[1.5rem] bg-gradient-to-br from-secondary/50 to-secondary/30 border border-theme/50 shadow-inner mb-6 transition-all duration-500 group-hover:rotate-6",
+                viewMode === 'list' && "mb-0 mr-6"
+            )}>
+                <provider.icon className="w-8 h-8 opacity-80" />
+            </div>
+            <div className="flex-1">
+                <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{provider.id} network</span>
+                <h4 className="text-xl font-black text-primary tracking-tighter uppercase italic leading-none my-1">{provider.name}</h4>
+                <p className="text-[11px] text-secondary font-medium leading-relaxed opacity-60 px-2">{provider.description}</p>
+            </div>
+            <div className={clsx(
+                "mt-6 flex items-center gap-2 px-6 py-2 bg-secondary/30 rounded-full text-[10px] font-black uppercase tracking-widest text-secondary transition-all group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20",
+                viewMode === 'list' && "mt-0"
+            )}>
+                Config <ChevronRight className="w-3.5 h-3.5" />
+            </div>
+        </div>
+    </div>
+);
+
+const InfrastructureCard: React.FC<{ 
+    name: string, desc: string, icon: any, connected: boolean, fields: any[], 
+    onTest: () => void, onSave: () => void, loading: boolean, saving: boolean, 
+    form: any, setForm: any, secondaryActions?: React.ReactNode 
+}> = ({ name, desc, icon: Icon, connected, fields, onTest, onSave, loading, saving, form, setForm, secondaryActions }) => {
+    const [showLocal, setShowLocal] = useState(false);
+    return (
+        <div className="glass rounded-[3rem] border border-theme overflow-hidden shadow-2xl transition-all duration-500 hover:border-blue-500/20">
+            <div className="flex flex-col md:flex-row md:items-center justify-between p-10 bg-secondary/20 border-b border-theme/50 relative overflow-hidden">
+                <div className="absolute inset-0 bg-blue-500/5 blur-3xl translate-x-1/2" />
+                <div className="flex items-center gap-6 relative z-10">
+                    <div className="p-5 rounded-[2rem] bg-white dark:bg-slate-900 border border-theme shadow-2xl transition-all duration-500 group-hover:scale-110">
+                        <Icon className="w-10 h-10" />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-3 mb-1">
+                            <h3 className="text-2xl font-black text-primary tracking-tighter uppercase italic">{name}</h3>
+                            <div className={clsx(
+                                "flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
+                                connected ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
+                            )}>
+                                <div className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", connected ? "bg-emerald-500" : "bg-red-500")} />
+                                {connected ? 'Live' : 'Offline'}
+                            </div>
+                        </div>
+                        <p className="text-sm font-medium text-secondary italic opacity-80">{desc}</p>
+                    </div>
+                </div>
+                <div className="mt-6 md:mt-0 flex gap-3 relative z-10">
+                    {secondaryActions}
+                    <button 
+                        onClick={onTest} 
+                        disabled={loading}
+                        className="btn-secondary py-3 px-6 rounded-2xl flex items-center gap-2 group"
+                    >
+                        {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4 group-hover:text-blue-500" />}
+                        <span className="text-xs font-black uppercase tracking-widest leading-none">Audit Link</span>
+                    </button>
+                    <button 
+                        onClick={onSave} 
+                        disabled={saving}
+                        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/30 transition-all hover:scale-[1.05] active:scale-[0.95]"
+                    >
+                        {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Commit'}
+                    </button>
+                </div>
+            </div>
+            
+            <div className="p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-white/5">
+                {fields.map(f => (
+                    <div key={f.key} className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1 opacity-60">{f.label}</label>
+                        <div className="relative">
+                            <input 
+                                type={f.secret && !showLocal ? "password" : "text"}
+                                value={form[f.key] || ''}
+                                onChange={e => setForm({...form, [f.key]: e.target.value})}
+                                placeholder={f.placeholder}
+                                className="input bg-secondary/10 p-4 border-theme/50 focus:border-blue-500/50 rounded-2xl w-full text-sm font-bold"
+                            />
+                            {f.secret && (
+                                <button 
+                                    onClick={() => setShowLocal(!showLocal)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary hover:text-primary"
+                                >
+                                    {showLocal ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const Field: React.FC<{ label: string, val: string, readOnly?: boolean, type?: string, placeholder?: string, onChange?: (v: string) => void }> = ({ label, val, readOnly, type = "text", placeholder, onChange }) => (
+    <div className="space-y-2 w-full">
+        <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1">{label}</label>
+        <input 
+            type={type}
+            value={val}
+            onChange={e => onChange?.(e.target.value)}
+            readOnly={readOnly}
+            placeholder={placeholder}
+            className={clsx(
+                "input p-4 border-theme/50 focus:border-blue-500/50 rounded-2xl w-full font-bold",
+                readOnly ? "bg-secondary/10 cursor-not-allowed opacity-50" : "bg-secondary/20"
+            )}
+        />
+    </div>
+);
+
+const LoadingSpinner = () => (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl" />
+        <p className="text-secondary font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">Syncing Control Center...</p>
+    </div>
+);
+
+const InventoryModal: React.FC<{ isOpen: boolean, onClose: () => void, inventory: any }> = ({ isOpen, onClose, inventory }) => (
+    <Modal isOpen={isOpen} onClose={onClose} title="Infrastructure Audit" maxWidth="4xl">
+        <div className="space-y-6">
+            {!inventory ? (
+                <div className="p-12 text-center text-secondary border-2 border-dashed border-theme rounded-[2rem] bg-secondary/10">
+                    <Cloud className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                    <p className="font-bold text-lg">No inventory cached</p>
+                    <p className="text-xs uppercase tracking-widest font-black opacity-50">Sync from provider to populate audit data</p>
+                </div>
+            ) : (
+                <div className="space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar pr-4">
+                    <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        <div>
+                            <p className="text-xs font-black uppercase tracking-widest text-primary">Sync Successful</p>
+                            <p className="text-[10px] font-bold text-secondary">{new Date(inventory.last_sync).toLocaleString()}</p>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-primary px-1 flex items-center gap-2">
+                            <Server className="w-4 h-4 text-blue-500" /> Virtual Entities ({inventory.vms?.length || 0})
+                        </h3>
+                        <div className="glass rounded-[2rem] border border-theme overflow-hidden shadow-lg">
+                            <table className="w-full text-left">
+                                <thead className="bg-secondary/20 text-[10px] font-black uppercase tracking-widest text-secondary border-b border-theme">
+                                    <tr>
+                                        <th className="px-6 py-4">Descriptor</th>
+                                        <th className="px-6 py-4">Metric</th>
+                                        <th className="px-6 py-4">Blueprint Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-theme text-sm">
+                                    {inventory.vms?.map((vm: any, i: number) => (
+                                        <tr key={i} className="hover:bg-secondary/10 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={clsx("w-2 h-2 rounded-full shadow-sm", vm.power_state?.toString().toLowerCase().includes('on') ? 'bg-emerald-500' : 'bg-slate-500')} />
+                                                    <span className="font-bold text-primary">{vm.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-xs font-bold text-secondary">
+                                                {vm.cpu}vCPU / {Math.round(vm.memory_mb/1024)}GB
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={clsx(
+                                                    "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                                                    vm.is_template ? "bg-purple-500/10 border-purple-500/20 text-purple-500" : "bg-blue-500/10 border-blue-500/20 text-blue-500"
+                                                )}>
+                                                    {vm.is_template ? 'Template' : 'Instance'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    </Modal>
+);
+
+const PasswordModal: React.FC<{ isOpen: boolean, onClose: () => void, form: any, setForm: any, onSave: (e: any) => void, loading: boolean }> = ({ isOpen, onClose, form, setForm, onSave, loading }) => (
+    <Modal isOpen={isOpen} onClose={onClose} title="Rotate Credentials" maxWidth="sm">
+        <form onSubmit={onSave} className="space-y-6">
+            <Field label="Current Alpha-Key" type="password" val={form.current_password} onChange={v => setForm({...form, current_password: v})} />
+            <div className="h-px bg-theme/50 w-full" />
+            <Field label="New Secure-Key" type="password" val={form.new_password} onChange={v => setForm({...form, new_password: v})} />
+            <Field label="Verify New Secure-Key" type="password" val={form.confirm_password} onChange={v => setForm({...form, confirm_password: v})} />
+            <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-500/30 transition-all hover:scale-[1.05]"
+            >
+                {loading ? 'Encrypting...' : 'Update Alpha-Key'}
+            </button>
+        </form>
+    </Modal>
+);
+
+const SMTPTestModal: React.FC<{ isOpen: boolean, onClose: () => void, recipient: string, setRecipient: (v: string) => void, onTest: () => void, loading: boolean }> = ({ isOpen, onClose, recipient, setRecipient, onTest, loading }) => (
+    <Modal isOpen={isOpen} onClose={onClose} title="Transport Audit" maxWidth="md">
+        <div className="space-y-6">
+            <p className="text-secondary font-medium text-sm text-center px-4">Initialize a test sequence to verify SMTP relay connectivity and security handshake.</p>
+            <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1">Target Recipient</label>
+                <div className="flex gap-2">
+                    <input 
+                        type="email" 
+                        value={recipient} 
+                        onChange={e => setRecipient(e.target.value)} 
+                        placeholder="admin@enterprise.com" 
+                        className="input flex-1 bg-secondary/10 p-4 border-theme focus:border-purple-500/50 rounded-2xl font-bold"
+                    />
+                    <button 
+                        onClick={onTest} 
+                        disabled={loading || !recipient}
+                        className="p-4 bg-purple-600 text-white rounded-2xl shadow-lg shadow-purple-500/20 active:scale-90 transition-all"
+                    >
+                        {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                    </button>
+                </div>
+            </div>
+            {loading && <div className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-500 text-center animate-pulse mt-4">Transmitting Handshake...</div>}
+        </div>
+    </Modal>
 );
 
 export default Settings;

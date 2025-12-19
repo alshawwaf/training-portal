@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Server, LogIn, ArrowLeft, Zap } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { LogIn, UserPlus, KeyRound } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
-  const { login, localLogin, user } = useAuth();
+  const { localLogin, user } = useAuth();
   const navigate = useNavigate();
-  const [showLocal, setShowLocal] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -33,111 +32,93 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-950 to-black relative overflow-hidden transition-colors duration-300">
-      {/* Gradient orbs removed - was covering content */}
-
-
-      {/* Noise texture overlay removed - was covering viewport */}
-      
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black relative overflow-hidden transition-colors duration-300">
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Card */}
-        <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-pink-500/30 shadow-pink-500/10">
+        <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-blue-500/30 shadow-blue-500/10">
           {/* Logo */}
-          <div className="flex justify-center mb-8">
-              <img src="/icon.png" alt="Check Point" className="w-24 h-24 object-contain" />
+          <div className="flex justify-center mb-6">
+              <img src="/icon.png" alt="Check Point" className="w-20 h-20 object-contain drop-shadow-2xl" />
           </div>
           
-          <h1 className="text-2xl font-bold text-white text-center mb-2">Check Point SE Training</h1>
-          <p className="text-gray-400 text-center mb-8 text-sm">Access your virtualization environments</p>
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-white mb-2">SE Training Portal</h1>
+            <p className="text-slate-400 text-sm">Sign in to your virtualization workspace</p>
+          </div>
 
-          {!showLocal ? (
-              <div className="space-y-4">
-                  <button
-                    onClick={login}
-                    className="w-full btn-primary py-3"
-                  >
-                    <ShieldCheck className="w-5 h-5" />
-                    Sign in with Microsoft
-                  </button>
-
-                  <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-theme"></div>
-                      </div>
-                      <div className="relative flex justify-center text-xs">
-                          <span className="px-2 bg-primary text-secondary">or</span>
-                      </div>
-                  </div>
-                  
-                  <button 
-                      onClick={() => setShowLocal(true)}
-                      className="w-full btn-secondary py-3 justify-center"
-                  >
-                      Admin Login
-                  </button>
+          <form onSubmit={handleLocalLogin} className="space-y-5">
+              <div className="space-y-2">
+                   <label className="text-sm font-medium text-slate-300 ml-1">Work Email</label>
+                   <input 
+                      type="email" 
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      className="input w-full"
+                      placeholder="john@checkpoint.com"
+                      required
+                  />
               </div>
-          ) : (
-              <form onSubmit={handleLocalLogin} className="space-y-5">
-                  <div>
-                       <label className="input-label">Email</label>
-                       <input 
-                          type="email" 
-                          value={email}
-                          onChange={e => setEmail(e.target.value)}
-                          className="input"
-                          placeholder="admin@example.com"
-                          required
-                      />
+              <div className="space-y-2">
+                   <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+                   <input 
+                      type="password" 
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="input w-full"
+                      placeholder="••••••••"
+                      required
+                  />
+              </div>
+              
+              {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-500 text-sm flex items-center gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      {error}
                   </div>
-                  <div>
-                       <label className="input-label">Password</label>
-                       <input 
-                          type="password" 
-                          value={password}
-                          onChange={e => setPassword(e.target.value)}
-                          className="input"
-                          placeholder="••••••••"
-                          required
-                      />
-                  </div>
-                  
-                  {error && (
-                      <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-500 text-sm">
-                          {error}
-                      </div>
+              )}
+              
+              <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full btn-primary py-3.5 flex items-center justify-center gap-2 font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-[0.98]"
+               >
+                  {isLoading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                      <>
+                          <LogIn className="w-5 h-5" />
+                          Sign In
+                      </>
                   )}
-                  
-                  <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full btn-primary py-3"
-                   >
-                      {isLoading ? (
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : (
-                          <>
-                              <LogIn className="w-5 h-5" />
-                              Login
-                          </>
-                      )}
-                  </button>
+              </button>
+          </form>
 
-                   <button 
-                      type="button"
-                      onClick={() => setShowLocal(false)}
-                      className="w-full btn-ghost flex items-center justify-center gap-2"
-                  >
-                      <ArrowLeft className="w-4 h-4" />
-                      Back to SSO
-                  </button>
-              </form>
-          )}
+          {/* Quick Actions */}
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            <Link 
+              to="/register" 
+              className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-blue-500/50 hover:bg-slate-800 transition-all group"
+            >
+              <UserPlus className="w-6 h-6 text-slate-400 group-hover:text-blue-400 mb-2" />
+              <span className="text-xs font-semibold text-slate-300">Create Account</span>
+            </Link>
+            <Link 
+              to="/join/any" 
+              onClick={(e) => { e.preventDefault(); navigate('/join/any'); }}
+              className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-emerald-500/50 hover:bg-slate-800 transition-all group"
+            >
+              <KeyRound className="w-6 h-6 text-slate-400 group-hover:text-emerald-400 mb-2" />
+              <span className="text-xs font-semibold text-slate-300">Join Class</span>
+            </Link>
+          </div>
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-secondary opacity-70">
-          Authorized personnel only. Contact admin for access.
-        </p>
+        <div className="mt-8 text-center">
+          <p className="text-xs text-slate-500 leading-relaxed max-w-[280px] mx-auto">
+            This portal is for authorized Check Point personnel and registered trainees.
+          </p>
+        </div>
       </div>
     </div>
   );

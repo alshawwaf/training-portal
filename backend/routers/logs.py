@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from db.database import get_db
 from db.models import ActionLog, User
+from .auth import get_current_user
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
@@ -50,7 +51,8 @@ def get_logs(
     action: Optional[str] = None,
     level: Optional[str] = None,
     source: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Fetch paginated system logs with filters"""
     query = db.query(ActionLog).order_by(desc(ActionLog.created_at))
@@ -67,7 +69,8 @@ def get_logs(
 @router.get("/export")
 def export_logs(
     format: str = Query("csv", enum=["csv", "json"]),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Export logs as CSV or JSON"""
     logs = db.query(ActionLog).order_by(desc(ActionLog.created_at)).all()
@@ -94,7 +97,7 @@ def export_logs(
     )
 
 @router.get("/stats")
-def get_log_stats(db: Session = Depends(get_db)):
+def get_log_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get log statistics for overview cards"""
     from sqlalchemy import func
     
@@ -107,7 +110,7 @@ def get_log_stats(db: Session = Depends(get_db)):
     return stats
 
 @router.get("/app-log")
-def get_application_logs(lines: int = Query(500, le=2000)):
+def get_application_logs(lines: int = Query(500, le=2000), current_user: User = Depends(get_current_user)):
     """Read the last N lines from the application log file"""
     log_file = "logs/app.log"
     if not os.path.exists(log_file):
@@ -123,7 +126,7 @@ def get_application_logs(lines: int = Query(500, le=2000)):
         return {"error": str(e)}
 
 @router.delete("/{log_id}")
-def delete_single_log(log_id: int, db: Session = Depends(get_db)):
+def delete_single_log(log_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Delete a single log entry by ID"""
     log = db.query(ActionLog).filter(ActionLog.id == log_id).first()
     if not log:
@@ -135,7 +138,8 @@ def delete_single_log(log_id: int, db: Session = Depends(get_db)):
 @router.delete("/bulk/delete")
 def delete_bulk_logs(
     log_ids: List[int],
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Delete multiple logs by IDs"""
     deleted = db.query(ActionLog).filter(ActionLog.id.in_(log_ids)).delete(synchronize_session=False)
@@ -146,7 +150,8 @@ def delete_bulk_logs(
 def delete_logs_by_date_range(
     start_date: Optional[datetime] = None,
     end_date: Optional[datetime] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Delete logs within a date range. If no dates provided, deletes all logs."""
     query = db.query(ActionLog)
@@ -161,7 +166,7 @@ def delete_logs_by_date_range(
     return {"message": f"Deleted {deleted} logs"}
 
 @router.delete("/clear/all")
-def clear_all_logs(confirm: bool = Query(False), db: Session = Depends(get_db)):
+def clear_all_logs(confirm: bool = Query(False), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Clear ALL logs. Requires confirm=true query parameter for safety."""
     if not confirm:
         raise HTTPException(status_code=400, detail="Add ?confirm=true to confirm deletion of all logs")

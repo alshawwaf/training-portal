@@ -49,11 +49,25 @@ SE Training Portal/
 │   │   │   ├── AuthContext.tsx    # User authentication state
 │   │   │   └── ToastContext.tsx   # Notification system
 │   │   ├── pages/             # Page components
-│   │   │   ├── Login.tsx      # SSO & local login
-│   │   │   ├── Dashboard.tsx  # Main dashboard
-│   │   │   ├── Classes.tsx    # Class list view
-│   │   │   ├── CreateClass.tsx # Class creation form
-│   │   │   └── Settings.tsx   # User settings
+│   │   │   ├── auth/          # Registration & Verification
+│   │   │   │   ├── Register.tsx
+│   │   │   │   └── VerifyEmail.tsx
+│   │   │   ├── admin/         # Administrative views
+│   │   │   │   └── Users.tsx
+│   │   │   ├── monitoring/    # Admin monitoring views
+│   │   │   │   ├── AllClasses.tsx
+│   │   │   │   ├── AllEnvironments.tsx
+│   │   │   │   └── Logs.tsx
+│   │   │   ├── classes/       # Redesigned Student View
+│   │   │   │   ├── ClassView.tsx
+│   │   │   │   └── GuestJoin.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── TrainingClasses.tsx
+│   │   │   ├── MyClasses.tsx
+│   │   │   ├── MyEnvironments.tsx
+│   │   │   ├── Templates.tsx
+│   │   │   └── Settings.tsx
 │   │   ├── api.ts             # Axios instance & interceptors
 │   │   ├── App.tsx            # Router & provider setup
 │   │   └── index.css          # Tailwind + design system
@@ -272,10 +286,17 @@ const MyComponent = () => {
 ```python
 class User(Base):
     id: int
-    oid: str          # Azure AD Object ID
     email: str
     name: str
-    role: UserRole    # instructor | student | admin
+    is_active: bool
+    is_verified: bool
+    group_id: int     # FK to Group
+    last_login: datetime
+
+class Group(Base):
+    id: int
+    name: str         # Admin | Instructor | Student
+    permissions: List[str]
 ```
 
 **Class**

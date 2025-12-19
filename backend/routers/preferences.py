@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import UserPreference, User
 from pydantic import BaseModel
+from .auth import get_current_user
 import os
 
 router = APIRouter(prefix="/preferences", tags=["preferences"])
@@ -19,18 +20,11 @@ class PreferenceUpdate(BaseModel):
     browser_notifications: bool = None
 
 @router.get("/", response_model=PreferenceRead)
-def get_preferences(db: Session = Depends(get_db)):
-    # In a real app, we'd get user from token. For now, use admin user
-    user_email = os.getenv("SUPERADMIN_EMAIL", "admin@cpdemo.com")
-    user = db.query(User).filter(User.email == user_email).first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    prefs = db.query(UserPreference).filter(UserPreference.user_id == user.id).first()
+def get_preferences(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    prefs = db.query(UserPreference).filter(UserPreference.user_id == current_user.id).first()
     if not prefs:
         # Create default preferences
-        prefs = UserPreference(user_id=user.id)
+        prefs = UserPreference(user_id=current_user.id)
         db.add(prefs)
         db.commit()
         db.refresh(prefs)
@@ -38,16 +32,10 @@ def get_preferences(db: Session = Depends(get_db)):
     return prefs
 
 @router.put("/", response_model=PreferenceRead)
-def update_preferences(pref_update: PreferenceUpdate, db: Session = Depends(get_db)):
-    user_email = os.getenv("SUPERADMIN_EMAIL", "admin@cpdemo.com")
-    user = db.query(User).filter(User.email == user_email).first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    prefs = db.query(UserPreference).filter(UserPreference.user_id == user.id).first()
+def update_preferences(pref_update: PreferenceUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    prefs = db.query(UserPreference).filter(UserPreference.user_id == current_user.id).first()
     if not prefs:
-        prefs = UserPreference(user_id=user.id)
+        prefs = UserPreference(user_id=current_user.id)
         db.add(prefs)
     
     if pref_update.email_notifications is not None:

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from db.database import engine, Base, SessionLocal
 from db.models import User, UserRole, SystemSetting, Template
-from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, logs, guacamole, console_ws
+from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, logs, guacamole, console_ws, users
 from services.proxmox_service import proxmox_service
 from services.email_service import email_service
 from services.vsphere_service import vsphere_service
@@ -86,6 +86,7 @@ app.add_middleware(
 # Startup Event for Seeding
 @app.on_event("startup")
 async def startup_event():
+    import asyncio
     logger.info("Starting up application...")
     
     # Debug: Print all routes
@@ -95,6 +96,17 @@ async def startup_event():
             
     db = SessionLocal()
     try:
+        # DB Migration: Add 'provider' column to 'templates' table if it doesn't exist
+        try:
+            from sqlalchemy import text
+            db.execute(text("ALTER TABLE templates ADD COLUMN IF NOT EXISTS provider VARCHAR(255) DEFAULT 'vSphere'"))
+            db.execute(text("ALTER TABLE classes ADD COLUMN IF NOT EXISTS join_token VARCHAR(255)"))
+            db.commit()
+            logger.info("Database migration: columns verified/added.")
+        except Exception as e:
+            logger.error(f"Migration error: {e}")
+            db.rollback()
+
         # Seed Admin User
         user = db.query(User).filter(User.email == os.getenv("SUPERADMIN_EMAIL", "admin@example.com")).first()
         if not user:
@@ -102,9 +114,13 @@ async def startup_event():
             hashed_pw = get_password_hash(os.getenv("SUPERADMIN_PASSWORD", "admin123"))
             admin_user = User(
                 email=os.getenv("SUPERADMIN_EMAIL", "admin@example.com"),
+                first_name="Super",
+                last_name="Admin",
                 name="Super Admin",
                 role=UserRole.ADMIN,
-                hashed_password=hashed_pw
+                hashed_password=hashed_pw,
+                is_active=True,
+                is_email_confirmed=True
             )
             db.add(admin_user)
             db.commit()
@@ -165,14 +181,26 @@ async def startup_event():
         
         db.commit()
 
-        # Initialize Services
-        proxmox_service.load_config(db)
-        vsphere_service.load_config(db)
-        vsphere_service.connect()
+        # Initialize email service only (fast)
         await email_service.load_config(db)
         
-        # Default Templates seeding removed for production.
-        # Use API/Admin UI to create templates.
+        # Load vSphere/Proxmox config (but don't connect yet)
+        proxmox_service.load_config(db)
+        vsphere_service.load_config(db)
+        
+        logger.info("Startup complete. Infrastructure will connect in background...")
+        
+        # Schedule vSphere sync in background after 10 second delay (don't block startup)
+        async def delayed_vsphere_connect():
+            await asyncio.sleep(10)  # Wait 10 seconds after startup
+            logger.info("Background: Attempting vSphere connection...")
+            try:
+                vsphere_service.connect()
+                logger.info("Background: vSphere connected successfully.")
+            except Exception as e:
+                logger.warning(f"Background: vSphere connection failed (non-critical): {e}")
+        
+        asyncio.create_task(delayed_vsphere_connect())
         
     except Exception as e:
         logger.error(f"Failed to seed database or load services: {e}")
@@ -180,6 +208,7 @@ async def startup_event():
         db.close()
 
 app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(classes.router)
 app.include_router(settings.router)
 app.include_router(preferences.router)

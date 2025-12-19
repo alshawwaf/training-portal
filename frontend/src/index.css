@@ -91,8 +91,8 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", Roboto, sans-serif;
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
@@ -230,7 +230,7 @@
   .input:focus {
     outline: none;
     border-color: rgb(var(--accent-primary));
-    box-shadow: 0 0 0 3px rgba(var(--accent-primary), 0.15);
+    box-shadow: 0 0 0 4px rgba(var(--accent-primary), 0.1);
     background-color: rgb(var(--bg-elevated));
   }
 
@@ -241,11 +241,12 @@
   .input-label,
   .label {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: rgb(var(--text-secondary));
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.01em;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: rgb(var(--text-primary));
+    margin-bottom: 0.625rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   /* ========================================
@@ -373,6 +374,14 @@
     border: 1px solid rgba(var(--border-color), 0.3);
   }
 
+  .glass-light {
+    background: rgba(var(--bg-elevated), 0.8);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(var(--border-color), 0.5);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+  }
+
   /* Animated gradient border */
   .gradient-border {
     position: relative;
@@ -396,6 +405,51 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+  }
+
+  /* Custom Scrollbar Utility */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(var(--border-color), 0.5);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--accent-primary), 0.5);
+  }
+}
+
+@layer utilities {
+  .animate-slide-in-right {
+    animation: slide-in-right 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-toast-progress {
+    animation: toast-progress 5s linear forwards;
+  }
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%) scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes toast-progress {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
   }
 }
 
@@ -617,9 +671,13 @@ html:not(.dark) .react-datepicker-popper .react-datepicker__day:hover {
 }
 
 html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--selected,
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--keyboard-selected,
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__day--keyboard-selected,
 html:not(.dark) .react-datepicker-popper .react-datepicker__day--selected,
-html:not(.dark) .react-datepicker-popper .react-datepicker__day--keyboard-selected {
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__day--keyboard-selected {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
   color: #ffffff !important;
   font-weight: 600 !important;
@@ -634,7 +692,9 @@ html:not(.dark) .react-datepicker-popper .react-datepicker__day--today {
   color: #3b82f6 !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__day--outside-month,
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__day--outside-month,
 html:not(.dark) .react-datepicker-popper .react-datepicker__day--outside-month {
   color: #cbd5e1 !important;
   opacity: 0.5 !important;
@@ -645,14 +705,24 @@ html:not(.dark) .react-datepicker-popper .react-datepicker__navigation {
   top: 16px !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__navigation-icon::before,
-html:not(.dark) .react-datepicker-popper .react-datepicker__navigation-icon::before {
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__navigation-icon::before,
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__navigation-icon::before {
   border-color: #64748b !important;
   border-width: 2px 2px 0 0 !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before,
-html:not(.dark) .react-datepicker-popper .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__navigation:hover
+  .react-datepicker__navigation-icon::before,
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__navigation:hover
+  .react-datepicker__navigation-icon::before {
   border-color: #6366f1 !important;
 }
 
@@ -663,13 +733,25 @@ html:not(.dark) .react-datepicker-popper .react-datepicker__time-container {
   width: 100px !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-container .react-datepicker__time,
-html:not(.dark) .react-datepicker-popper .react-datepicker__time-container .react-datepicker__time {
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__time-container
+  .react-datepicker__time,
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__time-container
+  .react-datepicker__time {
   background-color: #ffffff !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-container .react-datepicker__time-box,
-html:not(.dark) .react-datepicker-popper .react-datepicker__time-container .react-datepicker__time-box {
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__time-container
+  .react-datepicker__time-box,
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__time-container
+  .react-datepicker__time-box {
   width: 100px !important;
 }
 
@@ -696,14 +778,22 @@ html:not(.dark) .react-datepicker-popper .react-datepicker__time-list-item {
   transition: all 0.15s ease !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-list-item:hover,
-html:not(.dark) .react-datepicker-popper .react-datepicker__time-list-item:hover {
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__time-list-item:hover,
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__time-list-item:hover {
   background-color: #e0e7ff !important;
   color: #4f46e5 !important;
 }
 
-html:not(.dark) .custom-datepicker-wrapper .react-datepicker__time-list-item--selected,
-html:not(.dark) .react-datepicker-popper .react-datepicker__time-list-item--selected {
+html:not(.dark)
+  .custom-datepicker-wrapper
+  .react-datepicker__time-list-item--selected,
+html:not(.dark)
+  .react-datepicker-popper
+  .react-datepicker__time-list-item--selected {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
   color: #ffffff !important;
   font-weight: 600 !important;

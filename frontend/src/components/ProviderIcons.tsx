@@ -1,4 +1,3 @@
-import React from 'react';
 import { Server } from 'lucide-react';
 
 export const AwsIcon = (props: any) => (

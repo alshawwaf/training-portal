@@ -8,6 +8,11 @@ from db.database import get_db
 from db.models import User
 from pydantic import BaseModel
 import bcrypt
+import random
+import string
+from services.email_service import email_service
+from typing import List
+import datetime
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -62,6 +67,18 @@ SCOPE = ["User.Read"]
 
 # Frontend URL for redirects (configurable for different ports)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:9999")
+ALLOWED_DOMAINS = os.getenv("ALLOWED_DOMAINS", "checkpoint.com").split(",")
+
+class RegisterRequest(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    confirm_password: str
+
+class VerifyEmailRequest(BaseModel):
+    email: str
+    code: str
 
 class LoginRequest(BaseModel):
     email: str
@@ -119,10 +136,104 @@ def local_login(creds: LoginRequest, db: Session = Depends(get_db)):
     if not is_valid:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled")
+    
+    if not user.is_email_confirmed:
+        raise HTTPException(status_code=403, detail="Email not confirmed")
+
     sys.stderr.write("DEBUG LOGIN: Success\n")
     sys.stderr.flush()
+    
+    # Update last login
+    user.last_login = datetime.datetime.utcnow()
+    db.commit()
+
     # For mock token, we'll just sign user ID if we had JWT, but for now simple string
-    return {"token": f"local-user-{user.id}", "user": {"name": user.name, "email": user.email, "role": user.role}}
+    return {
+        "token": f"local-user-{user.id}", 
+        "user": {
+            "name": user.name, 
+            "email": user.email, 
+            "role": user.role,
+            "must_change_password": user.password_reset_required
+        }
+    }
+
+@router.post("/register")
+async def register(data: RegisterRequest, db: Session = Depends(get_db)):
+    # 1. Validate domain
+    domain = data.email.split("@")[-1].lower()
+    if domain not in [d.strip().lower() for d in ALLOWED_DOMAINS]:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Registration only allowed for domains: {', '.join(ALLOWED_DOMAINS)}"
+        )
+    
+    # 2. Check if user exists
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+    
+    # 3. Validate password confirmation
+    if data.password != data.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+
+    # 4. Create user
+    confirmation_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    new_user = User(
+        first_name=data.first_name,
+        last_name=data.last_name,
+        name=f"{data.first_name} {data.last_name}",
+        email=data.email,
+        hashed_password=get_password_hash(data.password),
+        is_active=True,
+        is_email_confirmed=False,
+        confirmation_code=confirmation_code
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # 4. Send email
+    try:
+        await email_service.load_config(db)
+        await email_service.send_email(
+            subject="Confirm your SE Training Portal account",
+            recipients=[data.email],
+            body={"message": f"Welcome to SE Training Portal! Your confirmation code is: {confirmation_code}"}
+        )
+    except Exception as e:
+        logger.error(f"Failed to send confirmation email: {e}")
+        # We don't fail registration if email fails, but maybe we should?
+        # For now, just log it.
+    
+    return {"message": "Registration successful. Please check your email for confirmation code."}
+
+@router.post("/verify-email")
+def verify_email(data: VerifyEmailRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.is_email_confirmed:
+        return {"message": "Email already confirmed"}
+    
+    if user.confirmation_code != data.code:
+        raise HTTPException(status_code=400, detail="Invalid confirmation code")
+    
+    user.is_email_confirmed = True
+    user.confirmation_code = None
+    
+    # Assign default Student group if it exists
+    from db.models import Group, UserGroup
+    student_group = db.query(Group).filter(Group.name == "Student").first()
+    if student_group:
+        user_group = UserGroup(user_id=user.id, group_id=student_group.id)
+        db.add(user_group)
+    
+    db.commit()
+    return {"message": "Email confirmed successfully. You can now login."}
 
 @router.post("/change-password")
 async def change_password(data: PasswordChangeRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

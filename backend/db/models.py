@@ -1,5 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from .database import Base
 import datetime
 import enum
@@ -7,6 +8,7 @@ import enum
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
     INSTRUCTOR = "instructor"
+    STUDENT = "student"
 
 class ClassStatus(str, enum.Enum):
     DRAFT = "draft"
@@ -21,14 +23,27 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
-    name = Column(String)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    name = Column(String) # Keeping for now, but will populate from first+last
     role = Column(String, default=UserRole.INSTRUCTOR)
     hashed_password = Column(String, nullable=True) # For local auth
     # Azure AD Object ID
     oid = Column(String, unique=True, index=True, nullable=True) 
+    
+    # Registration & Security
+    is_active = Column(Boolean, default=True)
+    is_email_confirmed = Column(Boolean, default=False)
+    confirmation_code = Column(String, nullable=True)
+    password_reset_required = Column(Boolean, default=False)
+    last_login = Column(DateTime, nullable=True)
+    @hybrid_property
+    def must_change_password(self):
+        return self.password_reset_required
 
     classes = relationship("Class", back_populates="instructor")
     preferences = relationship("UserPreference", back_populates="user", uselist=False)
+    groups = relationship("Group", secondary="user_groups", back_populates="users")
 
 class UserPreference(Base):
     __tablename__ = "user_preferences"
@@ -40,6 +55,33 @@ class UserPreference(Base):
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="preferences")
+
+class Group(Base):
+    __tablename__ = "groups"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    description = Column(String, nullable=True)
+    
+    users = relationship("User", secondary="user_groups", back_populates="groups")
+    permissions = relationship("Permission", secondary="group_permissions", back_populates="groups")
+
+class Permission(Base):
+    __tablename__ = "permissions"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True) # e.g. "manage_users", "view_all_classes"
+    description = Column(String, nullable=True)
+    
+    groups = relationship("Group", secondary="group_permissions", back_populates="permissions")
+
+class UserGroup(Base):
+    __tablename__ = "user_groups"
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"), primary_key=True)
+
+class GroupPermission(Base):
+    __tablename__ = "group_permissions"
+    group_id = Column(Integer, ForeignKey("groups.id", ondelete="CASCADE"), primary_key=True)
+    permission_id = Column(Integer, ForeignKey("permissions.id", ondelete="CASCADE"), primary_key=True)
 
 class SystemSetting(Base):
     __tablename__ = "system_settings"
@@ -65,6 +107,7 @@ class Class(Base):
     end_date = Column(DateTime)
     status = Column(String, default=ClassStatus.DRAFT)
     description = Column(Text, nullable=True)
+    join_token = Column(String, unique=True, index=True, nullable=True)  # UUID for shareable join link
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     

@@ -8,7 +8,8 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
 from db.database import get_db
-from db.models import SystemSetting
+from db.models import SystemSetting, User
+from .auth import get_current_user
 from services.proxmox_service import proxmox_service
 from services.vsphere_service import vsphere_service
 
@@ -42,7 +43,7 @@ class SaveSettingsRequest(BaseModel):
 # ============== Proxmox Endpoints ==============
 
 @router.post("/proxmox/test")
-async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Depends(get_db)):
+async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Test Proxmox connection with provided credentials."""
     try:
         password = request.password
@@ -66,7 +67,7 @@ async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Dep
 
 
 @router.post("/proxmox/save")
-async def save_proxmox_settings(request: SaveSettingsRequest, db: Session = Depends(get_db)):
+async def save_proxmox_settings(request: SaveSettingsRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Save Proxmox settings to database."""
     try:
         for key, value in request.settings.items():
@@ -115,7 +116,7 @@ async def get_proxmox_status(db: Session = Depends(get_db)):
 # ============== vSphere Endpoints ==============
 
 @router.post("/vsphere/test")
-async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Depends(get_db)):
+async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Test vSphere connection with provided credentials."""
     try:
         # Get the actual password to use
@@ -140,7 +141,7 @@ async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Dep
 
 
 @router.post("/vsphere/save")
-async def save_vsphere_settings(request: SaveSettingsRequest, db: Session = Depends(get_db)):
+async def save_vsphere_settings(request: SaveSettingsRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Save vSphere settings to database."""
     try:
         for key, value in request.settings.items():

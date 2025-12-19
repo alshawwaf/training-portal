@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Search, Users, Trash2 } from 'lucide-react';
+import { Plus, Search, Users, Trash2, BookOpen } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
 
 // Import Types
 import type { ClassModel, Template } from '../types/class';
-import { statusConfig } from '../types/class';
 
 // Import New Modals
 import CreateClassModal from '../components/classes/CreateClassModal';
 import EditClassModal from '../components/classes/EditClassModal';
-import ClassInfoModal from '../components/classes/ClassInfoModal';
+import ClassDetailsModal from '../components/classes/ClassDetailsModal';
 import ClassCard from '../components/classes/ClassCard';
 
 const TrainingClasses: React.FC = () => {
     const { showToast } = useToast();
     const [classes, setClasses] = useState<ClassModel[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
     const [isLoading, setIsLoading] = useState(true);
     
     // Modal states
@@ -98,8 +96,6 @@ const TrainingClasses: React.FC = () => {
         }
     };
 
-
-
     const openEditModal = (cls: ClassModel) => {
         setSelectedClass(cls);
         setEditModalOpen(true);
@@ -112,105 +108,96 @@ const TrainingClasses: React.FC = () => {
         setOpenMenuId(null);
     };
 
-    const openDeleteModal = (cls: ClassModel) => {
-        setClassToDelete(cls);
-        setDeleteModalOpen(true);
-        setOpenMenuId(null);
-    };
-
-    // --- Helpers ---
-
-
-
-
-    // getStatusBadge removed as it is now handled by ClassCard
-
     // Filter Logic
     const filteredClasses = classes.filter(cls => {
         const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                               cls.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || cls.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        return matchesSearch;
     });
 
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-primary mb-2">Training Classes</h1>
-                <p className="text-secondary">Manage training classes and student environments</p>
-            </div>
+        <div className="space-y-8 animate-in fade-in duration-700">
+            {/* Header Section - Templates Style */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                            <BookOpen className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <h1 className="text-3xl font-extrabold tracking-tight text-primary">Training Classes</h1>
+                    </div>
+                    <p className="text-secondary font-medium pl-10">
+                        Manage and orchestrate <span className="text-blue-500 font-bold">training sessions</span> for your team.
+                    </p>
+                </div>
 
-            {/* Actions Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-secondary/50 p-4 rounded-xl border border-theme backdrop-blur-sm">
-                <div className="flex items-center gap-4 w-full md:w-auto">
-                    <div className="relative flex-1 md:w-80">
-                        <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-500" />
+                <div className="flex items-center gap-3">
+                    <div className="relative group max-w-xs transition-all duration-300 focus-within:max-w-md">
+                        <Search className="w-5 h-5 text-secondary absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-blue-500 transition-colors" />
                         <input
                             type="text"
-                            placeholder="Search classes..."
+                            placeholder="Find classes..."
+                            className="input pl-12 bg-secondary/30 border-theme/50 focus:border-blue-500/50 rounded-2xl w-full"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="input pl-10"
+                            onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
                     
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="input cursor-pointer"
+                    <button
+                        onClick={() => setCreateModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
-                        <option value="all">All Status</option>
-                        {Object.entries(statusConfig).map(([key, conf]) => (
-                            <option key={key} value={key}>{conf.label}</option>
-                        ))}
-                    </select>
+                        <Plus className="w-5 h-5" />
+                        <span className="hidden sm:inline">New Class</span>
+                    </button>
                 </div>
-
-                <button
-                    onClick={() => setCreateModalOpen(true)}
-                    className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all shadow-lg shadow-blue-500/20 group"
-                >
-                    <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    New Class
-                </button>
             </div>
 
-            {/* Classes List */}
+            {/* Classes Content */}
             {isLoading ? (
-                <div className="text-center py-20">
-                    <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-secondary animate-pulse">Loading classes...</p>
+                <div className="space-y-3">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                        <div key={i} className="glass rounded-2xl p-4 border border-theme animate-pulse flex items-center gap-4">
+                            <div className="h-10 w-10 bg-secondary/20 rounded-xl"></div>
+                            <div className="flex-1">
+                                <div className="h-4 bg-secondary/20 rounded-full w-1/3 mb-2"></div>
+                                <div className="h-3 bg-secondary/20 rounded-full w-1/2"></div>
+                            </div>
+                            <div className="h-6 w-16 bg-secondary/20 rounded-full"></div>
+                        </div>
+                    ))}
                 </div>
             ) : filteredClasses.length === 0 ? (
-                <div className="text-center py-20 bg-secondary/30 rounded-2xl border border-theme border-dashed">
-                    <div className="bg-secondary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-8 h-8 text-gray-500" />
+                <div className="glass rounded-[3rem] border border-dashed border-theme p-20 text-center shadow-xl">
+                    <div className="w-24 h-24 mx-auto mb-6 rounded-[2rem] bg-secondary/20 flex items-center justify-center border border-theme">
+                        <Users className="w-12 h-12 text-secondary/50" />
                     </div>
-                    <h3 className="text-xl font-medium text-primary mb-2">No classes found</h3>
-                    <p className="text-secondary max-w-sm mx-auto mb-6">
-                        {searchTerm || statusFilter !== 'all' 
-                            ? "Try adjusting your search or filters" 
-                            : "Get started by creating your first training class"}
+                    <h3 className="text-2xl font-extrabold text-primary mb-3 tracking-tight">
+                        {searchTerm ? "No classes match your search" : "Your roster is empty"}
+                    </h3>
+                    <p className="text-secondary font-medium max-w-sm mx-auto mb-8">
+                        {searchTerm
+                            ? "Try refining your keywords to find what you're looking for."
+                            : "Classes define training sessions with environments for your participants."}
                     </p>
-                    {(searchTerm || statusFilter !== 'all') && (
-                        <button 
-                            onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
-                            className="text-blue-400 hover:text-blue-300 font-medium"
+                    {!searchTerm && (
+                        <button
+                            onClick={() => setCreateModalOpen(true)}
+                            className="btn-primary"
                         >
-                            Clear filters
+                            <Plus className="w-5 h-5" />
+                            Create First Class
                         </button>
                     )}
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {filteredClasses.map((cls) => (
                         <ClassCard 
                             key={cls.id}
                             cls={cls}
                             onView={openViewModal}
                             onEdit={openEditModal}
-                            onDelete={openDeleteModal}
                             onRefresh={fetchClasses}
                         />
                     ))}
@@ -234,7 +221,7 @@ const TrainingClasses: React.FC = () => {
                 templates={templates}
             />
 
-            <ClassInfoModal 
+            <ClassDetailsModal 
                 isOpen={viewModalOpen}
                 onClose={() => setViewModalOpen(false)}
                 classData={selectedClass}
@@ -244,26 +231,26 @@ const TrainingClasses: React.FC = () => {
             <Modal
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
-                title="Delete Class"
-                icon={<Trash2 className="w-6 h-6 text-red-500" />}
+                title="Decommission"
+                maxWidth="sm"
             >
-                <div>
-                    <p className="text-secondary mb-6">
-                        Are you sure you want to delete <span className="text-primary font-semibold">{classToDelete?.name}</span>? 
-                        This action cannot be undone and will remove all associated student environments.
-                    </p>
-                    <div className="flex justify-end gap-3">
-                        <button
-                            onClick={() => setDeleteModalOpen(false)}
-                            className="btn-secondary"
-                        >
-                            Cancel
+                <div className="space-y-6 text-center">
+                    <div className="w-20 h-20 mx-auto rounded-3xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                        <Trash2 className="w-10 h-10 text-red-500" />
+                    </div>
+                    <div>
+                        <h4 className="text-xl font-extrabold text-primary mb-2">Delete Class?</h4>
+                        <p className="text-secondary font-medium">This action cannot be undone. All environments associated with <span className="text-primary font-bold">{classToDelete?.name}</span> will be purged.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                        <button onClick={() => setDeleteModalOpen(false)} className="px-6 py-3 bg-secondary/50 rounded-2xl font-bold text-secondary hover:bg-secondary transition-all">
+                            Keep it
                         </button>
-                        <button
-                            onClick={handleDelete}
-                            className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-shadow shadow-lg shadow-red-500/20"
+                        <button 
+                            onClick={handleDelete} 
+                            className="px-6 py-3 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-500 shadow-lg shadow-red-500/20 transition-all"
                         >
-                            Delete Class
+                            Yes, Purge
                         </button>
                     </div>
                 </div>

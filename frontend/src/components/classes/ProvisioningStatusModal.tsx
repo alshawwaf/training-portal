@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, Terminal, CheckCircle, AlertTriangle, Loader2, ChevronDown } from 'lucide-react';
+import { Terminal, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import Modal from '../Modal';
 
 interface ProvisioningStatusModalProps {

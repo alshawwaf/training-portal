@@ -44,44 +44,70 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
     <ToastContext.Provider value={{ showToast }}>
       {children}
       
-      {/* Toast Notification - Small, top right corner */}
+      {/* Toast Notification - Floating glassmorphism card */}
       {notification && (
         <div 
-            className="fixed top-4 right-4 z-[100] animate-slide-in-right"
+            className="fixed top-6 right-6 z-[100] animate-slide-in-right"
         >
             <div 
                 className={clsx(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg min-w-[280px] max-w-md bg-elevated",
+                    "relative overflow-hidden flex items-center gap-4 px-5 py-4 rounded-2xl border shadow-2xl min-w-[320px] max-w-md backdrop-blur-xl transition-all duration-300",
                     {
-                        "border-green-500/30": notification.type === 'success',
-                        "border-red-500/30": notification.type === 'error',
-                        "border-blue-500/30": notification.type === 'info',
-                        "border-amber-500/30": notification.type === 'warning',
+                        "bg-emerald-500/10 border-emerald-500/30 text-emerald-100": notification.type === 'success',
+                        "bg-red-500/10 border-red-500/30 text-red-100": notification.type === 'error',
+                        "bg-blue-500/10 border-blue-500/30 text-blue-100": notification.type === 'info',
+                        "bg-amber-500/10 border-amber-500/30 text-amber-100": notification.type === 'warning',
                     }
                 )}
             >
-                {/* Icon */}
-                <div className={clsx("p-2 rounded-lg flex-shrink-0", {
-                    "bg-green-500/10 text-green-500": notification.type === 'success',
-                    "bg-red-500/10 text-red-500": notification.type === 'error',
-                    "bg-blue-500/10 text-blue-500": notification.type === 'info',
-                    "bg-amber-500/10 text-amber-500": notification.type === 'warning',
-                })}>
-                    {notification.type === 'success' && <CheckCircle className="w-5 h-5" />}
-                    {notification.type === 'error' && <AlertCircle className="w-5 h-5" />}
-                    {notification.type === 'info' && <Info className="w-5 h-5" />}
-                    {notification.type === 'warning' && <AlertTriangle className="w-5 h-5" />}
+                {/* Progress Bar Background */}
+                <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white/5" />
+                
+                {/* Animated Progress Bar */}
+                <div 
+                    className={clsx("absolute bottom-0 left-0 h-[3px] animate-toast-progress", {
+                        "bg-emerald-500": notification.type === 'success',
+                        "bg-red-500": notification.type === 'error',
+                        "bg-blue-500": notification.type === 'info',
+                        "bg-amber-500": notification.type === 'warning',
+                    })} 
+                />
+
+                {/* Icon with Glowing Background */}
+                <div className="relative flex-shrink-0">
+                    <div className={clsx("absolute -inset-2 rounded-full blur-md opacity-20", {
+                        "bg-emerald-500": notification.type === 'success',
+                        "bg-red-500": notification.type === 'error',
+                        "bg-blue-500": notification.type === 'info',
+                        "bg-amber-500": notification.type === 'warning',
+                    })} />
+                    <div className={clsx("relative p-2.5 rounded-xl flex-shrink-0 border border-white/10 shadow-inner", {
+                        "bg-emerald-500/20 text-emerald-400": notification.type === 'success',
+                        "bg-red-500/20 text-red-400": notification.type === 'error',
+                        "bg-blue-500/20 text-blue-400": notification.type === 'info',
+                        "bg-amber-500/20 text-amber-400": notification.type === 'warning',
+                    })}>
+                        {notification.type === 'success' && <CheckCircle className="w-5 h-5" />}
+                        {notification.type === 'error' && <AlertCircle className="w-5 h-5" />}
+                        {notification.type === 'info' && <Info className="w-5 h-5" />}
+                        {notification.type === 'warning' && <AlertTriangle className="w-5 h-5" />}
+                    </div>
                 </div>
 
-                {/* Message */}
-                <p className="text-sm text-primary flex-1">{notification.message}</p>
+                {/* Message & Title */}
+                <div className="flex-1 min-w-0 py-0.5">
+                    <p className="text-[11px] font-bold uppercase tracking-wider opacity-60 mb-0.5">
+                        {notification.type}
+                    </p>
+                    <p className="text-sm font-semibold text-primary leading-tight">{notification.message}</p>
+                </div>
 
                 {/* Close Button */}
                 <button 
                     onClick={closeNotification}
-                    className="p-1 text-secondary hover:text-primary rounded-lg hover:bg-secondary/10 transition-colors flex-shrink-0"
+                    className="p-1.5 text-secondary hover:text-primary rounded-lg hover:bg-white/10 transition-all flex-shrink-0 group"
                 >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 transition-transform group-hover:rotate-90" />
                 </button>
             </div>
         </div>

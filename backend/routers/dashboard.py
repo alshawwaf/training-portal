@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from db.database import get_db
-from db.models import Class
+from db.models import Class, User
+from .auth import get_current_user
 from services.vsphere_service import vsphere_service
 from services.proxmox_service import proxmox_service
 from datetime import datetime
@@ -11,7 +12,8 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 @router.get("/stats")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
-    vendor: str = Query("vsphere", description="Vendor to fetch VM stats from: vsphere, proxmox, or all")
+    vendor: str = Query("vsphere", description="Vendor to fetch VM stats from: vsphere, proxmox, or all"),
+    current_user: User = Depends(get_current_user)
 ):
     # 1. Fetch Classes for stats
     classes = db.query(Class).all()

@@ -41,8 +41,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     dateFormat={dateFormat}
                     className="w-full bg-elevated border border-theme rounded-lg py-1.5 pl-9 pr-3 text-sm text-primary placeholder-secondary/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all shadow-sm"
                     calendarClassName="!bg-elevated !border-theme !font-sans !shadow-xl !rounded-xl overflow-hidden"
-                    dayClassName={date => "hover:!bg-blue-500/20 !text-primary hover:!text-blue-400 !rounded-lg transition-colors"}
-                    timeClassName={time => "!text-primary hover:!bg-blue-500/20 !rounded-lg"}
+                    dayClassName={() => "hover:!bg-blue-500/20 !text-primary hover:!text-blue-400 !rounded-lg transition-colors"}
+                    timeClassName={() => "!text-primary hover:!bg-blue-500/20 !rounded-lg"}
                     wrapperClassName="w-full"
                     popperClassName="!z-[9999]"
                     portalId="root"
