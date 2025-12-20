@@ -15883,3 +15883,128 @@ TimeoutError: [Errno 110] Connection timed out
 2025-12-20 04:54:43,578 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
 2025-12-20 04:54:43,582 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
 2025-12-20 04:54:43,583 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:04:09,632 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 05:04:13,687 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 05:07:03,258 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 05:07:24,414 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 05:08:32,715 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 05:08:32,715 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 05:08:32,818 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=colo-Student_1-pfSense
+2025-12-20 05:08:32,847 - INFO - Starting VM provisioning: template_moid=vm-262, new_name=colo-Student_1-Kali_Linux-SBT-R82
+2025-12-20 05:08:32,910 - INFO - Found template VM: pfSense
+2025-12-20 05:08:32,976 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 05:08:33,037 - INFO - Found template VM: Kali Linux-SBT-R82
+2025-12-20 05:08:33,071 - INFO - Using template's resource pool: Resources
+2025-12-20 05:08:33,101 - INFO - Target folder ensured: SE_Training_Portal/colo/Student 1
+2025-12-20 05:08:33,122 - INFO - Cloning pfSense to colo-Student_1-pfSense in folder Student 1...
+2025-12-20 05:08:33,167 - INFO - Target folder ensured: SE_Training_Portal/colo/Student 1
+2025-12-20 05:08:33,181 - INFO - Cloning Kali Linux-SBT-R82 to colo-Student_1-Kali_Linux-SBT-R82 in folder Student 1...
+2025-12-20 05:08:39,274 - INFO - VM provisioned successfully: colo-Student_1-pfSense, MOID: vm-5369, IP: None
+2025-12-20 05:08:39,282 - INFO - Creating initial snapshot for colo-Student_1-pfSense
+2025-12-20 05:17:21,329 - INFO - VM provisioned successfully: colo-Student_1-Kali_Linux-SBT-R82, MOID: vm-5371, IP: None
+2025-12-20 05:17:21,340 - INFO - Creating initial snapshot for colo-Student_1-Kali_Linux-SBT-R82
+2025-12-20 05:17:30,505 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 05:18:19,433 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:18:19,447 - INFO - VM Power State: poweredOn
+2025-12-20 05:18:19,471 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:18:19,474 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:18:19,475 - DEBUG - Ticket.ticket value: 'dc7bcfdc714d915c' (length: 16)
+2025-12-20 05:18:19,476 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:18:19,477 - DEBUG - Ticket.port: 443
+2025-12-20 05:18:19,478 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:18:19,479 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:18:19,480 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/dc7bcfdc714d915c
+2025-12-20 05:18:19,490 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:18:19,496 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:18:19,499 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:04,325 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:04,345 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:04,365 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:04,367 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:04,369 - DEBUG - Ticket.ticket value: '3ad09a905674c280' (length: 16)
+2025-12-20 05:19:04,371 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:04,373 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:04,374 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:04,376 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:04,377 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/3ad09a905674c280
+2025-12-20 05:19:04,386 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:04,389 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:04,391 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:09,411 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:09,420 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:09,436 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:09,438 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:09,438 - DEBUG - Ticket.ticket value: 'bcef7b7c24c45edb' (length: 16)
+2025-12-20 05:19:09,439 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:09,440 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:09,441 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:09,442 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:09,443 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/bcef7b7c24c45edb
+2025-12-20 05:19:09,450 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:09,452 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:09,453 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:20,314 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:20,336 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:20,354 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:20,355 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:20,356 - DEBUG - Ticket.ticket value: 'fedd13f8a951e65a' (length: 16)
+2025-12-20 05:19:20,358 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:20,360 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:20,362 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:20,363 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:20,365 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/fedd13f8a951e65a
+2025-12-20 05:19:20,373 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:20,375 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:20,376 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:25,452 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:25,460 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:25,479 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:25,480 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:25,481 - DEBUG - Ticket.ticket value: '783a616e606cdd06' (length: 16)
+2025-12-20 05:19:25,482 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:25,483 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:25,483 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:25,484 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:25,485 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/783a616e606cdd06
+2025-12-20 05:19:25,493 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:25,495 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:25,497 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:40,133 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:40,141 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:40,157 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:40,158 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:40,159 - DEBUG - Ticket.ticket value: '455051fb711111d3' (length: 16)
+2025-12-20 05:19:40,159 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:40,160 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:40,161 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:40,162 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:40,163 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/455051fb711111d3
+2025-12-20 05:19:40,169 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:40,170 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:40,172 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:45,262 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:45,270 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:45,293 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:45,295 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:45,296 - DEBUG - Ticket.ticket value: '2d2c89b10b4f21f4' (length: 16)
+2025-12-20 05:19:45,298 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:45,299 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:45,300 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:45,301 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:45,303 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/2d2c89b10b4f21f4
+2025-12-20 05:19:45,309 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:45,310 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:45,311 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 05:19:50,212 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5369)
+2025-12-20 05:19:50,221 - INFO - VM Power State: poweredOn
+2025-12-20 05:19:50,239 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 05:19:50,240 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 05:19:50,241 - DEBUG - Ticket.ticket value: '7a55547167f0b1c6' (length: 16)
+2025-12-20 05:19:50,242 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 05:19:50,250 - DEBUG - Ticket.port: 443
+2025-12-20 05:19:50,251 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 05:19:50,252 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 05:19:50,253 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/7a55547167f0b1c6
+2025-12-20 05:19:50,262 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 05:19:50,264 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 05:19:50,266 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility

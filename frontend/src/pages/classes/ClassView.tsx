@@ -66,9 +66,22 @@ const ClassView: React.FC = () => {
 
             if (matchedEnv) {
                 setEnvironment(matchedEnv);
-                if (!selectedVm && matchedEnv.vms.length > 0) {
-                    setSelectedVm(matchedEnv.vms[0]);
-                }
+                // Only set selectedVm on initial load, not on refresh intervals
+                // Use functional update to access current state and avoid stale closure
+                setSelectedVm(current => {
+                    if (current === null && matchedEnv.vms.length > 0) {
+                        return matchedEnv.vms[0];
+                    }
+                    // If current VM still exists in the updated list, keep it selected
+                    // Otherwise fall back to first VM
+                    if (current) {
+                        const stillExists = matchedEnv.vms.find((vm: VM) => vm.id === current.id);
+                        if (stillExists) {
+                            return stillExists; // Update with fresh data but keep selection
+                        }
+                    }
+                    return matchedEnv.vms[0] || null;
+                });
                 setIsConnected(true);
             }
         } catch (err) {

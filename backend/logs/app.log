@@ -20966,3 +20966,273 @@ WHERE users.email = %(email_1)s
 2025-12-20 05:01:45,172 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
 2025-12-20 05:01:45,188 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 13 messages
 2025-12-20 05:01:45,207 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:04:12,421 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-20 05:04:12,426 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-20 05:04:12,433 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-20 05:04:12,440 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-20 05:04:12,445 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-20 05:04:12,449 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-20 05:04:12,455 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-20 05:04:12,468 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-20 05:04:12,474 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-20 05:04:12,478 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-20 05:04:12,484 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-20 05:04:12,491 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-20 05:04:12,494 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-20 05:04:12,497 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-20 05:04:12,503 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-20 05:04:12,509 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-20 05:04:12,516 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-20 05:04:12,521 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-20 05:04:12,529 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-20 05:04:12,536 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-20 05:04:12,540 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-20 05:04:12,545 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-20 05:04:12,550 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-20 05:04:12,556 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-20 05:04:12,563 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-20 05:04:12,567 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-20 05:04:12,572 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-20 05:04:12,580 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-20 05:04:12,584 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-20 05:04:12,591 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-20 05:04:12,596 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-20 05:04:12,601 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-20 05:04:12,610 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-20 05:04:12,617 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-20 05:04:12,621 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-20 05:04:12,628 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-20 05:04:12,633 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-20 05:04:12,639 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-20 05:04:12,642 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-20 05:04:12,647 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-20 05:04:12,651 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-20 05:04:12,655 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-20 05:04:12,660 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-20 05:04:12,667 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-20 05:04:12,671 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-20 05:04:12,678 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-20 05:04:12,683 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-20 05:04:12,687 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-20 05:04:12,691 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-20 05:04:12,696 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-20 05:04:12,701 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-20 05:04:12,704 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-20 05:04:12,709 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-20 05:04:12,715 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-20 05:04:12,719 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-20 05:04:12,724 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-20 05:04:12,729 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-20 05:04:12,733 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-20 05:04:12,738 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-20 05:04:12,743 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-20 05:04:12,746 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-20 05:04:12,749 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-20 05:04:12,752 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-20 05:04:12,754 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-20 05:04:12,757 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-20 05:04:12,759 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-20 05:04:12,762 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-20 05:04:12,766 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-20 05:04:12,769 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-20 05:04:12,771 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-20 05:04:12,774 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-20 05:04:12,776 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-20 05:04:12,779 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-20 05:04:12,782 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-20 05:04:12,785 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-20 05:04:12,788 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-20 05:04:12,791 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-20 05:04:12,793 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-20 05:04:12,795 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-20 05:04:12,798 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-20 05:04:12,800 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-20 05:04:12,802 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-20 05:04:12,805 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-20 05:04:12,807 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-20 05:04:12,810 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-20 05:04:12,812 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-20 05:04:12,815 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-20 05:04:12,817 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-20 05:04:12,820 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-20 05:04:12,823 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-20 05:04:12,826 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-20 05:04:12,829 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-20 05:04:12,831 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-20 05:04:12,834 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-20 05:04:12,836 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-20 05:04:12,839 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-20 05:04:12,842 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-20 05:04:12,844 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-20 05:04:12,847 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-20 05:04:12,849 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-20 05:04:12,851 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-20 05:04:12,854 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-20 05:04:12,856 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-20 05:04:12,859 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-20 05:04:12,861 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-20 05:04:12,864 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-20 05:04:12,867 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-20 05:04:12,891 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-20 05:04:12,985 - se_portal - INFO - main.py:121 - Seeding superadmin user...
+2025-12-20 05:04:13,679 - se_portal.email_service - INFO - email_service.py:39 - Email configuration loaded successfully.
+2025-12-20 05:04:13,688 - se_portal - INFO - main.py:207 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-20 05:07:49,379 - se_portal - INFO - templates.py:97 - Created template: sbt with 2 VMs
+2025-12-20 05:18:16,969 - se_portal - INFO - student.py:162 - Student administrator@americas-ses.com joined class 'colo' with environment #None
+2025-12-20 05:18:17,661 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:18:19,312 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:18:19,316 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:18:19,319 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:18:19,326 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:18:19,334 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:18:19,337 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:18:19,343 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:18:19,363 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:18:19,534 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:18:19,541 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/dc7bcfdc714d915c...
+2025-12-20 05:18:19,603 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:18:19,684 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:18:19,689 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:18:19,696 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:18:19,707 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:00,549 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-Kali_Linux-SBT-R82, URL=/api/console/1/1/2
+2025-12-20 05:19:00,742 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:00,745 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 25 messages
+2025-12-20 05:19:00,759 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:02,551 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:04,233 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:04,236 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:04,239 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:04,241 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:04,244 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:04,246 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:04,248 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:04,257 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:04,416 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:04,419 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/3ad09a905674c280...
+2025-12-20 05:19:04,449 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:04,492 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:04,495 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:04,498 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:04,511 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:07,032 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-Kali_Linux-SBT-R82, URL=/api/console/1/1/2
+2025-12-20 05:19:07,135 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:07,139 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 11 messages
+2025-12-20 05:19:07,152 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:07,777 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:09,331 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:09,334 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:09,338 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:09,343 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:09,348 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:09,351 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:09,354 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:09,369 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:09,466 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:09,469 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/bcef7b7c24c45edb...
+2025-12-20 05:19:09,491 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:09,520 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:09,522 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:09,525 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:09,988 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:17,376 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:17,382 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-20 05:19:17,399 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:18,661 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:20,230 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:20,233 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:20,238 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:20,243 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:20,248 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:20,251 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:20,253 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:20,267 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:20,395 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:20,400 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/fedd13f8a951e65a...
+2025-12-20 05:19:20,422 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:20,460 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:20,467 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:20,471 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:20,483 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:22,696 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-Kali_Linux-SBT-R82, URL=/api/console/1/1/2
+2025-12-20 05:19:22,813 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:22,817 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-20 05:19:22,835 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:23,777 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:25,362 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:25,365 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:25,370 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:25,375 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:25,380 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:25,384 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:25,386 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:25,401 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:25,524 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:25,530 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/783a616e606cdd06...
+2025-12-20 05:19:25,557 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:25,587 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:25,591 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:25,594 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:25,603 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:37,353 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-Kali_Linux-SBT-R82, URL=/api/console/1/1/2
+2025-12-20 05:19:37,487 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:37,490 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-20 05:19:37,498 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:38,575 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:40,059 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:40,062 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:40,068 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:40,072 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:40,076 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:40,078 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:40,080 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:40,087 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:40,200 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:40,204 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/455051fb711111d3...
+2025-12-20 05:19:40,233 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:40,270 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:40,273 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:40,276 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:40,283 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:42,079 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-Kali_Linux-SBT-R82, URL=/api/console/1/1/2
+2025-12-20 05:19:42,193 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:42,196 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-20 05:19:42,207 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:43,569 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:45,048 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-Kali_Linux-SBT-R82, URL=/api/console/1/1/2
+2025-12-20 05:19:45,191 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:45,194 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:45,197 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:45,200 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:45,204 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:45,206 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:45,209 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:45,214 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:45,324 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:45,327 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/2d2c89b10b4f21f4...
+2025-12-20 05:19:45,346 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:45,422 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:45,429 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:45,432 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:45,436 - se_portal.console_ws - ERROR - console_ws.py:178 - Relay vsphere->client error: WebSocketDisconnect: 
+2025-12-20 05:19:45,442 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-20 05:19:45,448 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 0 messages
+2025-12-20 05:19:45,456 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-20 05:19:48,605 - se_portal - INFO - student.py:372 - Console access granted for student administrator@americas-ses.com: VM=colo-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-20 05:19:50,120 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-20 05:19:50,124 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-20 05:19:50,127 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTUzNjkiLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-20 05:19:50,132 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5369
+2025-12-20 05:19:50,138 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5369', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-20 05:19:50,141 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5369
+2025-12-20 05:19:50,146 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5369...
+2025-12-20 05:19:50,156 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-20 05:19:50,289 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-20 05:19:50,294 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/7a55547167f0b1c6...
+2025-12-20 05:19:50,323 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-20 05:19:50,349 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-20 05:19:50,352 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-20 05:19:50,356 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-20 05:19:50,362 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-20 05:23:59,201 - se_portal.console_ws - INFO - console_ws.py:176 - Relay vsphere->client finished. vSphere closed the connection. Count: 8, Reason: 
+2025-12-20 05:23:59,211 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
