@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
 import { 
-    User, 
     Shield, 
     Bell, 
     ChevronRight,
@@ -19,7 +18,6 @@ import {
     EyeOff, 
     LayoutGrid, 
     Rows3, 
-    Edit3,
     Lock,
     Settings as SettingsIcon,
     Plus
@@ -39,7 +37,7 @@ interface SystemSetting {
 const Settings: React.FC = () => {
     const { user, isLoading } = useAuth();
     const { showToast } = useToast();
-    const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'cloud' | 'onprem' | 'system'>('profile');
+    const [activeTab, setActiveTab] = useState<'notifications' | 'cloud' | 'onprem' | 'system'>('notifications');
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [browserNotifications, setBrowserNotifications] = useState(false);
     
@@ -289,7 +287,6 @@ const Settings: React.FC = () => {
     };
 
     const tabs = [
-        { id: 'profile', label: 'Identity', icon: User, color: 'blue' },
         { id: 'notifications', label: 'Alerts', icon: Bell, color: 'amber' },
         { id: 'cloud', label: 'Ecosystem', icon: Cloud, color: 'sky' },
         { id: 'onprem', label: 'Infrastructure', icon: Server, color: 'emerald' },
@@ -340,7 +337,7 @@ const Settings: React.FC = () => {
                 {/* Navigation Sidebar */}
                 <aside className="w-full lg:w-72 flex-shrink-0 sticky top-24 z-10 space-y-2">
                     {tabs.map(tab => {
-                        if (tab.id !== 'profile' && tab.id !== 'notifications' && user?.role !== 'admin') return null;
+                        if (tab.id !== 'notifications' && user?.role !== 'admin') return null;
                         const isActive = activeTab === tab.id;
                         return (
                             <button
@@ -368,48 +365,6 @@ const Settings: React.FC = () => {
 
                 {/* Content Area */}
                 <main className="flex-1 w-full animate-in slide-in-from-right-4 duration-500">
-                    {activeTab === 'profile' && (
-                        <div className="space-y-6">
-                            <SectionHeader title="User Identity" subtitle="View and manage your account" />
-                            <div className="glass rounded-[2.5rem] p-10 border border-theme shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
-                                    <User className="w-48 h-48" />
-                                </div>
-                                <div className="flex flex-col md:flex-row items-center gap-10 relative z-10">
-                                    <div className="relative group">
-                                        <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-700 flex items-center justify-center text-white text-5xl font-black shadow-2xl ring-4 ring-white/10 group-hover:rotate-3 transition-transform duration-500">
-                                            {user?.name?.charAt(0)}
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 text-center md:text-left">
-                                        <h3 className="text-3xl font-black text-primary tracking-tight mb-1 uppercase italic">{user?.name}</h3>
-                                        <p className="text-secondary font-medium text-lg mb-4">{user?.email}</p>
-                                        <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                            <div className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-xs font-black uppercase tracking-widest leading-none">
-                                                {user?.role} Access
-                                            </div>
-                                            <div className="px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-black uppercase tracking-widest leading-none">
-                                                Verified
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col gap-3">
-                                        <a 
-                                            href="/profile"
-                                            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
-                                        >
-                                            <Edit3 className="w-4 h-4" />
-                                            Manage Profile
-                                        </a>
-                                        <p className="text-[10px] text-secondary text-center uppercase tracking-widest">
-                                            Edit name, email & password
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {activeTab === 'notifications' && (
                         <div className="space-y-6">
                             <SectionHeader title="Alert Subscriptions" subtitle="Configure how the platform reaches out to you" />

@@ -479,24 +479,24 @@ const AdminUsers: React.FC = () => {
 
             {/* Invite User Modal */}
             {showInviteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-primary border border-theme rounded-xl w-full max-w-md shadow-2xl">
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-theme">
-                            <h2 className="text-lg font-bold text-primary">Invite User</h2>
-                            <button onClick={() => setShowInviteModal(false)} className="p-1 text-secondary hover:text-primary"><X className="w-5 h-5" /></button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl w-full max-w-md shadow-2xl">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-slate-700">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Invite User</h2>
+                            <button onClick={() => setShowInviteModal(false)} className="p-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white"><X className="w-5 h-5" /></button>
                         </div>
                         <form onSubmit={handleInvite} className="p-5 space-y-4">
                             <div className="grid grid-cols-2 gap-3">
-                                <input type="text" required value={inviteFirstName} onChange={(e) => setInviteFirstName(e.target.value)} className="px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="First Name" />
-                                <input type="text" required value={inviteLastName} onChange={(e) => setInviteLastName(e.target.value)} className="px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="Last Name" />
+                                <input type="text" required value={inviteFirstName} onChange={(e) => setInviteFirstName(e.target.value)} className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="First Name" />
+                                <input type="text" required value={inviteLastName} onChange={(e) => setInviteLastName(e.target.value)} className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Last Name" />
                             </div>
-                            <input type="email" required value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="w-full px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="Email" />
-                            <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="w-full px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm">
+                            <input type="email" required value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Email" />
+                            <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="student">Student</option>
                                 <option value="instructor">Instructor</option>
                                 <option value="admin">Administrator</option>
                             </select>
-                            <button type="submit" disabled={isSubmitting} className="w-full py-2.5 bg-violet-600 text-white font-medium rounded-lg disabled:opacity-50">
+                            <button type="submit" disabled={isSubmitting} className="w-full py-2.5 bg-violet-600 text-white font-medium rounded-lg disabled:opacity-50 hover:bg-violet-700 transition-colors">
                                 {isSubmitting ? 'Sending...' : 'Send Invitation'}
                             </button>
                         </form>
@@ -506,19 +506,19 @@ const AdminUsers: React.FC = () => {
 
             {/* Edit User Modal */}
             {showEditUserModal && editingUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-primary border border-theme rounded-xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-theme sticky top-0 bg-primary">
-                            <h2 className="text-lg font-bold text-primary">Edit User</h2>
-                            <button onClick={() => setShowEditUserModal(false)} className="p-1 text-secondary hover:text-primary"><X className="w-5 h-5" /></button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-900">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Edit User</h2>
+                            <button onClick={() => setShowEditUserModal(false)} className="p-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white"><X className="w-5 h-5" /></button>
                         </div>
                         <form onSubmit={handleUpdateUser} className="p-5 space-y-4">
                             <div className="grid grid-cols-2 gap-3">
-                                <input type="text" required value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} className="px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="First Name" />
-                                <input type="text" required value={editLastName} onChange={(e) => setEditLastName(e.target.value)} className="px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="Last Name" />
+                                <input type="text" required value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="First Name" />
+                                <input type="text" required value={editLastName} onChange={(e) => setEditLastName(e.target.value)} className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Last Name" />
                             </div>
-                            <input type="email" required value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="Email" />
-                            <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm">
+                            <input type="email" required value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Email" />
+                            <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                 <option value="student">Student</option>
                                 <option value="instructor">Instructor</option>
                                 <option value="admin">Administrator</option>
@@ -526,25 +526,25 @@ const AdminUsers: React.FC = () => {
                             </select>
                             
                             {/* Password Reset */}
-                            <div className="p-3 bg-secondary/20 rounded-lg space-y-3">
-                                <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                                    <Key className="w-4 h-4 text-blue-400" /> Reset Password
+                            <div className="p-3 bg-gray-100 dark:bg-slate-800 rounded-lg space-y-3">
+                                <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
+                                    <Key className="w-4 h-4 text-blue-500" /> Reset Password
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="New Password" />
-                                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="Confirm" />
+                                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="New Password" />
+                                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="px-3 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Confirm" />
                                 </div>
                                 {newPassword && confirmPassword && newPassword !== confirmPassword && (
-                                    <p className="text-xs text-red-400">Passwords do not match</p>
+                                    <p className="text-xs text-red-500">Passwords do not match</p>
                                 )}
                             </div>
                             
                             {/* Groups */}
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-secondary">Groups</label>
+                                <label className="text-sm font-medium text-gray-600 dark:text-slate-400">Groups</label>
                                 <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
                                     {groups.map(group => (
-                                        <label key={group.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer text-sm ${editGroups.includes(group.id) ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40' : 'bg-secondary/30 text-secondary border border-transparent'}`}>
+                                        <label key={group.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer text-sm ${editGroups.includes(group.id) ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-500/40' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border border-transparent'}`}>
                                             <input type="checkbox" checked={editGroups.includes(group.id)} onChange={(e) => {
                                                 if (e.target.checked) setEditGroups([...editGroups, group.id]);
                                                 else setEditGroups(editGroups.filter(id => id !== group.id));
@@ -557,27 +557,27 @@ const AdminUsers: React.FC = () => {
                             
                             {/* Toggle Options */}
                             <div className="space-y-2">
-                                <label className="flex items-center gap-3 p-2 bg-secondary/20 rounded-lg cursor-pointer">
-                                    <input type="checkbox" checked={editIsActive} onChange={(e) => setEditIsActive(e.target.checked)} className="w-4 h-4" />
-                                    <span className="text-sm text-primary">Account Active</span>
+                                <label className="flex items-center gap-3 p-2 bg-gray-100 dark:bg-slate-800 rounded-lg cursor-pointer">
+                                    <input type="checkbox" checked={editIsActive} onChange={(e) => setEditIsActive(e.target.checked)} className="w-4 h-4 accent-violet-600" />
+                                    <span className="text-sm text-gray-900 dark:text-white">Account Active</span>
                                 </label>
-                                <label className="flex items-center gap-3 p-2 bg-secondary/20 rounded-lg cursor-pointer">
-                                    <input type="checkbox" checked={editIsConfirmed} onChange={(e) => setEditIsConfirmed(e.target.checked)} className="w-4 h-4" />
-                                    <span className="text-sm text-primary">Email Verified</span>
+                                <label className="flex items-center gap-3 p-2 bg-gray-100 dark:bg-slate-800 rounded-lg cursor-pointer">
+                                    <input type="checkbox" checked={editIsConfirmed} onChange={(e) => setEditIsConfirmed(e.target.checked)} className="w-4 h-4 accent-violet-600" />
+                                    <span className="text-sm text-gray-900 dark:text-white">Email Verified</span>
                                 </label>
-                                <label className="flex items-center gap-3 p-2 bg-secondary/20 rounded-lg cursor-pointer">
-                                    <input type="checkbox" checked={editMustChangePass} onChange={(e) => setEditMustChangePass(e.target.checked)} className="w-4 h-4" />
-                                    <span className="text-sm text-primary">Require Password Reset</span>
+                                <label className="flex items-center gap-3 p-2 bg-gray-100 dark:bg-slate-800 rounded-lg cursor-pointer">
+                                    <input type="checkbox" checked={editMustChangePass} onChange={(e) => setEditMustChangePass(e.target.checked)} className="w-4 h-4 accent-violet-600" />
+                                    <span className="text-sm text-gray-900 dark:text-white">Require Password Reset</span>
                                 </label>
                             </div>
                             
                             {editingUser?.id === currentUser?.id && (
-                                <div className="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 text-xs flex items-center gap-2">
+                                <div className="p-2 bg-amber-100 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 rounded-lg text-amber-700 dark:text-amber-400 text-xs flex items-center gap-2">
                                     <ShieldAlert className="w-4 h-4" /> You are editing your own account.
                                 </div>
                             )}
                             
-                            <button type="submit" disabled={isSubmitting || (newPassword !== '' && newPassword !== confirmPassword)} className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg disabled:opacity-50">
+                            <button type="submit" disabled={isSubmitting || (newPassword !== '' && newPassword !== confirmPassword)} className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg disabled:opacity-50 hover:bg-blue-700 transition-colors">
                                 {isSubmitting ? 'Saving...' : 'Save Changes'}
                             </button>
                         </form>
@@ -587,35 +587,35 @@ const AdminUsers: React.FC = () => {
 
             {/* Group Modal */}
             {showGroupModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-                    <div className="bg-primary border border-theme rounded-xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-theme sticky top-0 bg-primary">
-                            <h2 className="text-lg font-bold text-primary">{editingGroup ? 'Edit Group' : 'Create Group'}</h2>
-                            <button onClick={() => setShowGroupModal(false)} className="p-1 text-secondary hover:text-primary"><X className="w-5 h-5" /></button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-900">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{editingGroup ? 'Edit Group' : 'Create Group'}</h2>
+                            <button onClick={() => setShowGroupModal(false)} className="p-1 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white"><X className="w-5 h-5" /></button>
                         </div>
                         <form onSubmit={handleSaveGroup} className="p-5 space-y-4">
-                            <input type="text" required value={groupName} onChange={(e) => setGroupName(e.target.value)} className="w-full px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm" placeholder="Group Name" />
-                            <textarea required value={groupDesc} onChange={(e) => setGroupDesc(e.target.value)} className="w-full px-3 py-2 bg-secondary/30 border border-theme rounded-lg text-primary text-sm h-20 resize-none" placeholder="Description" />
+                            <input type="text" required value={groupName} onChange={(e) => setGroupName(e.target.value)} className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Group Name" />
+                            <textarea required value={groupDesc} onChange={(e) => setGroupDesc(e.target.value)} className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm h-20 resize-none placeholder:text-gray-500 dark:placeholder:text-slate-500" placeholder="Description" />
                             
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-secondary">Permissions</label>
+                                <label className="text-sm font-medium text-gray-600 dark:text-slate-400">Permissions</label>
                                 <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto">
                                     {permissions.map(perm => (
-                                        <label key={perm.id} className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer text-sm ${groupPermissions.includes(perm.id) ? 'bg-emerald-500/15 border border-emerald-500/40' : 'bg-secondary/30 border border-transparent'}`}>
+                                        <label key={perm.id} className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer text-sm ${groupPermissions.includes(perm.id) ? 'bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/40' : 'bg-gray-100 dark:bg-slate-800 border border-transparent'}`}>
                                             <input type="checkbox" checked={groupPermissions.includes(perm.id)} onChange={(e) => {
                                                 if (e.target.checked) setGroupPermissions([...groupPermissions, perm.id]);
                                                 else setGroupPermissions(groupPermissions.filter(id => id !== perm.id));
-                                            }} className="mt-0.5 w-4 h-4" />
+                                            }} className="mt-0.5 w-4 h-4 accent-emerald-600" />
                                             <div>
-                                                <div className={groupPermissions.includes(perm.id) ? 'text-emerald-400' : 'text-primary'}>{perm.name}</div>
-                                                <div className="text-xs text-secondary">{perm.description}</div>
+                                                <div className={groupPermissions.includes(perm.id) ? 'text-emerald-700 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}>{perm.name}</div>
+                                                <div className="text-xs text-gray-500 dark:text-slate-500">{perm.description}</div>
                                             </div>
                                         </label>
                                     ))}
                                 </div>
                             </div>
                             
-                            <button type="submit" disabled={isSubmitting} className="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg disabled:opacity-50">
+                            <button type="submit" disabled={isSubmitting} className="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg disabled:opacity-50 hover:bg-emerald-700 transition-colors">
                                 {isSubmitting ? 'Saving...' : (editingGroup ? 'Update Group' : 'Create Group')}
                             </button>
                         </form>

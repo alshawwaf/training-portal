@@ -154,7 +154,6 @@ def get_console_page(
     if force_webmks:
         # vSphere VM - Use WebMKS via WebSocket proxy (NOT Guacamole)
         from services.vsphere_service import vsphere_service
-        from fastapi.responses import HTMLResponse
         import logging
         import base64
         import json

@@ -200,9 +200,9 @@ const ClassCard: React.FC<ClassCardProps> = ({
               <span className="text-primary font-medium">{cls.max_users}</span>
             </div>
             {daysRemaining > 0 && cls.status === 'active' && (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 rounded text-xs">
-                <Clock className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400 font-medium">{daysRemaining}d</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-fuchsia-500/10 rounded text-xs">
+                <Clock className="w-3 h-3 text-fuchsia-400" />
+                <span className="text-fuchsia-400 font-medium">{daysRemaining}d</span>
               </div>
             )}
           </div>
@@ -211,7 +211,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
           <div className={clsx(
             "px-2 py-0.5 rounded text-[9px] font-bold uppercase",
             cls.status === 'active' 
-              ? "bg-emerald-500/15 text-emerald-400" 
+              ? "bg-fuchsia-500/15 text-fuchsia-400" 
               : cls.status === 'draft'
               ? "bg-blue-500/15 text-blue-400"
               : cls.status === 'completed'
@@ -257,17 +257,17 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
             {/* Student Access - Compact */}
             {joinUrl && (
-              <div className="bg-emerald-500/10 p-2 rounded border border-emerald-500/30">
+              <div className="bg-fuchsia-500/10 p-2 rounded border border-fuchsia-500/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <Link2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-xs font-bold text-emerald-400">Student Access</span>
+                  <Link2 className="w-3.5 h-3.5 text-fuchsia-400" />
+                  <span className="text-xs font-bold text-fuchsia-400">Student Access</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <input 
                     type="text" readOnly value={joinUrl} 
-                    className="flex-1 px-2 py-1 bg-slate-900/50 border border-emerald-500/20 rounded text-xs text-white font-mono truncate"
+                    className="flex-1 px-2 py-1 bg-slate-900/50 border border-fuchsia-500/20 rounded text-xs text-white font-mono truncate"
                   />
-                  <button onClick={copyJoinLink} className="flex items-center gap-1 px-2 py-1 bg-emerald-500 text-white rounded text-xs font-medium hover:bg-emerald-600 shrink-0">
+                  <button onClick={copyJoinLink} className="flex items-center gap-1 px-2 py-1 bg-fuchsia-500 text-white rounded text-xs font-medium hover:bg-fuchsia-600 shrink-0">
                     <Copy className="w-3 h-3" /> Copy
                   </button>
                 </div>
@@ -277,7 +277,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
             {/* Power Operations - Compact */}
             <div className="flex items-center gap-1 flex-wrap">
               <span className="text-[9px] font-bold text-secondary uppercase mr-1">Power:</span>
-              <button onClick={handleStartAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'start' ? "bg-emerald-500/20 text-emerald-400" : "bg-secondary/20 text-secondary hover:text-emerald-400 hover:bg-emerald-500/10")}>
+              <button onClick={handleStartAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'start' ? "bg-fuchsia-500/20 text-fuchsia-400" : "bg-secondary/20 text-secondary hover:text-fuchsia-400 hover:bg-fuchsia-500/10")}>
                 {isLoading === 'start' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />} Start
               </button>
               <button onClick={handleStopAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'stop' ? "bg-red-500/20 text-red-400" : "bg-secondary/20 text-secondary hover:text-red-400 hover:bg-red-500/10")}>
@@ -299,7 +299,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
                 className={clsx(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-all",
                   ["active", "draft"].includes(cls.status)
-                    ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                    ? "bg-fuchsia-600 text-white hover:bg-fuchsia-500"
                     : "bg-secondary/20 text-secondary/40 cursor-not-allowed"
                 )}
               >

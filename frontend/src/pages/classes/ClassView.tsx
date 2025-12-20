@@ -4,8 +4,9 @@ import {
     Monitor, Play, Square, RotateCcw, Power, 
     Maximize2, Minimize2, Terminal, AlertCircle,
     Copy, ExternalLink, User, Server, Keyboard,
-    PanelLeftClose, PanelLeft, Clock, Wifi, WifiOff,
-    ChevronDown, Settings2, Zap, RefreshCw, Hand
+    Clock, Wifi, WifiOff, Zap, RefreshCw, LogOut,
+    ChevronDown, ChevronRight, Settings, Pause, HardDrive,
+    Cpu, MemoryStick, Globe, Activity, Download
 } from 'lucide-react';
 import api from '../../api';
 import { useAuth } from '../../context/AuthContext';
@@ -15,11 +16,16 @@ import clsx from 'clsx';
 interface VM {
     id: number;
     name: string;
+    vm_name?: string;
     moid: string;
+    vm_moid?: string;
     ip_address?: string;
     power_state: string;
     access_url?: string;
     guest_os?: string;
+    cpu?: number;
+    memory_mb?: number;
+    disk_gb?: number;
 }
 
 interface Environment {
@@ -39,11 +45,10 @@ const ClassView: React.FC = () => {
     const [selectedVm, setSelectedVm] = useState<VM | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [showLeftPanel, setShowLeftPanel] = useState(true);
-    const [displayScale, setDisplayScale] = useState<'fit' | '100' | '125'>('fit');
     const [sessionTime, setSessionTime] = useState(0);
     const [isConnected, setIsConnected] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [expandedVms, setExpandedVms] = useState<Set<number>>(new Set());
 
     const fetchEnvironment = async () => {
         try {
@@ -80,13 +85,11 @@ const ClassView: React.FC = () => {
         return () => clearInterval(interval);
     }, [classId]);
 
-    // Session timer
     useEffect(() => {
         const timer = setInterval(() => setSessionTime(t => t + 1), 1000);
         return () => clearInterval(timer);
     }, []);
 
-    // Fullscreen handling
     const toggleFullscreen = useCallback(() => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
@@ -107,11 +110,11 @@ const ClassView: React.FC = () => {
         const targetVmId = vmId || selectedVm?.id;
         if (!targetVmId) return;
 
-        setActionLoading(action);
+        setActionLoading(`${action}-${targetVmId}`);
         try {
             await api.post(`/classes/environments/${classId}/vms/${targetVmId}/power`, { action });
             showToast(`${action.charAt(0).toUpperCase() + action.slice(1)} initiated`, 'success');
-            fetchEnvironment();
+            setTimeout(fetchEnvironment, 2000);
         } catch (err: any) {
             showToast(err.response?.data?.detail || 'Action failed', 'error');
         } finally {
@@ -121,11 +124,11 @@ const ClassView: React.FC = () => {
 
     const handleBulkAction = async (action: string) => {
         if (!environment) return;
-        setActionLoading(action);
+        setActionLoading(`bulk-${action}`);
         try {
             await api.post(`/classes/environments/${environment.id}/power`, { action });
             showToast(`Bulk ${action} initiated`, 'success');
-            fetchEnvironment();
+            setTimeout(fetchEnvironment, 2000);
         } catch (err: any) {
             showToast('Bulk action failed', 'error');
         } finally {
@@ -133,14 +136,18 @@ const ClassView: React.FC = () => {
         }
     };
 
-    const handleRevert = async () => {
+    const handleRevert = async (vmId?: number) => {
         if (!environment) return;
-        if (!window.confirm('Revert all machines to initial state? This cannot be undone.')) return;
-        setActionLoading('revert');
+        if (!window.confirm('Revert to initial state? This cannot be undone.')) return;
+        setActionLoading(vmId ? `revert-${vmId}` : 'bulk-revert');
         try {
-            await api.post(`/classes/environments/${environment.id}/revert`);
+            if (vmId) {
+                await api.post(`/classes/environments/${classId}/vms/${vmId}/revert`);
+            } else {
+                await api.post(`/classes/environments/${environment.id}/revert`);
+            }
             showToast('Revert initiated', 'success');
-            fetchEnvironment();
+            setTimeout(fetchEnvironment, 2000);
         } catch {
             showToast('Revert failed', 'error');
         } finally {
@@ -149,18 +156,34 @@ const ClassView: React.FC = () => {
     };
 
     const sendCtrlAltDel = () => {
-        // Post message to iframe for Ctrl+Alt+Del
         if (consoleRef.current?.contentWindow) {
             consoleRef.current.contentWindow.postMessage({ type: 'send-ctrl-alt-del' }, '*');
             showToast('Sent Ctrl+Alt+Del', 'info');
         }
     };
 
+    const handleEndSession = () => {
+        if (window.confirm('Are you sure you want to end your session?')) {
+            navigate('/');
+        }
+    };
+
+    const toggleVmExpanded = (vmId: number) => {
+        setExpandedVms(prev => {
+            const next = new Set(prev);
+            if (next.has(vmId)) next.delete(vmId);
+            else next.add(vmId);
+            return next;
+        });
+    };
+
     const formatTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600);
+        const d = Math.floor(seconds / 86400);
+        const h = Math.floor((seconds % 86400) / 3600);
         const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        if (d > 0) return `${d}d ${h}h`;
+        if (h > 0) return `${h}h ${m}m`;
+        return `${m}m ${seconds % 60}s`;
     };
 
     const getAuthToken = () => {
@@ -171,11 +194,28 @@ const ClassView: React.FC = () => {
         return '';
     };
 
+    const downloadRdpFile = (vm: VM) => {
+        if (!vm.ip_address) return;
+        const rdpContent = `full address:s:${vm.ip_address}\nprompt for credentials:i:1\nadministrative session:i:1`;
+        const blob = new Blob([rdpContent], { type: 'application/x-rdp' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${vm.name || vm.vm_name}.rdp`;
+        a.click();
+        showToast('RDP file downloaded', 'success');
+    };
+
+    const copyToClipboard = (text: string, label: string) => {
+        navigator.clipboard.writeText(text);
+        showToast(`${label} copied!`, 'success');
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-fuchsia-500/20 border-t-fuchsia-500 rounded-full animate-spin" />
                     <p className="text-slate-400 font-medium animate-pulse">Initializing Environment...</p>
                 </div>
             </div>
@@ -191,7 +231,7 @@ const ClassView: React.FC = () => {
                         <h2 className="text-xl font-bold text-white">No Environment Found</h2>
                         <p className="text-slate-400 mt-2">You don't have an environment assigned for this class.</p>
                     </div>
-                    <button onClick={() => navigate('/')} className="text-indigo-400 hover:text-white transition-colors">Go Back</button>
+                    <button onClick={() => navigate('/')} className="text-fuchsia-400 hover:text-white transition-colors">Go Back</button>
                 </div>
             </div>
         );
@@ -199,329 +239,342 @@ const ClassView: React.FC = () => {
 
     return (
         <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden">
-            {/* ===== TOP BAR: VM Tabs ===== */}
-            <header className="h-12 bg-slate-900 border-b border-slate-800 flex items-center px-2 shrink-0 z-20">
-                {/* Logo/Title */}
-                <div className="flex items-center gap-2 px-3 border-r border-slate-800 h-full">
-                    <Monitor className="w-4 h-4 text-indigo-400" />
-                    <span className="text-sm font-bold text-white hidden sm:inline">{environment.name}</span>
-                </div>
-
-                {/* VM Tabs */}
-                <div className="flex-1 flex items-center gap-1 px-2 overflow-x-auto scrollbar-hide">
-                    {environment.vms.map(vm => (
-                        <button
-                            key={vm.id}
-                            onClick={() => setSelectedVm(vm)}
-                            className={clsx(
-                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all shrink-0",
-                                selectedVm?.id === vm.id
-                                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                                    : "text-slate-400 hover:text-white hover:bg-slate-800"
-                            )}
-                        >
-                            <div className={clsx(
-                                "w-2 h-2 rounded-full",
-                                vm.power_state === 'poweredOn' ? "bg-green-500" : "bg-red-500"
-                            )} />
-                            <span className="max-w-[120px] truncate">{vm.name}</span>
-                        </button>
-                    ))}
-                </div>
-
-                {/* Right Controls */}
-                <div className="flex items-center gap-1 px-2 border-l border-slate-800 h-full">
-                    {/* Connection Status */}
-                    <div className={clsx(
-                        "flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase",
-                        isConnected ? "text-green-400" : "text-red-400"
-                    )}>
-                        {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                        <span className="hidden sm:inline">{isConnected ? 'Connected' : 'Disconnected'}</span>
+            {/* ===== TOP HEADER BAR ===== */}
+            <header className="h-12 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 shrink-0 z-20">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 border border-fuchsia-500/30 flex items-center justify-center">
+                        <Monitor className="w-4 h-4 text-fuchsia-400" />
                     </div>
-
-                    {/* Session Timer */}
-                    <div className="flex items-center gap-1.5 px-2 py-1 text-slate-400 text-xs font-mono">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatTime(sessionTime)}</span>
-                    </div>
-
-                    {/* User */}
-                    <div className="flex items-center gap-2 px-2 py-1 bg-slate-800 rounded text-xs">
-                        <User className="w-3 h-3 text-slate-400" />
-                        <span className="text-slate-300 font-medium hidden sm:inline">{user?.name || 'Guest'}</span>
+                    <div>
+                        <h1 className="text-white font-bold text-sm uppercase tracking-wide">{environment.name}</h1>
+                        <span className="text-[10px] text-slate-500 uppercase">Workspace • ENV #{environment.id}</span>
                     </div>
                 </div>
+
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-full border border-slate-700">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="text-white font-mono font-bold text-xs">{formatTime(sessionTime)}</span>
+                </div>
+
+                <button
+                    onClick={handleEndSession}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 rounded-lg text-red-400 text-xs font-bold uppercase tracking-wide transition-colors"
+                >
+                    <LogOut className="w-3.5 h-3.5" />
+                    End Session
+                </button>
             </header>
 
-            {/* ===== TOOLBAR ===== */}
-            <div className="h-10 bg-slate-800/80 border-b border-slate-700 flex items-center px-3 justify-between shrink-0">
-                <div className="flex items-center gap-2">
-                    {/* Toggle Panel */}
-                    <button
-                        onClick={() => setShowLeftPanel(!showLeftPanel)}
-                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
-                        title={showLeftPanel ? "Hide Panel" : "Show Panel"}
-                    >
-                        {showLeftPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
-                    </button>
+            <div className="flex-1 flex overflow-hidden">
+                {/* ===== LEFT SIDEBAR ===== */}
+                <aside className="w-64 bg-slate-900/80 border-r border-slate-800 flex flex-col shrink-0 overflow-hidden">
+                    {/* LAB INFRASTRUCTURE */}
+                    <div className="p-3 border-b border-slate-800">
+                        <h2 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">Lab Infrastructure</h2>
+                        <div className="space-y-1 max-h-[40vh] overflow-y-auto">
+                            {environment.vms.map(vm => {
+                                const isExpanded = expandedVms.has(vm.id);
+                                const isSelected = selectedVm?.id === vm.id;
+                                const vmName = vm.name || vm.vm_name || 'VM';
+                                const isPoweredOn = vm.power_state === 'poweredOn';
 
-                    <div className="w-px h-5 bg-slate-700" />
+                                return (
+                                    <div key={vm.id} className="rounded-lg overflow-hidden">
+                                        {/* VM Header Row */}
+                                        <div
+                                            className={clsx(
+                                                "flex items-center gap-2 px-2 py-2 cursor-pointer transition-all",
+                                                isSelected ? "bg-fuchsia-500/20 border-l-2 border-fuchsia-500" : "hover:bg-slate-800"
+                                            )}
+                                        >
+                                            <button
+                                                onClick={() => toggleVmExpanded(vm.id)}
+                                                className="p-0.5 text-slate-500 hover:text-white"
+                                            >
+                                                {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                            </button>
+                                            
+                                            <div
+                                                onClick={() => setSelectedVm(vm)}
+                                                className="flex-1 flex items-center gap-2 min-w-0"
+                                            >
+                                                <div className={clsx(
+                                                    "w-6 h-6 rounded flex items-center justify-center shrink-0",
+                                                    isSelected ? "bg-fuchsia-500" : "bg-slate-700"
+                                                )}>
+                                                    <Server className="w-3 h-3 text-white" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={clsx(
+                                                        "text-[10px] font-bold uppercase truncate",
+                                                        isSelected ? "text-fuchsia-300" : "text-white"
+                                                    )}>{vmName}</p>
+                                                    <p className="text-[9px] text-slate-500 truncate">{vm.ip_address || 'No IP'}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className={clsx(
+                                                "w-2 h-2 rounded-full shrink-0",
+                                                isPoweredOn ? "bg-green-500" : "bg-slate-500"
+                                            )} />
+                                        </div>
 
-                    {/* VM Actions */}
-                    {selectedVm && (
-                        <>
-                            <button
-                                onClick={() => handleVmAction(selectedVm.power_state === 'poweredOn' ? 'stop' : 'start')}
-                                disabled={actionLoading !== null}
-                                className={clsx(
-                                    "flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-all",
-                                    selectedVm.power_state === 'poweredOn'
-                                        ? "text-red-400 hover:bg-red-500/10"
-                                        : "text-green-400 hover:bg-green-500/10"
-                                )}
-                            >
-                                {actionLoading === 'start' || actionLoading === 'stop' 
-                                    ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                    : <Power className="w-3.5 h-3.5" />
-                                }
-                                {selectedVm.power_state === 'poweredOn' ? 'Stop' : 'Start'}
-                            </button>
-                            <button
-                                onClick={() => handleVmAction('reset')}
-                                disabled={actionLoading !== null}
-                                className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium text-amber-400 hover:bg-amber-500/10 transition-all"
-                            >
-                                <RotateCcw className="w-3.5 h-3.5" />
-                                Restart
-                            </button>
-                        </>
-                    )}
-                </div>
+                                        {/* Expanded VM Details */}
+                                        {isExpanded && (
+                                            <div className="bg-slate-800/50 border-t border-slate-700 px-3 py-2 space-y-2 text-[10px]">
+                                                {/* VM Specs */}
+                                                <div className="grid grid-cols-2 gap-1">
+                                                    <div className="flex items-center gap-1.5 text-slate-400">
+                                                        <Cpu className="w-3 h-3 text-blue-400" />
+                                                        <span>{vm.cpu || 2} vCPU</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-slate-400">
+                                                        <MemoryStick className="w-3 h-3 text-purple-400" />
+                                                        <span>{vm.memory_mb ? Math.round(vm.memory_mb/1024) : 4} GB RAM</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-slate-400">
+                                                        <HardDrive className="w-3 h-3 text-amber-400" />
+                                                        <span>{vm.disk_gb || 40} GB Disk</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-slate-400">
+                                                        <Globe className="w-3 h-3 text-cyan-400" />
+                                                        <span>{vm.ip_address || 'N/A'}</span>
+                                                    </div>
+                                                </div>
 
-                <div className="flex items-center gap-2">
-                    {/* Ctrl+Alt+Del */}
-                    <button
-                        onClick={sendCtrlAltDel}
-                        className="flex items-center gap-1.5 px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs font-medium text-slate-300 transition-all"
-                        title="Send Ctrl+Alt+Del"
-                    >
-                        <Keyboard className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Ctrl+Alt+Del</span>
-                    </button>
+                                                {/* VM Status */}
+                                                <div className="flex items-center gap-2 pt-1 border-t border-slate-700">
+                                                    <Activity className={clsx("w-3 h-3", isPoweredOn ? "text-green-400" : "text-slate-500")} />
+                                                    <span className={isPoweredOn ? "text-green-400" : "text-slate-500"}>
+                                                        {isPoweredOn ? 'Powered On' : 'Powered Off'}
+                                                    </span>
+                                                </div>
 
-                    {/* Display Scale */}
-                    <div className="flex items-center bg-slate-700 rounded overflow-hidden">
-                        {(['fit', '100', '125'] as const).map(scale => (
-                            <button
-                                key={scale}
-                                onClick={() => setDisplayScale(scale)}
-                                className={clsx(
-                                    "px-2 py-1 text-[10px] font-bold transition-colors",
-                                    displayScale === scale
-                                        ? "bg-indigo-600 text-white"
-                                        : "text-slate-400 hover:text-white"
-                                )}
-                            >
-                                {scale === 'fit' ? 'Fit' : `${scale}%`}
-                            </button>
-                        ))}
+                                                {/* VM Power Actions */}
+                                                <div className="flex flex-wrap gap-1 pt-1 border-t border-slate-700">
+                                                    {!isPoweredOn ? (
+                                                        <button
+                                                            onClick={() => handleVmAction('start', vm.id)}
+                                                            disabled={actionLoading !== null}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-400 rounded text-[9px] font-bold"
+                                                        >
+                                                            {actionLoading === `start-${vm.id}` ? <RefreshCw className="w-2.5 h-2.5 animate-spin" /> : <Play className="w-2.5 h-2.5" />}
+                                                            Start
+                                                        </button>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                onClick={() => handleVmAction('stop', vm.id)}
+                                                                disabled={actionLoading !== null}
+                                                                className="flex items-center gap-1 px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded text-[9px] font-bold"
+                                                            >
+                                                                {actionLoading === `stop-${vm.id}` ? <RefreshCw className="w-2.5 h-2.5 animate-spin" /> : <Square className="w-2.5 h-2.5" />}
+                                                                Stop
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleVmAction('reset', vm.id)}
+                                                                disabled={actionLoading !== null}
+                                                                className="flex items-center gap-1 px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded text-[9px] font-bold"
+                                                            >
+                                                                {actionLoading === `reset-${vm.id}` ? <RefreshCw className="w-2.5 h-2.5 animate-spin" /> : <RotateCcw className="w-2.5 h-2.5" />}
+                                                                Restart
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleVmAction('suspend', vm.id)}
+                                                                disabled={actionLoading !== null}
+                                                                className="flex items-center gap-1 px-2 py-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded text-[9px] font-bold"
+                                                            >
+                                                                {actionLoading === `suspend-${vm.id}` ? <RefreshCw className="w-2.5 h-2.5 animate-spin" /> : <Pause className="w-2.5 h-2.5" />}
+                                                                Suspend
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleRevert(vm.id)}
+                                                        disabled={actionLoading !== null}
+                                                        className="flex items-center gap-1 px-2 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded text-[9px] font-bold"
+                                                    >
+                                                        {actionLoading === `revert-${vm.id}` ? <RefreshCw className="w-2.5 h-2.5 animate-spin" /> : <RotateCcw className="w-2.5 h-2.5" />}
+                                                        Revert
+                                                    </button>
+                                                </div>
+
+                                                {/* Quick Copy Actions */}
+                                                {vm.ip_address && (
+                                                    <div className="flex gap-1 pt-1 border-t border-slate-700">
+                                                        <button
+                                                            onClick={() => copyToClipboard(vm.ip_address!, 'IP')}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded text-[9px]"
+                                                        >
+                                                            <Copy className="w-2.5 h-2.5" /> IP
+                                                        </button>
+                                                        <button
+                                                            onClick={() => downloadRdpFile(vm)}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded text-[9px]"
+                                                        >
+                                                            <Download className="w-2.5 h-2.5" /> RDP
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
 
-                    {/* Fullscreen */}
-                    <button
-                        onClick={toggleFullscreen}
-                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
-                        title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-                    >
-                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                    </button>
-
-                    {/* Open in New Window */}
-                    <button
-                        onClick={() => window.open(`/api/classes/environments/${classId}/vms/${selectedVm?.id}/console?token=${getAuthToken()}`, '_blank')}
-                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
-                        title="Open in New Window"
-                    >
-                        <ExternalLink className="w-4 h-4" />
-                    </button>
-                </div>
-            </div>
-
-            <div className="flex-1 flex overflow-hidden">
-                {/* ===== LEFT PANEL ===== */}
-                {showLeftPanel && (
-                    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 animate-in slide-in-from-left-2 duration-200">
-                        {/* Overview */}
-                        <div className="p-3 border-b border-slate-800">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Server className="w-4 h-4 text-indigo-400" />
-                                <span className="text-xs font-bold text-white uppercase tracking-wide">Overview</span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="bg-slate-800/50 rounded-lg p-2">
-                                    <div className="text-[10px] text-slate-500 uppercase">VMs</div>
-                                    <div className="text-lg font-bold text-white">{environment.vms.length}</div>
-                                </div>
-                                <div className="bg-slate-800/50 rounded-lg p-2">
-                                    <div className="text-[10px] text-slate-500 uppercase">Online</div>
-                                    <div className="text-lg font-bold text-green-400">
-                                        {environment.vms.filter(v => v.power_state === 'poweredOn').length}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Selected VM Details */}
-                        {selectedVm && (
-                            <div className="p-3 border-b border-slate-800 space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <Terminal className="w-4 h-4 text-indigo-400" />
-                                    <span className="text-xs font-bold text-white uppercase tracking-wide">VM Details</span>
-                                </div>
-                                <div className="space-y-2 text-xs">
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Name</span>
-                                        <span className="text-slate-200 font-medium truncate ml-2">{selectedVm.name}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">Status</span>
-                                        <span className={clsx(
-                                            "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase",
-                                            selectedVm.power_state === 'poweredOn' 
-                                                ? "bg-green-500/20 text-green-400" 
-                                                : "bg-red-500/20 text-red-400"
-                                        )}>
-                                            {selectedVm.power_state === 'poweredOn' ? 'Online' : 'Offline'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-slate-500">IP Address</span>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-indigo-400 font-mono text-[11px]">{selectedVm.ip_address || '—'}</span>
-                                            {selectedVm.ip_address && (
-                                                <button 
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(selectedVm.ip_address!);
-                                                        showToast('IP copied', 'success');
-                                                    }}
-                                                    className="text-slate-500 hover:text-indigo-400"
-                                                >
-                                                    <Copy className="w-3 h-3" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500">OS</span>
-                                        <span className="text-slate-300 text-[11px]">{selectedVm.guest_os || 'Unknown'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Quick Actions */}
-                        <div className="p-3 flex-1">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Zap className="w-4 h-4 text-amber-400" />
-                                <span className="text-xs font-bold text-white uppercase tracking-wide">Quick Actions</span>
-                            </div>
-                            <div className="space-y-1">
-                                <button
-                                    onClick={() => handleBulkAction('start')}
-                                    disabled={actionLoading !== null}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
-                                >
-                                    <Play className="w-3.5 h-3.5 text-green-400" />
-                                    Start All VMs
-                                </button>
-                                <button
-                                    onClick={() => handleBulkAction('stop')}
-                                    disabled={actionLoading !== null}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
-                                >
-                                    <Square className="w-3.5 h-3.5 text-red-400" />
-                                    Stop All VMs
-                                </button>
-                                <button
-                                    onClick={handleRevert}
-                                    disabled={actionLoading !== null}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
-                                >
-                                    <RotateCcw className="w-3.5 h-3.5" />
-                                    Revert to Snapshot
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Help */}
-                        <div className="p-3 border-t border-slate-800">
-                            <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors">
-                                <Hand className="w-3.5 h-3.5" />
-                                Request Assistance
+                    {/* MANAGEMENT - Bulk Actions */}
+                    <div className="p-3 border-b border-slate-800">
+                        <h2 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">Management</h2>
+                        <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                                onClick={() => handleBulkAction('start')}
+                                disabled={actionLoading !== null}
+                                className="flex flex-col items-center gap-1 p-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/20 rounded-lg transition-all"
+                            >
+                                <Play className={clsx("w-4 h-4 text-fuchsia-400", actionLoading === 'bulk-start' && "animate-pulse")} />
+                                <span className="text-[8px] font-bold text-fuchsia-400 uppercase">Start All</span>
+                            </button>
+                            <button
+                                onClick={() => handleBulkAction('stop')}
+                                disabled={actionLoading !== null}
+                                className="flex flex-col items-center gap-1 p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-all"
+                            >
+                                <Square className={clsx("w-4 h-4 text-red-400", actionLoading === 'bulk-stop' && "animate-pulse")} />
+                                <span className="text-[8px] font-bold text-red-400 uppercase">Stop All</span>
+                            </button>
+                            <button
+                                onClick={() => handleBulkAction('reset')}
+                                disabled={actionLoading !== null}
+                                className="flex flex-col items-center gap-1 p-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition-all"
+                            >
+                                <RotateCcw className={clsx("w-4 h-4 text-amber-400", actionLoading === 'bulk-reset' && "animate-pulse")} />
+                                <span className="text-[8px] font-bold text-amber-400 uppercase">Restart All</span>
+                            </button>
+                            <button
+                                onClick={() => handleRevert()}
+                                disabled={actionLoading !== null}
+                                className="flex flex-col items-center gap-1 p-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-lg transition-all"
+                            >
+                                <RotateCcw className={clsx("w-4 h-4 text-purple-400", actionLoading === 'bulk-revert' && "animate-pulse")} />
+                                <span className="text-[8px] font-bold text-purple-400 uppercase">Revert All</span>
                             </button>
                         </div>
-                    </aside>
-                )}
+                    </div>
 
-                {/* ===== MAIN CONSOLE AREA ===== */}
-                <main className="flex-1 bg-black flex flex-col overflow-hidden relative">
-                    {selectedVm ? (
-                        selectedVm.power_state === 'poweredOn' ? (
-                            <iframe 
-                                ref={consoleRef}
-                                src={`/api/classes/environments/${classId}/vms/${selectedVm.id}/console?token=${getAuthToken()}`}
-                                className={clsx(
-                                    "w-full h-full border-0",
-                                    displayScale === 'fit' && "object-contain",
-                                    displayScale === '100' && "scale-100 origin-top-left",
-                                    displayScale === '125' && "scale-125 origin-top-left"
-                                )}
-                                title="VM Console"
-                            />
-                        ) : (
-                            <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-900 to-slate-950">
-                                <div className="p-6 bg-slate-800/50 rounded-2xl border border-slate-700">
-                                    <Power className="w-12 h-12 text-slate-600" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-slate-300 font-medium mb-1">VM is powered off</p>
-                                    <p className="text-slate-500 text-sm">{selectedVm.name}</p>
-                                </div>
-                                <button 
-                                    onClick={() => handleVmAction('start')}
-                                    disabled={actionLoading === 'start'}
-                                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2"
-                                >
-                                    {actionLoading === 'start' ? (
-                                        <RefreshCw className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        <Play className="w-4 h-4" />
-                                    )}
-                                    Power On
-                                </button>
+                    {/* SYSTEM DETAILS */}
+                    <div className="p-3 flex-1">
+                        <h2 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2">System Details</h2>
+                        <div className="space-y-2 text-[10px]">
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-500 flex items-center gap-1.5"><User className="w-3 h-3" /> Role</span>
+                                <span className="text-white font-medium px-1.5 py-0.5 bg-slate-800 rounded text-[9px] uppercase">Guest</span>
                             </div>
-                        )
-                    ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
-                            <Monitor className="w-16 h-16 mb-4 opacity-20" />
-                            <p>Select a VM to open console</p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-500 flex items-center gap-1.5"><Settings className="w-3 h-3" /> Platform</span>
+                                <span className="text-white font-medium text-[9px] uppercase">Standard</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-500 flex items-center gap-1.5"><Server className="w-3 h-3" /> VMs</span>
+                                <span className="text-white font-medium text-[9px]">{environment.vms.length}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-slate-500 flex items-center gap-1.5"><Wifi className="w-3 h-3" /> Status</span>
+                                <span className={clsx("font-medium text-[9px]", isConnected ? "text-green-400" : "text-red-400")}>
+                                    {isConnected ? 'Connected' : 'Disconnected'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                {/* ===== MAIN CONTENT AREA ===== */}
+                <main className="flex-1 flex flex-col overflow-hidden bg-black">
+                    {/* Console Toolbar */}
+                    {selectedVm && (
+                        <div className="h-9 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-3 shrink-0">
+                            <div className="flex items-center gap-2">
+                                <Zap className="w-3 h-3 text-fuchsia-400" />
+                                <span className="text-[10px] font-bold text-white uppercase">{selectedVm.name || selectedVm.vm_name} Connection</span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[9px] text-slate-500 uppercase font-bold mr-1">Adaptive DPI</span>
+                                
+                                <button
+                                    onClick={() => window.open(`/api/classes/environments/${classId}/vms/${selectedVm?.id}/console?token=${getAuthToken()}`, '_blank')}
+                                    className="flex items-center gap-1 px-2 py-1 bg-fuchsia-500 hover:bg-fuchsia-600 rounded text-white text-[9px] font-bold uppercase transition-colors"
+                                >
+                                    <ExternalLink className="w-3 h-3" />
+                                    Pop-out
+                                </button>
+
+                                <div className="w-px h-4 bg-slate-700" />
+
+                                <button
+                                    onClick={sendCtrlAltDel}
+                                    className="px-2 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300 text-[9px] font-medium"
+                                >
+                                    Ctrl+Alt+Del
+                                </button>
+
+                                <button
+                                    onClick={toggleFullscreen}
+                                    className="px-2 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300 text-[9px] font-medium"
+                                >
+                                    {isFullscreen ? 'Exit' : 'Fullscreen'}
+                                </button>
+
+                                <div className="w-px h-4 bg-slate-700" />
+
+                                <div className={clsx(
+                                    "flex items-center gap-1 px-2 py-1 rounded text-[9px] font-medium",
+                                    isConnected ? "text-green-400" : "text-red-400"
+                                )}>
+                                    {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                                    {isConnected ? 'Connected' : 'Disconnected'}
+                                </div>
+                            </div>
                         </div>
                     )}
+
+                    {/* Console View */}
+                    <div className="flex-1 relative">
+                        {selectedVm ? (
+                            selectedVm.power_state === 'poweredOn' ? (
+                                <iframe 
+                                    ref={consoleRef}
+                                    src={`/api/classes/environments/${classId}/vms/${selectedVm.id}/console?token=${getAuthToken()}`}
+                                    className="w-full h-full border-0"
+                                    title="VM Console"
+                                />
+                            ) : (
+                                <div className="flex-1 h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-900 to-slate-950">
+                                    <div className="p-6 bg-slate-800/50 rounded-xl border border-slate-700">
+                                        <Power className="w-12 h-12 text-slate-600" />
+                                    </div>
+                                    <p className="text-slate-300 font-bold">VM is powered off</p>
+                                    <p className="text-slate-500 text-sm">{selectedVm.name || selectedVm.vm_name}</p>
+                                    <button 
+                                        onClick={() => handleVmAction('start')}
+                                        disabled={actionLoading !== null}
+                                        className="px-6 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold rounded-lg transition-all flex items-center gap-2"
+                                    >
+                                        {actionLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                                        Power On
+                                    </button>
+                                </div>
+                            )
+                        ) : (
+                            <div className="flex-1 h-full flex flex-col items-center justify-center text-slate-600">
+                                <Monitor className="w-16 h-16 mb-3 opacity-20" />
+                                <p>Select a VM to open console</p>
+                            </div>
+                        )}
+                    </div>
                 </main>
             </div>
-
-            {/* ===== BOTTOM STATUS BAR ===== */}
-            <footer className="h-7 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-3 text-[10px] shrink-0">
-                <div className="flex items-center gap-4 text-slate-500">
-                    <span>Environment: <span className="text-slate-300">{environment.name}</span></span>
-                    <span>VMs: <span className="text-slate-300">{environment.vms.length}</span></span>
-                </div>
-                <div className="flex items-center gap-4 text-slate-500">
-                    <span>Session: <span className="text-slate-300 font-mono">{formatTime(sessionTime)}</span></span>
-                    {selectedVm && <span>Current: <span className="text-indigo-400">{selectedVm.name}</span></span>}
-                </div>
-            </footer>
         </div>
     );
 };

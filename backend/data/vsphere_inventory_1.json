@@ -1,5 +1,5 @@
 {
-  "last_sync": "2025-12-20T03:00:48.941632",
+  "last_sync": "2025-12-20T04:27:12.776232",
   "datacenters": [
     {
       "name": "vCenter-Datacenter",
@@ -110,6 +110,15 @@
     }
   ],
   "vms": [
+    {
+      "name": "nyc-Student_1-pfSense",
+      "moid": "vm-5353",
+      "power_state": "poweredOn",
+      "guest_os": "FreeBSD 12 or later versions (64-bit)",
+      "cpu": 2,
+      "memory_mb": 4096,
+      "is_template": false
+    },
     {
       "name": "Proxmox",
       "moid": "vm-5230",

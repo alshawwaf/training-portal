@@ -116,7 +116,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
             {!isStudent && isInstructor && (
                 <div className="pt-2">
-                    <p className="px-4 mb-3 text-[10px] font-bold text-emerald-400/80 uppercase tracking-[0.2em]">Workspace</p>
+                    <p className="px-4 mb-3 text-[10px] font-bold text-fuchsia-400/80 uppercase tracking-[0.2em]">Workspace</p>
                     <div className="space-y-1.5">{workspaceItems.map(item => (
                     <Link
                         key={item.path}
@@ -129,11 +129,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         )}
                     >
                         {location.pathname === item.path && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 shadow-[0_4px_12px_rgba(16,185,129,0.3)]" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-pink-600 shadow-[0_4px_12px_rgba(217,70,239,0.3)]" />
                         )}
                         <item.icon className={clsx(
                             "w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110",
-                            location.pathname === item.path ? "text-white" : "text-emerald-500/70 group-hover:text-emerald-500"
+                            location.pathname === item.path ? "text-white" : "text-fuchsia-500/70 group-hover:text-fuchsia-500"
                         )} />
                         <span className="relative z-10">{item.label}</span>
                     </Link>

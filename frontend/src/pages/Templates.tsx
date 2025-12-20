@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import { 
     Plus, Search, Server, Trash2, Edit, Check, Clock, Monitor, HardDrive, Cpu, 
-    Layout as LayoutTemplate, RefreshCw, Layers, ChevronDown
+    Layout as LayoutTemplate, RefreshCw, Layers
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import Modal from '../components/Modal';
@@ -45,8 +45,6 @@ interface InventoryVM {
     is_template: boolean;
     power_state: string;
 }
-
-const providerOptions = ['vSphere', 'Proxmox', 'AWS', 'Azure', 'GCP'];
 
 const Templates: React.FC = () => {
     const { showToast } = useToast();
@@ -291,9 +289,8 @@ const Templates: React.FC = () => {
 
     const openVMSelector = () => {
         setVmSelectorOpen(true);
-        if (!inventory) {
-            fetchInventory();
-        }
+        // Always fetch fresh inventory when opening the selector
+        fetchInventory();
     };
 
     const toggleVMSelection = (vm: InventoryVM) => {
@@ -434,139 +431,126 @@ const Templates: React.FC = () => {
             <Modal
                 isOpen={createModalOpen || editModalOpen}
                 onClose={() => { setCreateModalOpen(false); setEditModalOpen(false); }}
-                title={createModalOpen ? "New Blueprint" : "Refine Blueprint"}
-                icon={<LayoutTemplate className="w-5 h-5 text-purple-500" />}
-                maxWidth="lg"
+                title={createModalOpen ? "New Blueprint" : "Edit Blueprint"}
+                icon={<LayoutTemplate className="w-4 h-4 text-purple-500" />}
+                maxWidth="md"
             >
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                        <div className="md:col-span-8 space-y-1.5">
-                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Blueprint Name</label>
+                <div className="space-y-4">
+                    {/* Row 1: Name + Status */}
+                    <div className="flex gap-3">
+                        <div className="flex-1">
+                            <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Name</label>
                             <input
                                 type="text"
-                                className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 text-primary font-bold transition-all"
-                                placeholder="Enterprise Lab v3"
+                                className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm font-medium"
+                                placeholder="e.g. Enterprise Lab v3"
                                 value={form.name}
                                 onChange={e => setForm({...form, name: e.target.value})}
                             />
                         </div>
-                        <div className="md:col-span-4 space-y-1.5">
-                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Environment Status</label>
-                            <div className="flex items-center gap-3 p-2 bg-secondary/10 rounded-xl border border-theme h-[46px]">
-                                <span className="flex-1 text-xs font-bold pl-2 text-secondary">{form.is_active ? 'Active' : 'Draft'}</span>
-                                <button
-                                    type="button"
-                                    onClick={() => setForm({...form, is_active: !form.is_active})}
-                                    className={clsx(
-                                        "relative w-10 h-6 rounded-full transition-all duration-300 flex items-center px-0.5",
-                                        form.is_active ? "bg-emerald-500" : "bg-slate-400"
-                                    )}
-                                >
-                                    <div className={clsx(
-                                        "w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-300",
-                                        form.is_active ? "translate-x-4" : "translate-x-0"
-                                    )} />
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div className="md:col-span-4 space-y-1.5">
-                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Cloud Platform</label>
-                            <div className="relative">
-                                <select
-                                    className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 pr-10 text-primary font-bold appearance-none cursor-not-allowed"
-                                    value={form.provider}
-                                    disabled
-                                >
-                                    {providerOptions.map(opt => (
-                                        <option key={opt} value={opt}>{opt}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-8 space-y-1.5">
-                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Infrastructure Connection</label>
-                            <div className="relative">
-                                <select
-                                    className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 pr-10 text-primary font-bold appearance-none"
-                                    value={form.connection_id || ''}
-                                    onChange={e => {
-                                        setForm({...form, connection_id: e.target.value ? parseInt(e.target.value) : null});
-                                        setSelectedVMs([]);
-                                        setInventory(null);
-                                    }}
-                                >
-                                    <option value="" disabled>Select Connection</option>
-                                    {connections.filter(c => c.provider === form.provider).map(c => (
-                                        <option key={c.id} value={c.id}>{c.name} ({c.host})</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="w-4 h-4 text-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-12 space-y-1.5">
-                            <label className="text-[10px] font-black text-secondary uppercase tracking-widest pl-1 opacity-50">Design Brief (Description)</label>
-                            <textarea
-                                className="input bg-secondary/10 border-theme/40 focus:border-purple-500 rounded-xl p-3 text-primary font-medium min-h-[80px] text-sm"
-                                placeholder="Purpose and specifications of this training lab..."
-                                value={form.description}
-                                onChange={e => setForm({...form, description: e.target.value})}
-                            />
+                        <div className="w-24">
+                            <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Status</label>
+                            <button
+                                type="button"
+                                onClick={() => setForm({...form, is_active: !form.is_active})}
+                                className={clsx(
+                                    "w-full px-3 py-2 rounded-lg text-xs font-bold border transition-all",
+                                    form.is_active 
+                                        ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-500" 
+                                        : "bg-gray-100 dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-secondary"
+                                )}
+                            >
+                                {form.is_active ? 'Active' : 'Draft'}
+                            </button>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-bold text-primary uppercase tracking-widest">Resource Matrix</h3>
+                    {/* Row 2: Provider + Connection */}
+                    <div className="flex gap-3">
+                        <div className="w-28">
+                            <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Provider</label>
+                            <div className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white">
+                                {form.provider}
+                            </div>
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Connection</label>
+                            <select
+                                className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white"
+                                value={form.connection_id || ''}
+                                onChange={e => {
+                                    setForm({...form, connection_id: e.target.value ? parseInt(e.target.value) : null});
+                                    setSelectedVMs([]);
+                                    setInventory(null);
+                                }}
+                            >
+                                <option value="" disabled>Select Connection</option>
+                                {connections.filter(c => c.provider === form.provider).map(c => (
+                                    <option key={c.id} value={c.id}>{c.name} ({c.host})</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Row 3: Description */}
+                    <div>
+                        <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Description (optional)</label>
+                        <textarea
+                            className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm text-gray-900 dark:text-white min-h-[60px] resize-none"
+                            placeholder="Brief description..."
+                            value={form.description}
+                            onChange={e => setForm({...form, description: e.target.value})}
+                        />
+                    </div>
+
+                    {/* VMs Section */}
+                    <div className="border-t border-gray-200 dark:border-slate-700 pt-3">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-bold text-primary">VMs ({selectedVMs.length})</span>
                             <button 
                                 type="button"
                                 onClick={openVMSelector}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all"
+                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-medium hover:bg-blue-600 transition-colors"
                             >
-                                <Plus className="w-4 h-4" />
-                                Add Instances
+                                <Plus className="w-3 h-3" />
+                                Select VMs
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3">
-                            {selectedVMs.length > 0 ? (
-                                selectedVMs.map(vm => (
-                                    <SelectedVMCard 
-                                        key={vm.vm_moid} 
-                                        vm={vm} 
-                                        onRemove={removeSelectedVM}
-                                        onSetPrimary={setPrimaryVM}
-                                    />
-                                ))
-                            ) : (
-                                <div className="p-8 border-2 border-dashed border-theme rounded-[1.5rem] text-center bg-secondary/10">
-                                    <Server className="w-10 h-10 mx-auto mb-3 text-secondary/40" />
-                                    <p className="text-sm font-bold text-secondary">No instances defined</p>
-                                    <p className="text-[10px] uppercase font-bold text-secondary/60 mt-1">Add resources to finalize blueprint</p>
-                                </div>
-                            )}
-                        </div>
+                        {selectedVMs.length > 0 ? (
+                            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                                {selectedVMs.map(vm => (
+                                    <div key={vm.vm_moid} className="flex items-center gap-2 px-2 py-1.5 bg-gray-100 dark:bg-slate-800 rounded-lg text-xs">
+                                        <Monitor className="w-3 h-3 text-purple-400" />
+                                        <span className="flex-1 font-medium text-gray-900 dark:text-white truncate">{vm.vm_name}</span>
+                                        {vm.is_primary && <span className="px-1.5 py-0.5 bg-fuchsia-500/10 text-fuchsia-500 text-[9px] font-bold rounded">Primary</span>}
+                                        <button onClick={() => setPrimaryVM(vm.vm_moid)} className="text-[9px] text-secondary hover:text-fuchsia-500">Set Primary</button>
+                                        <button onClick={() => removeSelectedVM(vm.vm_moid)} className="text-red-400 hover:text-red-500">×</button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-4 text-center text-xs text-secondary border border-dashed border-gray-300 dark:border-slate-600 rounded-lg">
+                                No VMs selected
+                            </div>
+                        )}
                     </div>
 
-                    <div className="flex gap-4">
-                        <button 
-                            onClick={createModalOpen ? handleCreate : handleEdit}
-                            disabled={isSubmitting || !form.name || !form.connection_id || selectedVMs.length === 0}
-                            className="flex-1 flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:grayscale"
-                        >
-                            {isSubmitting ? (
-                                <RefreshCw className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <>
-                                    <Check className="w-5 h-5 font-bold" />
-                                    <span>{createModalOpen ? "Deploy Design" : "Update Specifications"}</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
+                    {/* Actions */}
+                    <button 
+                        onClick={createModalOpen ? handleCreate : handleEdit}
+                        disabled={isSubmitting || !form.name || !form.connection_id || selectedVMs.length === 0}
+                        className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-bold text-sm shadow-lg shadow-purple-500/20 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
+                    >
+                        {isSubmitting ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <>
+                                <Check className="w-4 h-4" />
+                                {createModalOpen ? "Create Template" : "Save Changes"}
+                            </>
+                        )}
+                    </button>
                 </div>
             </Modal>
 
@@ -574,18 +558,19 @@ const Templates: React.FC = () => {
             <Modal 
                 isOpen={vmSelectorOpen} 
                 onClose={() => setVmSelectorOpen(false)} 
-                title="Resource Selector"
-                icon={<Server className="w-6 h-6 text-purple-500" />}
-                maxWidth="3xl"
+                title="Select VMs"
+                icon={<Server className="w-4 h-4 text-purple-500" />}
+                maxWidth="lg"
             >
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between gap-4 p-4 bg-secondary/10 dark:bg-black/20 rounded-2xl border border-theme">
+                <div className="space-y-3">
+                    {/* Search & Sync Row */}
+                    <div className="flex items-center gap-2">
                         <div className="relative flex-1">
-                            <Search className="w-4 h-4 text-secondary absolute left-4 top-1/2 -translate-y-1/2" />
+                            <Search className="w-3.5 h-3.5 text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
                             <input 
                                 type="text"
-                                placeholder={`Filter ${form.provider} Inventory...`}
-                                className="input pl-10 bg-transparent border-none py-2 text-sm font-medium"
+                                placeholder={`Filter ${form.provider} inventory...`}
+                                className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm"
                                 value={inventorySearch}
                                 onChange={e => setInventorySearch(e.target.value)}
                             />
@@ -593,16 +578,17 @@ const Templates: React.FC = () => {
                         <button 
                             onClick={syncInventory}
                             disabled={loadingInventory}
-                            className="flex items-center gap-2 px-4 py-2 bg-secondary/20 dark:bg-white/5 hover:bg-theme-hover rounded-xl text-xs font-bold transition-all border border-theme"
+                            className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg text-xs font-medium transition-all"
                         >
-                            <RefreshCw className={clsx("w-4 h-4", loadingInventory && "animate-spin")} />
-                            Sync Source
+                            <RefreshCw className={clsx("w-3.5 h-3.5", loadingInventory && "animate-spin")} />
+                            Refresh
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                    {/* VM List */}
+                    <div className="max-h-80 overflow-y-auto space-y-1 border border-gray-200 dark:border-slate-700 rounded-lg p-1">
                         {loadingInventory ? (
-                            [1,2,3,4].map(i => <div key={i} className="h-20 bg-secondary/10 animate-pulse rounded-2xl border border-theme" />)
+                            [1,2,3,4].map(i => <div key={i} className="h-12 bg-gray-100 dark:bg-slate-800 animate-pulse rounded-lg" />)
                         ) : filteredInventoryVMs.length > 0 ? (
                             filteredInventoryVMs.map((vm: InventoryVM) => (
                                 <InventoryVMRow 
@@ -613,15 +599,16 @@ const Templates: React.FC = () => {
                                 />
                             ))
                         ) : (
-                            <div className="py-20 text-center opacity-50 italic">No resources found matching filter</div>
+                            <div className="py-8 text-center text-sm text-secondary">No VMs found</div>
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between p-6 bg-secondary/10 dark:bg-black/20 border-t border-theme rounded-b-[2rem] -mx-8 -mb-8">
-                        <span className="text-sm font-bold text-primary">{selectedVMs.length} entities staged</span>
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-slate-700">
+                        <span className="text-xs font-medium text-secondary">{selectedVMs.length} VM(s) selected</span>
                         <button 
                             onClick={() => setVmSelectorOpen(false)}
-                            className="px-8 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-500 transition-colors shadow-lg shadow-purple-500/20"
+                            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium text-sm hover:bg-purple-500 transition-colors"
                         >
                             Confirm Selection
                         </button>
@@ -753,133 +740,51 @@ const TemplateCard: React.FC<{ tpl: TemplateModel; onEdit: () => void; onDelete:
 };
 
 
-const SelectedVMCard: React.FC<{ 
-    vm: TemplateVM; 
-    onRemove: (moid: string) => void;
-    onSetPrimary: (moid: string) => void;
-}> = ({ vm, onRemove, onSetPrimary }) => (
-    <div className={clsx(
-        "group relative flex items-center justify-between p-5 rounded-[2rem] transition-all border overflow-hidden",
-        vm.is_primary 
-            ? "bg-emerald-500/10 border-emerald-500/40 shadow-[0_10px_30px_-10px_rgba(16,185,129,0.2)]" 
-            : "bg-secondary/40 border-white/5 hover:border-theme shadow-lg"
-    )}>
-        {/* Subtle Background Icon */}
-        <div className="absolute -right-2 -bottom-2 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-            <Server className="w-24 h-24" />
-        </div>
-
-        <div className="flex items-center gap-5 relative z-10">
-            <div className={clsx(
-                "w-14 h-14 rounded-[1.25rem] flex items-center justify-center border shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
-                vm.is_primary 
-                    ? "bg-emerald-500 text-white border-emerald-400/50 shadow-emerald-500/20" 
-                    : "bg-blue-600 text-white border-blue-400/50 shadow-blue-500/20"
-            )}>
-                <Server className="w-7 h-7" />
-            </div>
-            <div>
-                <dt className="text-[10px] font-black text-secondary uppercase tracking-[0.25em] mb-1.5 opacity-60">
-                    {vm.guest_os || 'Architectural Entity'}
-                </dt>
-                <dd className="text-lg font-black text-primary tracking-tight uppercase italic drop-shadow-sm">
-                    {vm.vm_name}
-                </dd>
-            </div>
-        </div>
-        
-        <div className="flex items-center gap-6 relative z-10">
-            <div className="hidden lg:flex flex-col items-end px-6 border-r border-white/10">
-                <span className="text-[10px] font-black text-secondary uppercase tracking-widest opacity-50 mb-1">Configuration</span>
-                <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/5 px-2 py-1 rounded-lg">
-                        <Cpu className="w-3 h-3 text-blue-500" /> {vm.cpu}vCPU
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/5 px-2 py-1 rounded-lg">
-                        <HardDrive className="w-3 h-3 text-purple-500" /> {Math.round(vm.memory_mb/1024)}GB
-                    </span>
-                </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-                <button 
-                    onClick={() => onSetPrimary(vm.vm_moid)}
-                    className={clsx(
-                        "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all tracking-[0.2em] shadow-lg",
-                        vm.is_primary 
-                            ? "bg-emerald-500 text-white shadow-emerald-500/30 scale-105" 
-                            : "bg-secondary/80 text-secondary hover:text-emerald-500 hover:bg-emerald-500/10 border border-white/5 hover:border-emerald-500/30 shadow-black/10"
-                    )}
-                >
-                    {vm.is_primary ? 'MASTER ENTITY' : 'SET AS MASTER'}
-                </button>
-                <button 
-                    onClick={() => onRemove(vm.vm_moid)} 
-                    className="p-3 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20 group/remove"
-                    title="Remove Instance"
-                >
-                    <Trash2 className="w-5 h-5 transition-transform group-hover/remove:scale-110" />
-                </button>
-            </div>
-        </div>
-    </div>
-);
-
 const InventoryVMRow: React.FC<{ vm: InventoryVM; isSelected: boolean; onToggle: () => void }> = ({ vm, isSelected, onToggle }) => (
     <div 
         onClick={onToggle}
         className={clsx(
-            "group relative flex items-center justify-between p-5 rounded-[1.75rem] cursor-pointer transition-all border overflow-hidden",
+            "flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all",
             isSelected 
-                ? "bg-purple-600/10 border-purple-500/50 shadow-[0_10px_30px_-10px_rgba(168,85,247,0.2)]" 
-                : "bg-secondary/10 dark:bg-black/20 border-white/5 hover:bg-secondary/30 dark:hover:bg-black/40 hover:border-purple-500/30 shadow-md"
+                ? "bg-purple-500/10 border border-purple-500/30" 
+                : "bg-gray-50 dark:bg-slate-800/50 border border-transparent hover:border-purple-500/20 hover:bg-purple-500/5"
         )}
     >
-        <div className="flex items-center gap-5 relative z-10">
-            <div className={clsx(
-                "w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-2xl",
-                isSelected 
-                    ? "bg-purple-600 text-white scale-110 rotate-3 shadow-purple-500/40" 
-                    : (vm.is_template ? "bg-purple-500/10 text-purple-500 border border-purple-500/20" : "bg-blue-500/10 text-blue-500 border border-blue-500/20")
-            )}>
-                <Server className="w-7 h-7" />
-            </div>
-            <div>
-                <h4 className="text-lg font-black text-primary leading-tight mb-2 tracking-tight uppercase italic drop-shadow-sm transition-colors group-hover:text-purple-500">{vm.name}</h4>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5 text-[9px] font-black text-secondary uppercase tracking-widest">
-                        <Cpu className="w-3.5 h-3.5 text-blue-500" /> {vm.num_cpu}vCPU
-                    </div>
-                    <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5 text-[9px] font-black text-secondary uppercase tracking-widest">
-                        <HardDrive className="w-3.5 h-3.5 text-purple-500" /> {Math.round(vm.memory_mb/1024)}GB RAM
-                    </div>
-                    <div className={clsx(
-                        "text-[8px] px-2.5 py-1 rounded-md font-black tracking-[0.2em] uppercase border shadow-sm",
-                        vm.power_state === 'poweredOn' 
-                            ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" 
-                            : "bg-slate-500/10 border-slate-500/30 text-secondary"
-                    )}>
-                        {vm.power_state === 'poweredOn' ? 'ONLINE' : 'OFFLINE'}
-                    </div>
-                </div>
-            </div>
-        </div>
+        {/* Checkbox */}
         <div className={clsx(
-            "w-9 h-9 rounded-2xl flex items-center justify-center transition-all duration-500 border-2 relative z-10 shadow-lg",
+            "w-5 h-5 rounded flex items-center justify-center border transition-all shrink-0",
             isSelected 
-                ? "bg-purple-500 border-purple-400 scale-110 shadow-purple-500/50 rotate-12" 
-                : "bg-secondary/50 border-white/10 group-hover:border-purple-500/50 group-hover:rotate-6"
+                ? "bg-purple-500 border-purple-500" 
+                : "bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600"
         )}>
-            {isSelected ? (
-                <Check className="w-5 h-5 text-white stroke-[3]" />
-            ) : (
-                <Plus className="w-5 h-5 text-secondary/30 group-hover:text-purple-500/50 transition-colors" />
-            )}
+            {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
         </div>
-        
-        {/* Selection Glow */}
-        {isSelected && (
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] -mr-10 -mt-10" />
+
+        {/* Icon */}
+        <div className={clsx(
+            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+            isSelected ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
+        )}>
+            <Server className="w-4 h-4" />
+        </div>
+
+        {/* VM Info */}
+        <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{vm.name}</p>
+            <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-slate-400">
+                <span>{vm.num_cpu}vCPU</span>
+                <span>•</span>
+                <span>{Math.round(vm.memory_mb/1024)}GB</span>
+                <span>•</span>
+                <span className={vm.power_state === 'poweredOn' ? "text-green-500" : "text-gray-400"}>
+                    {vm.power_state === 'poweredOn' ? 'Online' : 'Offline'}
+                </span>
+            </div>
+        </div>
+
+        {/* Template badge */}
+        {vm.is_template && (
+            <span className="px-1.5 py-0.5 text-[9px] font-bold bg-purple-500/10 text-purple-500 rounded uppercase">TPL</span>
         )}
     </div>
 );
