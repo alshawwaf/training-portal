@@ -204,20 +204,7 @@ async def startup_event():
         proxmox_service.load_config(db)
         vsphere_service.load_config(db)
         
-        logger.info("Startup complete. Infrastructure will connect in background...")
-        
-        # Schedule vSphere sync in background after 10 second delay (don't block startup)
-        async def delayed_vsphere_connect():
-            await asyncio.sleep(10)  # Wait 10 seconds after startup
-            logger.info("Background: Attempting vSphere connection...")
-            try:
-                loop = asyncio.get_event_loop()
-                await loop.run_in_executor(None, vsphere_service.connect)
-                logger.info("Background: vSphere connected successfully.")
-            except Exception as e:
-                logger.warning(f"Background: vSphere connection failed (non-critical): {e}")
-        
-        asyncio.create_task(delayed_vsphere_connect())
+        logger.info("Startup complete. Infrastructure connections are now managed on-demand via the UI.")
         
     except Exception as e:
         logger.error(f"Failed to seed database or load services: {e}")

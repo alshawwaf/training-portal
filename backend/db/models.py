@@ -26,7 +26,7 @@ class User(Base):
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
     name = Column(String) # Keeping for now, but will populate from first+last
-    role = Column(String, default=UserRole.INSTRUCTOR)
+    role = Column(String, default=UserRole.STUDENT)
     hashed_password = Column(String, nullable=True) # For local auth
     # Azure AD Object ID
     oid = Column(String, unique=True, index=True, nullable=True) 

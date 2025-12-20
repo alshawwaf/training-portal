@@ -6,7 +6,7 @@ import datetime
 
 from db.database import get_db
 from db.models import InfrastructureConnection, User, Template
-from .auth import get_current_user
+from .auth import get_admin_user
 from services.proxmox_service import ProxmoxService
 from services.vsphere_service import VSphereService
 from services.logging_service import logging_service
@@ -39,19 +39,19 @@ class ConnectionUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 @router.get("/", response_model=List[Dict[str, Any]])
-async def get_connections(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_connections(db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connections = db.query(InfrastructureConnection).all()
     return [c.to_dict() for c in connections]
 
 @router.get("/{connection_id}", response_model=Dict[str, Any])
-async def get_connection(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_connection(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")
     return connection.to_dict()
 
 @router.post("/", response_model=Dict[str, Any])
-async def create_connection(request: ConnectionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_connection(request: ConnectionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     try:
         new_connection = InfrastructureConnection(
             name=request.name,
@@ -94,7 +94,7 @@ async def create_connection(request: ConnectionCreate, db: Session = Depends(get
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{connection_id}", response_model=Dict[str, Any])
-async def update_connection(connection_id: int, request: ConnectionUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def update_connection(connection_id: int, request: ConnectionUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")
@@ -122,7 +122,7 @@ async def update_connection(connection_id: int, request: ConnectionUpdate, db: S
     return connection.to_dict()
 
 @router.delete("/{connection_id}")
-async def delete_connection(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def delete_connection(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")
@@ -149,7 +149,7 @@ async def delete_connection(connection_id: int, db: Session = Depends(get_db), c
     return {"success": True, "message": "Connection deleted"}
 
 @router.post("/{connection_id}/test")
-async def test_connection(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def test_connection(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")
@@ -224,7 +224,7 @@ async def test_connection(connection_id: int, db: Session = Depends(get_db), cur
         return {"success": False, "message": str(e)}
 
 @router.post("/{connection_id}/sync")
-async def sync_inventory(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def sync_inventory(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")
@@ -290,7 +290,7 @@ async def sync_inventory(connection_id: int, db: Session = Depends(get_db), curr
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{connection_id}/inventory")
-async def get_inventory(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_inventory(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
     connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
     if not connection:
         raise HTTPException(status_code=404, detail="Connection not found")

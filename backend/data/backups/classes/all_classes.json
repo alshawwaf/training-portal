@@ -2,20 +2,20 @@
   "classes": [
     {
       "id": 1,
-      "name": "class34",
+      "name": "colo",
       "instructor_id": 1,
       "blueprint_id": "1",
       "template_id": 1,
       "max_users": 1,
       "passcode": "Cpwins!1",
-      "start_date": "2025-12-20T04:07:25.982000",
-      "end_date": "2025-12-27T04:07:25.982000",
+      "start_date": "2025-12-20T03:01:08.569000",
+      "end_date": "2025-12-27T03:01:08.569000",
       "status": "active",
       "description": "",
-      "created_at": "2025-12-19T23:07:44.296289",
-      "updated_at": "2025-12-19T23:09:47.620661"
+      "created_at": "2025-12-20T03:01:23.243885",
+      "updated_at": "2025-12-20T03:01:23.243890"
     }
   ],
-  "backup_timestamp": "2025-12-19T23:09:47.655889",
+  "backup_timestamp": "2025-12-20T03:01:23.292953",
   "total_count": 1
 }

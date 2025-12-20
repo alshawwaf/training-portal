@@ -62,10 +62,13 @@ const ProvisioningStatusModal: React.FC<ProvisioningStatusModalProps> = ({
             // Note: We use fetch here instead of axios to handle streaming response manually
             // We need the full URL from environment or relative path if proxy is set up
             const baseUrl = '/api';
+            const token = localStorage.getItem('token');
+            
             const response = await fetch(`${baseUrl}/classes/${id}/provision`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : '',
                 },
                 signal: controller.signal
             });

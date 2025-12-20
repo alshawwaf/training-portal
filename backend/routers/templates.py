@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import get_db
-from .auth import get_current_user
+from .auth import get_instructor_user, get_admin_user
 from db.models import User, Template, TemplateVM
 from db.database import SessionLocal
 from db.models import Template, TemplateVM
@@ -56,18 +56,14 @@ class TemplateUpdate(BaseModel):
 
 # Routes
 @router.get("/")
-def list_templates(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def list_templates(db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """List all templates with their VMs - role-based filtering"""
-    # Students don't see templates (they only access their assigned VMs)
-    if current_user.role not in ['admin', 'super_admin', 'administrator', 'instructor']:
-        return []
-    
     templates = db.query(Template).order_by(Template.name).all()
     return [t.to_dict() for t in templates]
 
 
 @router.post("/")
-def create_template(template: TemplateCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_template(template: TemplateCreate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Create a new template with optional VMs"""
     new_template = Template(
         name=template.name,
@@ -103,7 +99,7 @@ def create_template(template: TemplateCreate, db: Session = Depends(get_db), cur
 
 
 @router.get("/{template_id}")
-def get_template(template_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_template(template_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Get a single template by ID with all its VMs"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:
@@ -112,7 +108,7 @@ def get_template(template_id: int, db: Session = Depends(get_db), current_user: 
 
 
 @router.put("/{template_id}")
-def update_template(template_id: int, update: TemplateUpdate, db: Session = Depends(get_db)):
+def update_template(template_id: int, update: TemplateUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Update an existing template"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:
@@ -138,7 +134,7 @@ def update_template(template_id: int, update: TemplateUpdate, db: Session = Depe
 
 
 @router.delete("/{template_id}")
-def delete_template(template_id: int, db: Session = Depends(get_db)):
+def delete_template(template_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Delete a template and all its VMs"""
     from db.models import Class  # Import here to avoid circular imports
     
@@ -164,7 +160,7 @@ def delete_template(template_id: int, db: Session = Depends(get_db)):
 
 # VM Management Endpoints
 @router.post("/{template_id}/vms")
-def add_vm_to_template(template_id: int, vm: TemplateVMCreate, db: Session = Depends(get_db)):
+def add_vm_to_template(template_id: int, vm: TemplateVMCreate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Add a VM from vSphere inventory to a template"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:
@@ -198,7 +194,7 @@ def add_vm_to_template(template_id: int, vm: TemplateVMCreate, db: Session = Dep
 
 
 @router.put("/{template_id}/vms/{vm_id}")
-def update_template_vm(template_id: int, vm_id: int, update: TemplateVMUpdate, db: Session = Depends(get_db)):
+def update_template_vm(template_id: int, vm_id: int, update: TemplateVMUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Update a VM's settings in a template"""
     vm = db.query(TemplateVM).filter(
         TemplateVM.id == vm_id,
@@ -226,7 +222,7 @@ def update_template_vm(template_id: int, vm_id: int, update: TemplateVMUpdate, d
 
 
 @router.delete("/{template_id}/vms/{vm_id}")
-def remove_vm_from_template(template_id: int, vm_id: int, db: Session = Depends(get_db)):
+def remove_vm_from_template(template_id: int, vm_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Remove a VM from a template"""
     vm = db.query(TemplateVM).filter(
         TemplateVM.id == vm_id,
@@ -243,7 +239,7 @@ def remove_vm_from_template(template_id: int, vm_id: int, db: Session = Depends(
 
 
 @router.get("/{template_id}/vms")
-def list_template_vms(template_id: int, db: Session = Depends(get_db)):
+def list_template_vms(template_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """List all VMs in a template"""
     template = db.query(Template).filter(Template.id == template_id).first()
     if not template:

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import Class, ClassEnvironment, ClassStudent, EnvironmentVM, User
 from services.vsphere_service import vsphere_service
-from .auth import get_current_user
+from .auth import get_instructor_user, get_admin_user
 from pydantic import BaseModel
 from typing import Optional, List
 import datetime
@@ -78,7 +78,7 @@ def get_activity_status(last_active: datetime.datetime) -> str:
 @router.get("/classes")
 def get_instructor_classes(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_instructor_user)
 ):
     """
     Get list of classes the instructor can monitor.
@@ -118,7 +118,7 @@ def get_instructor_classes(
 def get_class_students(
     class_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_instructor_user)
 ):
     """
     Get all students in a class with their environment status and VMs.
@@ -213,7 +213,7 @@ def perform_student_action(
     student_id: int,
     request: StudentActionRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_instructor_user)
 ):
     """
     Perform an action on a student's environment.
@@ -293,7 +293,7 @@ def get_student_environment_details(
     class_id: int,
     student_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_instructor_user)
 ):
     """
     Get detailed information about a specific student's environment.

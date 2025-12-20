@@ -686,131 +686,72 @@ const TemplateCard: React.FC<{ tpl: TemplateModel; onEdit: () => void; onDelete:
     const ProviderIcon = getProviderIcon(tpl.provider);
     
     return (
-        <div className="glass-light rounded-2xl border border-white/10 hover:border-purple-500/40 transition-all duration-300 relative group shadow-xl bg-white/5 dark:bg-gray-900/40 overflow-hidden">
-            {/* Compact Header - Always Visible */}
+        <div className="bg-secondary/20 rounded-lg border border-theme hover:border-purple-500/40 transition-all group overflow-hidden">
+            {/* Compact Header */}
             <div 
-                className="flex items-center gap-4 p-4 cursor-pointer hover:bg-secondary/5 transition-colors"
+                className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-secondary/10 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                {/* Expand Icon */}
-                <div className="text-secondary">
-                    {isExpanded ? <ChevronDownIcon className="w-4 h-4" /> : <ChevronRightIcon className="w-4 h-4" />}
+                <button className="text-secondary p-0.5">
+                    {isExpanded ? <ChevronDownIcon className="w-3.5 h-3.5" /> : <ChevronRightIcon className="w-3.5 h-3.5" />}
+                </button>
+
+                <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <ProviderIcon className="w-4 h-4 text-purple-400" />
                 </div>
 
-                {/* Provider Icon */}
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/10 border border-white/10 transition-all group-hover:scale-105">
-                    <ProviderIcon className="w-5 h-5 text-primary" />
-                </div>
-
-                {/* Title & Provider */}
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-bold text-primary truncate group-hover:text-purple-400 transition-colors">
-                        {tpl.name}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-secondary">
-                        <span>{tpl.provider || 'vSphere'}</span>
-                        <span>•</span>
-                        <span>{tpl.vms?.length || 0} VMs</span>
-                    </div>
+                    <h3 className="text-sm font-semibold text-primary truncate">{tpl.name}</h3>
+                    <span className="text-xs text-secondary">{tpl.provider || 'vSphere'} • {tpl.vms?.length || 0} VMs</span>
                 </div>
 
-                {/* VM Count Pill */}
-                <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-purple-500/10 rounded-lg text-xs border border-purple-500/20">
-                    <Server className="w-3 h-3 text-purple-400" />
-                    <span className="text-purple-400 font-medium">{tpl.vms?.length || 0}</span>
-                </div>
-
-                {/* Status Badge */}
                 <div className={clsx(
-                    "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border",
+                    "px-2 py-0.5 rounded text-[9px] font-bold uppercase",
                     tpl.is_active 
-                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" 
-                        : "bg-slate-500/10 border-slate-500/30 text-slate-400"
+                        ? "bg-emerald-500/15 text-emerald-400" 
+                        : "bg-slate-500/15 text-slate-400"
                 )}>
                     {tpl.is_active ? 'Active' : 'Inactive'}
                 </div>
 
-                {/* Quick Actions (always visible) */}
-                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                    <button 
-                        onClick={onEdit} 
-                        className="p-2 text-secondary hover:text-purple-500 hover:bg-purple-500/10 rounded-lg transition-colors"
-                        title="Edit Template"
-                    >
-                        <Edit className="w-4 h-4" />
+                <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
+                    <button onClick={onEdit} className="p-1.5 text-secondary hover:text-purple-400 hover:bg-purple-500/10 rounded transition-colors">
+                        <Edit className="w-3.5 h-3.5" />
                     </button>
-                    <button 
-                        onClick={onDelete} 
-                        className="p-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                        title="Delete Template"
-                    >
-                        <Trash2 className="w-4 h-4" />
+                    <button onClick={onDelete} className="p-1.5 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
                     </button>
                 </div>
             </div>
 
             {/* Expanded Content */}
             {isExpanded && (
-                <div className="border-t border-white/5 bg-secondary/5 p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
-                    {/* Description */}
+                <div className="border-t border-theme bg-secondary/10 px-3 py-2 space-y-2 animate-in slide-in-from-top-1 duration-150">
                     {tpl.description && (
-                        <p className="text-sm text-secondary leading-relaxed pl-1 border-l-2 border-purple-500/20">
-                            {tpl.description}
-                        </p>
+                        <p className="text-xs text-secondary pl-2 border-l-2 border-purple-500/30">{tpl.description}</p>
                     )}
-
-                    {/* VM List */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-secondary uppercase tracking-wide">Environment Stack</span>
-                            <span className="text-[10px] text-secondary">{tpl.vms?.length || 0} VMs</span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2">
-                            {tpl.vms?.map(vm => (
-                                <div key={vm.vm_moid} className="flex items-center gap-3 bg-secondary/20 p-3 rounded-xl border border-white/5 hover:bg-secondary/30 transition-colors">
-                                    <div className={clsx(
-                                        "w-1.5 h-6 rounded-full", 
-                                        vm.is_primary ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-purple-500/40"
-                                    )} />
-                                    <div className="flex-1 min-w-0">
-                                        <span className="text-xs font-bold text-primary truncate block">{vm.vm_name}</span>
-                                        <span className="text-[10px] text-secondary">{vm.guest_os || 'Unknown OS'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-secondary">
-                                        <span className="flex items-center gap-1">
-                                            <Cpu className="w-3 h-3 text-purple-400" /> {vm.cpu}
-                                        </span>
-                                        <span className="flex items-center gap-1">
-                                            <HardDrive className="w-3 h-3 text-purple-400" /> {Math.round(vm.memory_mb/1024)}GB
-                                        </span>
-                                    </div>
-                                    {vm.is_primary && (
-                                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 text-[9px] font-bold uppercase rounded border border-emerald-500/30">
-                                            Primary
-                                        </span>
-                                    )}
-                                </div>
-                            ))}
-                            {(!tpl.vms || tpl.vms.length === 0) && (
-                                <div className="text-center py-4 text-secondary text-sm">
-                                    No VMs configured
-                                </div>
-                            )}
-                        </div>
+                    <div className="space-y-1">
+                        {tpl.vms?.map(vm => (
+                            <div key={vm.vm_moid} className="flex items-center gap-2 bg-secondary/20 px-2 py-1.5 rounded text-xs">
+                                <div className={clsx("w-1 h-4 rounded-full", vm.is_primary ? "bg-emerald-500" : "bg-purple-500/40")} />
+                                <span className="font-medium text-primary truncate flex-1">{vm.vm_name}</span>
+                                <span className="text-secondary flex items-center gap-1"><Cpu className="w-3 h-3" />{vm.cpu}</span>
+                                <span className="text-secondary flex items-center gap-1"><HardDrive className="w-3 h-3" />{Math.round(vm.memory_mb/1024)}G</span>
+                                {vm.is_primary && <span className="px-1 py-0.5 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold rounded">Primary</span>}
+                            </div>
+                        ))}
+                        {(!tpl.vms || tpl.vms.length === 0) && <div className="text-center py-2 text-secondary text-xs">No VMs</div>}
                     </div>
-
-                    {/* Footer with timestamp */}
-                    <div className="flex items-center justify-between pt-3 border-t border-white/5 text-xs text-secondary">
-                        <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>Last updated: {tpl.updated_at ? new Date(tpl.updated_at).toLocaleDateString() : 'Never'}</span>
-                        </div>
+                    <div className="flex items-center gap-1 text-[10px] text-secondary pt-1">
+                        <Clock className="w-3 h-3" />
+                        <span>Updated: {tpl.updated_at ? new Date(tpl.updated_at).toLocaleDateString() : 'Never'}</span>
                     </div>
                 </div>
             )}
         </div>
     );
 };
+
 
 const SelectedVMCard: React.FC<{ 
     vm: TemplateVM; 

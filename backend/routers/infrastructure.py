@@ -9,7 +9,7 @@ from typing import Optional, List, Dict, Any
 
 from db.database import get_db
 from db.models import SystemSetting, User
-from .auth import get_current_user
+from .auth import get_admin_user
 from services.proxmox_service import proxmox_service
 from services.vsphere_service import vsphere_service
 
@@ -43,7 +43,7 @@ class SaveSettingsRequest(BaseModel):
 # ============== Proxmox Endpoints ==============
 
 @router.post("/proxmox/test")
-async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Test Proxmox connection with provided credentials."""
     try:
         password = request.password
@@ -67,7 +67,7 @@ async def test_proxmox_connection(request: ProxmoxTestRequest, db: Session = Dep
 
 
 @router.post("/proxmox/save")
-async def save_proxmox_settings(request: SaveSettingsRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def save_proxmox_settings(request: SaveSettingsRequest, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Save Proxmox settings to database."""
     try:
         for key, value in request.settings.items():
@@ -99,7 +99,7 @@ async def save_proxmox_settings(request: SaveSettingsRequest, db: Session = Depe
 
 
 @router.get("/proxmox/status")
-async def get_proxmox_status(db: Session = Depends(get_db)):
+async def get_proxmox_status(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get current Proxmox connection status."""
     try:
         nodes = proxmox_service.get_nodes()
@@ -114,7 +114,7 @@ async def get_proxmox_status(db: Session = Depends(get_db)):
 
 
 @router.post("/proxmox/sync")
-async def sync_proxmox_inventory(db: Session = Depends(get_db)):
+async def sync_proxmox_inventory(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Trigger inventory sync from Proxmox to cache."""
     try:
         result = proxmox_service.sync_inventory()
@@ -124,7 +124,7 @@ async def sync_proxmox_inventory(db: Session = Depends(get_db)):
 
 
 @router.get("/proxmox/inventory")
-async def get_proxmox_inventory(db: Session = Depends(get_db)):
+async def get_proxmox_inventory(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get cached Proxmox inventory."""
     try:
         result = proxmox_service.get_cached_inventory()
@@ -136,7 +136,7 @@ async def get_proxmox_inventory(db: Session = Depends(get_db)):
 # ============== vSphere Endpoints ==============
 
 @router.post("/vsphere/test")
-async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Test vSphere connection with provided credentials."""
     try:
         # Get the actual password to use
@@ -161,7 +161,7 @@ async def test_vsphere_connection(request: VSphereTestRequest, db: Session = Dep
 
 
 @router.post("/vsphere/save")
-async def save_vsphere_settings(request: SaveSettingsRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def save_vsphere_settings(request: SaveSettingsRequest, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Save vSphere settings to database."""
     try:
         for key, value in request.settings.items():
@@ -193,7 +193,7 @@ async def save_vsphere_settings(request: SaveSettingsRequest, db: Session = Depe
 
 
 @router.get("/vsphere/status")
-async def get_vsphere_status(db: Session = Depends(get_db)):
+async def get_vsphere_status(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get current vSphere connection status and data."""
     try:
         datacenters = vsphere_service.get_datacenters()
@@ -213,7 +213,7 @@ async def get_vsphere_status(db: Session = Depends(get_db)):
 
 
 @router.get("/vsphere/vms")
-async def get_vsphere_vms(db: Session = Depends(get_db)):
+async def get_vsphere_vms(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get list of vSphere VMs."""
     try:
         vms = vsphere_service.get_vms()
@@ -223,7 +223,7 @@ async def get_vsphere_vms(db: Session = Depends(get_db)):
 
 
 @router.get("/vsphere/hosts")
-async def get_vsphere_hosts(db: Session = Depends(get_db)):
+async def get_vsphere_hosts(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get list of ESXi hosts."""
     try:
         hosts = vsphere_service.get_hosts()
@@ -233,7 +233,7 @@ async def get_vsphere_hosts(db: Session = Depends(get_db)):
 
 
 @router.get("/vsphere/networks")
-async def get_vsphere_networks(db: Session = Depends(get_db)):
+async def get_vsphere_networks(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get list of vSphere networks."""
     try:
         networks = vsphere_service.get_networks()
@@ -243,7 +243,7 @@ async def get_vsphere_networks(db: Session = Depends(get_db)):
 
 
 @router.post("/vsphere/sync")
-async def sync_vsphere_inventory(db: Session = Depends(get_db)):
+async def sync_vsphere_inventory(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Trigger inventory sync from vSphere to cache."""
     try:
         result = vsphere_service.sync_inventory()
@@ -253,7 +253,7 @@ async def sync_vsphere_inventory(db: Session = Depends(get_db)):
 
 
 @router.get("/vsphere/inventory")
-async def get_vsphere_inventory(db: Session = Depends(get_db)):
+async def get_vsphere_inventory(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Get cached vSphere inventory."""
     try:
         result = vsphere_service.get_cached_inventory()

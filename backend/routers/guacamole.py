@@ -33,25 +33,38 @@ def get_fresh_ticket(
     
     guac_log = logging.getLogger("guacamole")
     
+    guac_log.info(f"=== FRESH TICKET REQUEST ===")
+    guac_log.info(f"Class ID: {class_id}, Env ID: {env_id}, VM ID: {vm_id}")
+    
     # Verify VM exists and belongs to the class/env
     env_vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
     if not env_vm or not env_vm.vm_moid:
+        guac_log.error(f"VM not found or missing MOID: vm_id={vm_id}")
         raise HTTPException(status_code=404, detail="VM not found")
+    
+    guac_log.info(f"Found VM: {env_vm.vm_name} (MOID: {env_vm.vm_moid})")
         
     class_env = db.query(ClassEnvironment).filter(ClassEnvironment.id == env_id).first()
     if not class_env or class_env.class_id != class_id:
+        guac_log.error(f"Environment not found or class mismatch: env_id={env_id}, expected class_id={class_id}")
         raise HTTPException(status_code=404, detail="Environment not found")
         
     if env_vm.env_id != env_id:
+        guac_log.error(f"VM does not belong to environment: vm.env_id={env_vm.env_id}, expected={env_id}")
         raise HTTPException(status_code=400, detail="VM does not belong to this environment")
     
     # Generate FRESH ticket
+    guac_log.info(f"Calling vsphere_service.generate_html5_console_ticket('{env_vm.vm_moid}')...")
     ticket_result = vsphere_service.generate_html5_console_ticket(env_vm.vm_moid)
     
+    guac_log.info(f"Ticket result: success={ticket_result.get('success')}, message={ticket_result.get('message', 'N/A')}")
+    
     if not ticket_result.get("success"):
+        error_msg = ticket_result.get('message', 'Unknown error')
+        guac_log.error(f"Ticket generation failed: {error_msg}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to generate ticket: {ticket_result.get('message', 'Unknown error')}"
+            detail=f"Failed to generate ticket: {error_msg}"
         )
     
     # Return the WebSocket URL with fresh ticket
@@ -63,7 +76,7 @@ def get_fresh_ticket(
         from urllib.parse import quote
         ws_url = f"wss://{host}:{port}/ticket/{quote(ticket, safe='')}"
     
-    guac_log.info(f"Generated fresh ticket for VM {env_vm.vm_name} (MOID: {env_vm.vm_moid})")
+    guac_log.info(f"Returning fresh ticket. WS URL length: {len(ws_url)}")
     
     return {"ws_url": ws_url}
 
@@ -150,6 +163,9 @@ def get_console_page(
         # For vSphere VMs, use WebSocket proxy to bypass CORS/SSL issues
         # Pass VM context to the proxy (it will generate the ticket on-demand)
         guac_log.info(f"WebMKS console page for vSphere VM {env_vm.vm_name} (MOID: {env_vm.vm_moid})")
+        
+        guac_log.info(f"=== WEBMKS CONSOLE PAGE REQUEST ===")
+        guac_log.info(f"VM: {env_vm.vm_name}, MOID: {env_vm.vm_moid}, Class: {class_id}, Env: {env_id}")
         
         ws_config = {
             "vm_moid": env_vm.vm_moid,

@@ -57,13 +57,37 @@ class EmailService:
             return
 
         html_content = f"""
+        <!DOCTYPE html>
         <html>
-            <body>
-                <h1>{subject}</h1>
-                <p>{body.get('message', '')}</p>
-                <br>
-                <p>SE Training Portal</p>
-            </body>
+        <head>
+            <style>
+                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f7f9; }}
+                .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }}
+                .header {{ background: linear-gradient(135deg, #005bb7 0%, #003366 100%); padding: 30px; text-align: center; color: white; }}
+                .content {{ padding: 30px; }}
+                .footer {{ background: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }}
+                .button {{ display: inline-block; padding: 12px 24px; background-color: #005bb7; color: white !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }}
+                .highlight {{ color: #005bb7; font-weight: bold; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin:0; font-size: 24px;">SE Training Portal</h1>
+                </div>
+                <div class="content">
+                    <h2 style="color: #1e293b; margin-top: 0;">{subject}</h2>
+                    <p>{body.get('message', '')}</p>
+                    {f'<div style="text-align: center;"><a href="{body.get("url")}" class="button">Access Portal</a></div>' if body.get('url') else ''}
+                    <p style="margin-top: 30px;">Best regards,<br><span class="highlight">Check Point SE Training Team</span></p>
+                </div>
+                <div class="footer">
+                    <p>This is an automated notification from the SE Training Portal.</p>
+                    <p>&copy; {datetime.datetime.now().year} Check Point Software Technologies Ltd. All rights reserved.</p>
+                    <p style="font-size: 10px; opacity: 0.7;">Powered by SE Training Portal</p>
+                </div>
+            </div>
+        </body>
         </html>
         """
 

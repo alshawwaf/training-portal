@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import User, Group, UserGroup, Permission, GroupPermission
-from routers.auth import get_current_user, get_password_hash
-from pydantic import BaseModel, EmailStr
-from typing import List, Optional
+import logging
 import random
 import string
-import logging
+from typing import List, Optional
+from pydantic import BaseModel, EmailStr
 from services.email_service import email_service
+from .auth import get_admin_user, get_password_hash
 
 logger = logging.getLogger("se_portal.users")
 
@@ -63,21 +63,15 @@ class GroupCreate(BaseModel):
     description: Optional[str] = None
     permission_ids: List[int] = []
 
-# --- Helpers ---
-def check_admin(user: User = Depends(get_current_user)):
-    if user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin permissions required")
-    return user
-
 # --- Routes ---
 
 @router.get("/", response_model=List[UserRead])
-def list_users(db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def list_users(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """List all users (Admin only)"""
     return db.query(User).all()
 
 @router.post("/invite")
-async def invite_user(invite: UserInvite, db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+async def invite_user(invite: UserInvite, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Invite a new user and send them an email (Admin only)"""
     existing = db.query(User).filter(User.email == invite.email).first()
     if existing:
@@ -122,7 +116,7 @@ async def invite_user(invite: UserInvite, db: Session = Depends(get_db), admin: 
     return {"message": "User invited successfully"}
 
 @router.get("/permissions", response_model=List[PermissionRead])
-def list_permissions(db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def list_permissions(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """List all available permissions (seeds default if empty)"""
     perms = db.query(Permission).all()
     if not perms:
@@ -144,12 +138,12 @@ def list_permissions(db: Session = Depends(get_db), admin: User = Depends(check_
     return perms
 
 @router.get("/groups", response_model=List[GroupRead])
-def list_groups(db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def list_groups(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """List all groups (Admin only)"""
     return db.query(Group).all()
 
 @router.post("/groups", response_model=GroupRead)
-def create_group(group: GroupCreate, db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def create_group(group: GroupCreate, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Create a new group (Admin only)"""
     new_group = Group(name=group.name, description=group.description)
     db.add(new_group)
@@ -165,7 +159,7 @@ def create_group(group: GroupCreate, db: Session = Depends(get_db), admin: User 
     return new_group
 
 @router.put("/{user_id}", response_model=UserRead)
-def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Update a user (Admin only)"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -190,7 +184,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     return user
 
 @router.delete("/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def delete_user(user_id: int, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Delete a user (Admin only)"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -204,7 +198,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db), admin: User = Depen
     return {"message": "User deleted successfully"}
 
 @router.delete("/groups/{group_id}")
-def delete_group(group_id: int, db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def delete_group(group_id: int, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Delete a group (Admin only)"""
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:
@@ -214,7 +208,7 @@ def delete_group(group_id: int, db: Session = Depends(get_db), admin: User = Dep
     return {"message": "Group deleted successfully"}
 
 @router.put("/groups/{group_id}", response_model=GroupRead)
-def update_group(group_id: int, group_update: GroupCreate, db: Session = Depends(get_db), admin: User = Depends(check_admin)):
+def update_group(group_id: int, group_update: GroupCreate, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """Update a group (Admin only)"""
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:

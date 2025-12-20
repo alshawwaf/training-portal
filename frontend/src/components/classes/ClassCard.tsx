@@ -174,250 +174,145 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   return (
     <>
-      <div className="glass-light rounded-2xl border border-white/10 hover:border-blue-500/40 transition-all duration-300 relative group shadow-xl bg-white/5 dark:bg-gray-900/40 overflow-hidden">
-        {/* Compact Header - Always Visible */}
+      <div className="bg-secondary/20 rounded-lg border border-theme hover:border-blue-500/40 transition-all group overflow-hidden">
+        {/* Compact Header */}
         <div 
-          className="flex items-center gap-4 p-4 cursor-pointer hover:bg-secondary/5 transition-colors"
+          className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-secondary/10 transition-colors"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          {/* Expand Icon */}
-          <div className="text-secondary">
-            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          <button className="text-secondary p-0.5">
+            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+
+          <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <ProviderIcon className="w-4 h-4 text-blue-400" />
           </div>
 
-          {/* Provider Icon */}
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/10 border border-white/10 transition-all group-hover:scale-105">
-            <ProviderIcon className="w-5 h-5 text-primary" />
-          </div>
-
-          {/* Title & Template */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-bold text-primary truncate group-hover:text-blue-400 transition-colors">
-              {cls.name}
-            </h3>
-            <div className="flex items-center gap-2 text-xs text-secondary">
-              <span>{cls.template?.name || 'No Template'}</span>
-              <span>•</span>
-              <span>{formatDate(cls.start_date)} - {formatDate(cls.end_date)}</span>
-            </div>
+            <h3 className="text-sm font-semibold text-primary truncate">{cls.name}</h3>
+            <span className="text-xs text-secondary">{cls.template?.name || 'No Template'} • {formatDate(cls.start_date)} - {formatDate(cls.end_date)}</span>
           </div>
 
-          {/* Stats Pills */}
-          <div className="hidden sm:flex items-center gap-2">
-            <div className="flex items-center gap-1 px-2 py-1 bg-secondary/20 rounded-lg text-xs">
+          {/* Stats */}
+          <div className="hidden sm:flex items-center gap-1.5">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-secondary/20 rounded text-xs">
               <Users className="w-3 h-3 text-blue-400" />
               <span className="text-primary font-medium">{cls.max_users}</span>
             </div>
             {daysRemaining > 0 && cls.status === 'active' && (
-              <div className="flex items-center gap-1 px-2 py-1 bg-emerald-500/10 rounded-lg text-xs border border-emerald-500/20">
-                <Clock className="w-3 h-3 text-emerald-500" />
-                <span className="text-emerald-500 font-medium">{daysRemaining}d</span>
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/10 rounded text-xs">
+                <Clock className="w-3 h-3 text-emerald-400" />
+                <span className="text-emerald-400 font-medium">{daysRemaining}d</span>
               </div>
             )}
           </div>
 
           {/* Status Badge */}
           <div className={clsx(
-            "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border",
+            "px-2 py-0.5 rounded text-[9px] font-bold uppercase",
             cls.status === 'active' 
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" 
+              ? "bg-emerald-500/15 text-emerald-400" 
               : cls.status === 'draft'
-              ? "bg-blue-500/10 border-blue-500/30 text-blue-500"
+              ? "bg-blue-500/15 text-blue-400"
               : cls.status === 'completed'
-              ? "bg-slate-500/10 border-slate-500/30 text-slate-500"
-              : "bg-gray-500/10 border-gray-500/30 text-gray-500"
+              ? "bg-slate-500/15 text-slate-400"
+              : "bg-gray-500/15 text-gray-400"
           )}>
             {config.label}
           </div>
 
-          {/* Quick Actions (always visible) */}
-          <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-            <button 
-              onClick={() => onView(cls)} 
-              className="p-2 text-secondary hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
-              title="View Details"
-            >
-              <Eye className="w-4 h-4" />
+          {/* Quick Actions */}
+          <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
+            <button onClick={() => onView(cls)} className="p-1.5 text-secondary hover:text-blue-400 hover:bg-blue-500/10 rounded transition-colors">
+              <Eye className="w-3.5 h-3.5" />
             </button>
-            <button 
-              onClick={() => onEdit(cls)} 
-              className="p-2 text-secondary hover:text-amber-500 hover:bg-amber-500/10 rounded-lg transition-colors"
-              title="Edit"
-            >
-              <Edit className="w-4 h-4" />
+            <button onClick={() => onEdit(cls)} className="p-1.5 text-secondary hover:text-amber-400 hover:bg-amber-500/10 rounded transition-colors">
+              <Edit className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="border-t border-white/5 bg-secondary/5 p-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
-            {/* Description */}
+          <div className="border-t border-theme bg-secondary/10 px-3 py-2 space-y-3 animate-in slide-in-from-top-1 duration-150">
             {cls.description && (
-              <p className="text-sm text-secondary leading-relaxed pl-1 border-l-2 border-blue-500/20">
-                {cls.description}
-              </p>
+              <p className="text-xs text-secondary pl-2 border-l-2 border-blue-500/30">{cls.description}</p>
             )}
 
-            {/* Details Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="bg-secondary/20 p-3 rounded-xl border border-white/5">
-                <div className="flex items-center gap-2 text-xs text-secondary mb-1">
-                  <Layers className="w-3 h-3" /> Template
-                </div>
-                <div className="text-sm font-medium text-primary truncate">
-                  {cls.template?.name || '—'}
-                </div>
+            {/* Details Grid - Compact */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <div className="bg-secondary/20 px-2 py-1.5 rounded text-xs">
+                <div className="flex items-center gap-1 text-secondary mb-0.5"><Layers className="w-3 h-3" /> Template</div>
+                <div className="font-medium text-primary truncate">{cls.template?.name || '—'}</div>
               </div>
-              <div className="bg-secondary/20 p-3 rounded-xl border border-white/5">
-                <div className="flex items-center gap-2 text-xs text-secondary mb-1">
-                  <Calendar className="w-3 h-3" /> Schedule
-                </div>
-                <div className="text-sm font-medium text-primary">
-                  {formatDate(cls.start_date)} — {formatDate(cls.end_date)}
-                </div>
+              <div className="bg-secondary/20 px-2 py-1.5 rounded text-xs">
+                <div className="flex items-center gap-1 text-secondary mb-0.5"><Calendar className="w-3 h-3" /> Schedule</div>
+                <div className="font-medium text-primary">{formatDate(cls.start_date)} — {formatDate(cls.end_date)}</div>
               </div>
-              <div className="bg-secondary/20 p-3 rounded-xl border border-white/5">
-                <div className="flex items-center gap-2 text-xs text-secondary mb-1">
-                  <Key className="w-3 h-3" /> Passcode
-                </div>
-                <div className="text-sm font-mono font-medium text-primary">
-                  {cls.passcode || '—'}
-                </div>
+              <div className="bg-secondary/20 px-2 py-1.5 rounded text-xs">
+                <div className="flex items-center gap-1 text-secondary mb-0.5"><Key className="w-3 h-3" /> Passcode</div>
+                <div className="font-mono font-medium text-primary">{cls.passcode || '—'}</div>
               </div>
             </div>
 
-            {/* Student Access Section - Prominent and Copiable */}
+            {/* Student Access - Compact */}
             {joinUrl && (
-              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 p-4 rounded-xl border border-emerald-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-1.5 bg-emerald-500/20 rounded-lg">
-                    <Link2 className="w-4 h-4 text-emerald-500" />
-                  </div>
-                  <span className="text-sm font-bold text-emerald-400">Student Access</span>
+              <div className="bg-emerald-500/10 p-2 rounded border border-emerald-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <Link2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-xs font-bold text-emerald-400">Student Access</span>
                 </div>
-                
-                {/* Join Link */}
-                <div className="space-y-2 mb-3">
-                  <label className="text-[10px] font-bold text-emerald-500/70 uppercase tracking-wide">Join Link</label>
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      readOnly 
-                      value={joinUrl} 
-                      className="flex-1 px-3 py-2 bg-slate-900 border border-emerald-500/30 rounded-lg text-sm text-white font-mono text-xs truncate"
-                    />
-                    <button
-                      onClick={copyJoinLink}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition-colors shrink-0"
-                    >
-                      <Copy className="w-3.5 h-3.5" /> Copy
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="text" readOnly value={joinUrl} 
+                    className="flex-1 px-2 py-1 bg-slate-900/50 border border-emerald-500/20 rounded text-xs text-white font-mono truncate"
+                  />
+                  <button onClick={copyJoinLink} className="flex items-center gap-1 px-2 py-1 bg-emerald-500 text-white rounded text-xs font-medium hover:bg-emerald-600 shrink-0">
+                    <Copy className="w-3 h-3" /> Copy
+                  </button>
                 </div>
-
-                {/* Access Info Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-slate-900/50 rounded-lg p-2.5 border border-white/5">
-                    <div className="text-[10px] font-bold text-secondary uppercase tracking-wide mb-0.5">Passcode</div>
-                    <div className="text-sm font-mono font-bold text-white">{cls.passcode}</div>
-                  </div>
-                  <div className="bg-slate-900/50 rounded-lg p-2.5 border border-white/5">
-                    <div className="text-[10px] font-bold text-secondary uppercase tracking-wide mb-0.5">Max Students</div>
-                    <div className="text-sm font-bold text-white">{cls.max_users}</div>
-                  </div>
-                </div>
-                
-                <p className="text-[10px] text-emerald-500/60 mt-2">
-                  Share this link with students. They'll use the passcode to access their class environment.
-                </p>
               </div>
             )}
 
-            {/* Power Operations */}
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-wide mr-2">Power:</span>
-              <button
-                onClick={handleStartAll}
-                disabled={isLoading !== null}
-                className={clsx(
-                  "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                  isLoading === 'start'
-                    ? "bg-emerald-500/20 text-emerald-500 border-emerald-500/40"
-                    : "bg-secondary/20 text-secondary hover:text-emerald-500 hover:bg-emerald-500/10 border-white/5 hover:border-emerald-500/30"
-                )}
-              >
-                {isLoading === 'start' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-                Start
+            {/* Power Operations - Compact */}
+            <div className="flex items-center gap-1 flex-wrap">
+              <span className="text-[9px] font-bold text-secondary uppercase mr-1">Power:</span>
+              <button onClick={handleStartAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'start' ? "bg-emerald-500/20 text-emerald-400" : "bg-secondary/20 text-secondary hover:text-emerald-400 hover:bg-emerald-500/10")}>
+                {isLoading === 'start' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />} Start
               </button>
-              <button
-                onClick={handleStopAll}
-                disabled={isLoading !== null}
-                className={clsx(
-                  "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                  isLoading === 'stop'
-                    ? "bg-red-500/20 text-red-500 border-red-500/40"
-                    : "bg-secondary/20 text-secondary hover:text-red-500 hover:bg-red-500/10 border-white/5 hover:border-red-500/30"
-                )}
-              >
-                {isLoading === 'stop' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Power className="w-3 h-3" />}
-                Stop
+              <button onClick={handleStopAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'stop' ? "bg-red-500/20 text-red-400" : "bg-secondary/20 text-secondary hover:text-red-400 hover:bg-red-500/10")}>
+                {isLoading === 'stop' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Power className="w-3 h-3" />} Stop
               </button>
-              <button
-                onClick={handleSuspendAll}
-                disabled={isLoading !== null}
-                className={clsx(
-                  "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                  isLoading === 'suspend'
-                    ? "bg-amber-500/20 text-amber-500 border-amber-500/40"
-                    : "bg-secondary/20 text-secondary hover:text-amber-500 hover:bg-amber-500/10 border-white/5 hover:border-amber-500/30"
-                )}
-              >
-                {isLoading === 'suspend' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />}
-                Suspend
+              <button onClick={handleSuspendAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'suspend' ? "bg-amber-500/20 text-amber-400" : "bg-secondary/20 text-secondary hover:text-amber-400 hover:bg-amber-500/10")}>
+                {isLoading === 'suspend' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />} Suspend
               </button>
-              <button
-                onClick={handleRevertAll}
-                disabled={isLoading !== null}
-                className={clsx(
-                  "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
-                  isLoading === 'revert'
-                    ? "bg-purple-500/20 text-purple-500 border-purple-500/40"
-                    : "bg-secondary/20 text-secondary hover:text-purple-500 hover:bg-purple-500/10 border-white/5 hover:border-purple-500/30"
-                )}
-              >
-                {isLoading === 'revert' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
-                Revert
+              <button onClick={handleRevertAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'revert' ? "bg-purple-500/20 text-purple-400" : "bg-secondary/20 text-secondary hover:text-purple-400 hover:bg-purple-500/10")}>
+                {isLoading === 'revert' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />} Revert
               </button>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+            {/* Action Buttons - Compact */}
+            <div className="flex items-center justify-between pt-2 border-t border-theme">
               <button
                 onClick={handleOpenProvision}
                 disabled={!["active", "draft"].includes(cls.status)}
                 className={clsx(
-                  "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wide transition-all border shadow-lg",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-all",
                   ["active", "draft"].includes(cls.status)
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-transparent hover:scale-105 active:scale-95 shadow-emerald-500/20"
-                    : "bg-secondary/20 text-secondary/40 border-theme/20 cursor-not-allowed"
+                    ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                    : "bg-secondary/20 text-secondary/40 cursor-not-allowed"
                 )}
               >
-                <Sparkles className="w-4 h-4" />
-                Provision Environments
+                <Sparkles className="w-3.5 h-3.5" /> Provision
               </button>
-              
-              <button 
-                onClick={handleOpenDeletion} 
-                className="flex items-center gap-2 px-4 py-2 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors text-xs font-medium"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete Class
+              <button onClick={handleOpenDeletion} className="flex items-center gap-1 px-2 py-1.5 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded text-[10px] font-medium">
+                <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
             </div>
           </div>
         )}
       </div>
+
 
       {/* Status Modals */}
       <ProvisioningStatusModal

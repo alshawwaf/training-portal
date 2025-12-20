@@ -15,6 +15,9 @@ import logging
 router = APIRouter(prefix="/student", tags=["student"])
 logger = logging.getLogger("se_portal")
 
+from .auth import get_admin_user, get_current_user
+from db.models import User
+
 def get_db():
     db = SessionLocal()
     try:
@@ -366,6 +369,8 @@ def get_vm_console(vm_id: int, session_token: str, db: Session = Depends(get_db)
         # Generate console URL - points to the Guacamole router endpoint which serves the HTML console
         console_url = f"/api/console/{student.class_id}/{student.environment_id}/{vm.id}"
         
+        logger.info(f"Console access granted for student {student.email}: VM={vm.vm_name}, URL={console_url}")
+        
         return {
             "success": True,
             "vm_name": vm.vm_name,
@@ -373,7 +378,9 @@ def get_vm_console(vm_id: int, session_token: str, db: Session = Depends(get_db)
             "ip_address": vm.ip_address
         }
     except Exception as e:
-        logger.error(f"Failed to get console URL: {e}")
+        logger.error(f"Failed to get console URL for VM {vm_id}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -413,7 +420,7 @@ def get_class_info(join_token: str, db: Session = Depends(get_db)):
 # ============ Admin Routes ============
 
 @router.get("/admin/sessions")
-def get_all_student_sessions(db: Session = Depends(get_db)):
+def get_all_student_sessions(db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
     """
     Get all active student sessions across all classes (Admin only).
     Returns student email, name, class info, environment info, joined time, last active.

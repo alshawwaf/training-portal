@@ -32,11 +32,16 @@ async def console_websocket_endpoint(websocket: WebSocket, token: str):
     
     try:
         # 1. Decode token to get VM context
+        logger.info(f"=== CONSOLE SESSION START ===")
+        logger.info(f"Received token (length: {len(token)}): {token[:50]}...")
         try:
             decoded_bytes = base64.urlsafe_b64decode(token)
             decoded_str = decoded_bytes.decode('utf-8')
             config = json.loads(decoded_str)
             vm_moid = config.get("vm_moid")
+            
+            logger.info(f"Token decoded successfully. VM MOID: {vm_moid}")
+            logger.debug(f"Full token config: {config}")
             
             if not vm_moid:
                 logger.error("Invalid token: missing vm_moid")
@@ -46,12 +51,41 @@ async def console_websocket_endpoint(websocket: WebSocket, token: str):
             logger.info(f"Connecting to console for VM: {vm_moid}")
         except Exception as e:
             logger.error(f"Token decode failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             await websocket.close(code=1008)
             return
 
         # 2. Generate FRESH vSphere ticket
+        # First, find an active vSphere connection
+        logger.info(f"Generating vSphere HTML5 console ticket for {vm_moid}...")
+        
+        from db.database import SessionLocal
+        from db.models import InfrastructureConnection
+        
+        db = SessionLocal()
+        try:
+            # Find an active vSphere connection (case-insensitive match)
+            vsphere_conn = db.query(InfrastructureConnection).filter(
+                InfrastructureConnection.provider.ilike("%vsphere%"),
+                InfrastructureConnection.is_active == True
+            ).first()
+            
+            if not vsphere_conn:
+                # Try any vsphere connection (case-insensitive)
+                vsphere_conn = db.query(InfrastructureConnection).filter(
+                    InfrastructureConnection.provider.ilike("%vsphere%")
+                ).first()
+            
+            connection_id = vsphere_conn.id if vsphere_conn else None
+            logger.info(f"Using vSphere connection ID: {connection_id}")
+        finally:
+            db.close()
+        
         from services.vsphere_service import vsphere_service
-        ticket_result = vsphere_service.generate_html5_console_ticket(vm_moid)
+        ticket_result = vsphere_service.generate_html5_console_ticket(vm_moid, connection_id=connection_id)
+        
+        logger.info(f"Ticket generation result: success={ticket_result.get('success')}, host={ticket_result.get('host')}, port={ticket_result.get('port')}")
         
         if not ticket_result.get("success"):
             error_msg = ticket_result.get('message', 'Failed to generate ticket')
@@ -69,13 +103,14 @@ async def console_websocket_endpoint(websocket: WebSocket, token: str):
             from urllib.parse import quote
             ws_url = f"wss://{host}:{port}/ticket/{quote(ticket, safe='')}"
         
-        logger.info(f"Proxying to vSphere: {ws_url}")
+        logger.info(f"Proxying to vSphere WebSocket: {ws_url[:80]}...")
 
         ssl_context = ssl.create_default_context()
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
 
         try:
+            logger.info(f"Attempting WebSocket connection to {host}:{port}...")
             # We must offer BOTH binary and base64 to vSphere
             vsphere_ws = await websockets.connect(
                 ws_url, 
@@ -85,13 +120,16 @@ async def console_websocket_endpoint(websocket: WebSocket, token: str):
                 ping_interval=None,
                 close_timeout=5
             )
-            logger.info(f"vSphere connected. Protocol: {vsphere_ws.subprotocol}")
+            logger.info(f"vSphere WebSocket connected. Protocol: {vsphere_ws.subprotocol}")
         except Exception as e:
-            logger.error(f"vSphere connection failed: {e}")
+            logger.error(f"vSphere WebSocket connection failed: {type(e).__name__}: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             await websocket.close(code=1011)
             return
         
         # 4. Data Pipe Logic
+        logger.info("Starting bidirectional relay between client and vSphere...")
         async def relay_client_to_vsphere():
             try:
                 msg_count = 0
@@ -163,9 +201,10 @@ async def console_websocket_endpoint(websocket: WebSocket, token: str):
         logger.info("WebSocket tunnel disconnected by user")
     except Exception as e:
         logger.error(f"Proxy crash: {type(e).__name__}: {e}")
+        import traceback
         logger.error(traceback.format_exc())
     finally:
         if vsphere_ws:
             await vsphere_ws.close()
-        logger.info("Console proxy session closed")
+        logger.info("=== CONSOLE SESSION END ===")
 

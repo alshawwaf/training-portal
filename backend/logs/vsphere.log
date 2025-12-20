@@ -15385,3 +15385,260 @@ TimeoutError: [Errno 110] Connection timed out
 2025-12-19 17:52:10,075 - INFO - VSphereService: Configuration loaded from database
 2025-12-19 17:52:20,090 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
 2025-12-19 17:52:20,169 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-19 22:56:53,908 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 22:56:59,796 - INFO - VSphereService: Configuration loaded from database
+2025-12-19 22:57:09,832 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-19 22:57:09,979 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-19 22:59:23,543 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 23:02:52,570 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 23:08:08,011 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-19 23:08:08,141 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=class34-Student_1-pfSense
+2025-12-19 23:08:08,216 - INFO - Found template VM: pfSense
+2025-12-19 23:08:08,296 - INFO - Using datacenter compute resource pool: Resources
+2025-12-19 23:08:08,406 - INFO - Target folder ensured: SE_Training_Portal/class34/Student 1
+2025-12-19 23:08:08,420 - INFO - Cloning pfSense to class34-Student_1-pfSense in folder Student 1...
+2025-12-19 23:08:18,621 - INFO - VM provisioned successfully: class34-Student_1-pfSense, MOID: vm-5318, IP: None
+2025-12-19 23:08:18,631 - INFO - Creating initial snapshot for class34-Student_1-pfSense
+2025-12-19 23:10:06,357 - INFO - Acquiring WebMKS ticket for VM class34-Student_1-pfSense (MOID: vm-5318)
+2025-12-19 23:10:06,371 - INFO - VM Power State: poweredOn
+2025-12-19 23:10:06,393 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-19 23:10:06,394 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-19 23:10:06,395 - DEBUG - Ticket.ticket value: 'd64f5bf70f36665d' (length: 16)
+2025-12-19 23:10:06,395 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-19 23:10:06,396 - DEBUG - Ticket.port: 443
+2025-12-19 23:10:06,397 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/class34-Student_1-pfSense/class34-Student_1-pfSense.vmx
+2025-12-19 23:10:06,398 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-19 23:10:06,399 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/d64f5bf70f36665d
+2025-12-19 23:10:06,409 - INFO - Generated WebMKS ticket for class34-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-19 23:10:06,412 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-19 23:10:06,413 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-19 23:10:45,297 - INFO - Acquiring WebMKS ticket for VM class34-Student_1-pfSense (MOID: vm-5318)
+2025-12-19 23:10:45,309 - INFO - VM Power State: poweredOn
+2025-12-19 23:10:45,341 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-19 23:10:45,342 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-19 23:10:45,343 - DEBUG - Ticket.ticket value: 'be851a0fbe146565' (length: 16)
+2025-12-19 23:10:45,344 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-19 23:10:45,345 - DEBUG - Ticket.port: 443
+2025-12-19 23:10:45,346 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/class34-Student_1-pfSense/class34-Student_1-pfSense.vmx
+2025-12-19 23:10:45,346 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-19 23:10:45,347 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/be851a0fbe146565
+2025-12-19 23:10:45,353 - INFO - Generated WebMKS ticket for class34-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-19 23:10:45,354 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-19 23:10:45,355 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-19 23:27:59,731 - INFO - Acquiring WebMKS ticket for VM class34-Student_1-pfSense (MOID: vm-5318)
+2025-12-19 23:27:59,739 - INFO - VM Power State: poweredOn
+2025-12-19 23:27:59,760 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-19 23:27:59,761 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-19 23:27:59,762 - DEBUG - Ticket.ticket value: '8cca1884fcbbf4f4' (length: 16)
+2025-12-19 23:27:59,763 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-19 23:27:59,764 - DEBUG - Ticket.port: 443
+2025-12-19 23:27:59,765 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/class34-Student_1-pfSense/class34-Student_1-pfSense.vmx
+2025-12-19 23:27:59,766 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-19 23:27:59,767 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/8cca1884fcbbf4f4
+2025-12-19 23:27:59,773 - INFO - Generated WebMKS ticket for class34-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-19 23:27:59,775 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-19 23:27:59,776 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-19 23:28:36,874 - INFO - Acquiring WebMKS ticket for VM class34-Student_1-pfSense (MOID: vm-5318)
+2025-12-19 23:28:36,895 - INFO - VM Power State: poweredOn
+2025-12-19 23:28:36,915 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-19 23:28:36,917 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-19 23:28:36,918 - DEBUG - Ticket.ticket value: '18517bda42df73d' (length: 15)
+2025-12-19 23:28:36,919 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-19 23:28:36,919 - DEBUG - Ticket.port: 443
+2025-12-19 23:28:36,920 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/class34-Student_1-pfSense/class34-Student_1-pfSense.vmx
+2025-12-19 23:28:36,921 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-19 23:28:36,922 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/18517bda42df73d
+2025-12-19 23:28:36,927 - INFO - Generated WebMKS ticket for class34-Student_1-pfSense. Ticket length: 15. URL available: True
+2025-12-19 23:28:36,928 - INFO - Using ticket.url for WebMKS connection (ticket length: 15)
+2025-12-19 23:28:36,929 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-19 23:29:09,897 - INFO - Acquiring WebMKS ticket for VM class34-Student_1-pfSense (MOID: vm-5318)
+2025-12-19 23:29:09,927 - INFO - VM Power State: poweredOn
+2025-12-19 23:29:09,949 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-19 23:29:09,951 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-19 23:29:09,952 - DEBUG - Ticket.ticket value: '35b16b805b227688' (length: 16)
+2025-12-19 23:29:09,953 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-19 23:29:09,955 - DEBUG - Ticket.port: 443
+2025-12-19 23:29:09,956 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/class34-Student_1-pfSense/class34-Student_1-pfSense.vmx
+2025-12-19 23:29:09,957 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-19 23:29:09,958 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/35b16b805b227688
+2025-12-19 23:29:09,964 - INFO - Generated WebMKS ticket for class34-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-19 23:29:09,965 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-19 23:29:09,968 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-19 18:34:34,707 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:34:36,048 - INFO - VSphereService: Configuration loaded from database
+2025-12-19 18:34:49,829 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:34:51,010 - INFO - VSphereService: Configuration loaded from database
+2025-12-19 18:35:01,027 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-19 18:35:01,106 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-19 18:35:05,211 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:35:11,253 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:35:29,331 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:35:33,380 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:35:48,708 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:37:44,635 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:37:51,159 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:37:58,138 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:38:04,984 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:38:39,832 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:38:46,422 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 18:38:56,205 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:10:32,485 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:10:41,108 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:10:48,916 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:10:54,724 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:11:01,276 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:11:08,541 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:11:17,473 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:11:29,649 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:11:48,595 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 19:11:58,100 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 19:12:01,677 - INFO - VSphereService: Configuration loaded from database
+2025-12-19 19:12:11,699 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-19 19:12:11,780 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-20 00:12:20,367 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:12:22,814 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 00:12:32,828 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-20 00:12:32,958 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-20 00:15:26,201 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:15:31,355 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 00:15:41,401 - INFO - Attempting to connect to vSphere: 192.168.10.10:443 as administrator@vsphere.local, SSL verify: False
+2025-12-20 00:15:41,536 - INFO - Successfully connected to vSphere: VMware vCenter Server 8.0.3 build-24022515
+2025-12-19 19:18:53,879 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-19 19:18:55,085 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 00:25:11,574 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:25:16,540 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 00:32:06,802 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:32:10,676 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 00:52:50,394 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:52:55,638 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 00:58:14,922 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 00:59:08,473 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:00:06,806 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 01:00:06,910 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=SEMASTERS-Student_1-pfSense
+2025-12-20 01:00:06,971 - INFO - Found template VM: pfSense
+2025-12-20 01:00:07,117 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 01:00:07,248 - INFO - Target folder ensured: SE_Training_Portal/SEMASTERS/Student 1
+2025-12-20 01:00:07,260 - INFO - Cloning pfSense to SEMASTERS-Student_1-pfSense in folder Student 1...
+2025-12-20 01:00:14,398 - INFO - VM provisioned successfully: SEMASTERS-Student_1-pfSense, MOID: vm-5322, IP: None
+2025-12-20 01:00:14,409 - INFO - Creating initial snapshot for SEMASTERS-Student_1-pfSense
+2025-12-20 01:10:31,676 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:10:36,649 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 01:12:58,884 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:28:03,717 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:28:07,814 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 01:33:26,155 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:34:04,907 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:34:10,250 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:35:37,362 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:36:20,796 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 01:36:25,067 - ERROR - Failed to connect to vSphere 1: (vim.fault.InvalidLogin) {
+   dynamicType = <unset>,
+   dynamicProperty = (vmodl.DynamicProperty) [],
+   msg = 'Cannot complete login due to an incorrect user name or password.',
+   faultCause = <unset>,
+   faultMessage = (vmodl.LocalizableMessage) []
+}
+2025-12-20 01:36:25,073 - ERROR - provision_vm called but not connected to vSphere
+2025-12-20 01:37:25,922 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:37:52,726 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:37:59,463 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:37:59,475 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 01:37:59,610 - DEBUG - RootFolder: Datacenters
+2025-12-20 01:37:59,611 - DEBUG - Datacenters found: 2
+2025-12-20 01:38:05,170 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:44:24,743 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:44:28,559 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 01:47:40,559 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:47:46,756 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:48:56,826 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:50:05,581 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 01:50:05,704 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=NYC-Student_1-pfSense
+2025-12-20 01:50:05,780 - INFO - Found template VM: pfSense
+2025-12-20 01:50:05,862 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 01:50:05,997 - INFO - Target folder ensured: SE_Training_Portal/NYC/Student 1
+2025-12-20 01:50:06,015 - INFO - Cloning pfSense to NYC-Student_1-pfSense in folder Student 1...
+2025-12-20 01:50:17,241 - INFO - VM provisioned successfully: NYC-Student_1-pfSense, MOID: vm-5326, IP: None
+2025-12-20 01:50:17,247 - INFO - Creating initial snapshot for NYC-Student_1-pfSense
+2025-12-20 01:53:21,404 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:57:05,965 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:57:10,056 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 01:58:10,632 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:58:16,961 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 01:59:08,594 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:01:27,434 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 02:01:27,562 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=NY-Student_1-pfSense
+2025-12-20 02:01:27,626 - INFO - Found template VM: pfSense
+2025-12-20 02:01:27,680 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 02:01:27,769 - INFO - Target folder ensured: SE_Training_Portal/NY/Student 1
+2025-12-20 02:01:27,782 - INFO - Cloning pfSense to NY-Student_1-pfSense in folder Student 1...
+2025-12-20 02:01:41,031 - INFO - VM provisioned successfully: NY-Student_1-pfSense, MOID: vm-5330, IP: None
+2025-12-20 02:01:41,042 - INFO - Creating initial snapshot for NY-Student_1-pfSense
+2025-12-20 02:02:08,220 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:07:02,969 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:07:07,067 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 02:08:57,450 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:09:58,488 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:10:06,289 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:10:06,300 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 02:10:06,438 - DEBUG - RootFolder: Datacenters
+2025-12-20 02:10:06,439 - DEBUG - Datacenters found: 2
+2025-12-20 02:10:11,269 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:10:38,605 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 02:10:38,699 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=JDHF-Student_1-pfSense
+2025-12-20 02:10:38,819 - INFO - Found template VM: pfSense
+2025-12-20 02:10:38,869 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 02:10:38,952 - INFO - Target folder ensured: SE_Training_Portal/JDHF/Student 1
+2025-12-20 02:10:38,969 - INFO - Cloning pfSense to JDHF-Student_1-pfSense in folder Student 1...
+2025-12-20 02:10:40,020 - ERROR - Clone task failed: Insufficient disk space on datastore ''.
+2025-12-20 02:12:37,373 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:13:01,726 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:15:29,907 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:15:32,922 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:20:19,543 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:20:23,312 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 02:22:31,930 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:22:59,197 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:23:11,337 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:24:44,770 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:25:08,614 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:25:14,423 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:25:14,449 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 02:25:14,646 - DEBUG - RootFolder: Datacenters
+2025-12-20 02:25:14,647 - DEBUG - Datacenters found: 2
+2025-12-20 02:25:19,428 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:25:41,475 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:25:41,484 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 02:25:41,659 - DEBUG - RootFolder: Datacenters
+2025-12-20 02:25:41,661 - DEBUG - Datacenters found: 2
+2025-12-20 02:25:46,483 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:26:35,161 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 02:26:35,264 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=ghgh-Student_1-pfSense
+2025-12-20 02:26:35,318 - INFO - Found template VM: pfSense
+2025-12-20 02:26:35,377 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 02:26:35,486 - INFO - Target folder ensured: SE_Training_Portal/ghgh/Student 1
+2025-12-20 02:26:35,502 - INFO - Cloning pfSense to ghgh-Student_1-pfSense in folder Student 1...
+2025-12-20 02:26:41,659 - INFO - VM provisioned successfully: ghgh-Student_1-pfSense, MOID: vm-5337, IP: None
+2025-12-20 02:26:41,673 - INFO - Creating initial snapshot for ghgh-Student_1-pfSense
+2025-12-20 02:27:00,632 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:27:24,754 - INFO - Acquiring WebMKS ticket for VM ghgh-Student_1-pfSense (MOID: vm-5337)
+2025-12-20 02:27:24,769 - INFO - VM Power State: poweredOn
+2025-12-20 02:27:24,789 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 02:27:24,790 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 02:27:24,791 - DEBUG - Ticket.ticket value: 'a0841e3553b11c71' (length: 16)
+2025-12-20 02:27:24,792 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 02:27:24,793 - DEBUG - Ticket.port: 443
+2025-12-20 02:27:24,793 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/ghgh-Student_1-pfSense/ghgh-Student_1-pfSense.vmx
+2025-12-20 02:27:24,794 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 02:27:24,795 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/a0841e3553b11c71
+2025-12-20 02:27:24,802 - INFO - Generated WebMKS ticket for ghgh-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 02:27:24,805 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 02:27:24,806 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 02:44:18,729 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:44:23,531 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 02:47:31,670 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:48:09,538 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:48:11,906 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 02:48:11,916 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=2)
+2025-12-20 02:48:12,060 - DEBUG - RootFolder: Datacenters
+2025-12-20 02:48:12,063 - DEBUG - Datacenters found: 2
+2025-12-20 02:48:16,295 - INFO - vSphere Service initialized (DB Connections only).

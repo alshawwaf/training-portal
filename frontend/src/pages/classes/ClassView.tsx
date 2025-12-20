@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-    Monitor, Play, Square, RotateCcw, Power, LayoutGrid, 
-    Settings, Maximize2, Terminal, Info, ChevronRight, AlertCircle,
-    Copy, ExternalLink, ShieldCheck, User, Server
+    Monitor, Play, Square, RotateCcw, Power, 
+    Maximize2, Minimize2, Terminal, AlertCircle,
+    Copy, ExternalLink, User, Server, Keyboard,
+    PanelLeftClose, PanelLeft, Clock, Wifi, WifiOff,
+    ChevronDown, Settings2, Zap, RefreshCw, Hand
 } from 'lucide-react';
 import api from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import clsx from 'clsx';
 
 interface VM {
     id: number;
@@ -30,18 +33,21 @@ const ClassView: React.FC = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
+    const consoleRef = useRef<HTMLIFrameElement>(null);
 
     const [environment, setEnvironment] = useState<Environment | null>(null);
     const [selectedVm, setSelectedVm] = useState<VM | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'console' | 'details'>('console');
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showLeftPanel, setShowLeftPanel] = useState(true);
+    const [displayScale, setDisplayScale] = useState<'fit' | '100' | '125'>('fit');
+    const [sessionTime, setSessionTime] = useState(0);
+    const [isConnected, setIsConnected] = useState(true);
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     const fetchEnvironment = async () => {
         try {
-            // If guest, we might need a different endpoint or handle it in the standard one
             const res = await api.get(`/classes/${classId}/environments`);
-            // Scoping: In a real app, the backend should only return one env for the user/guest.
-            // For now, we take the first unassigned one or the one assigned to us.
             const guestToken = sessionStorage.getItem(`guest_token_${classId}`);
             
             let matchedEnv = null;
@@ -58,9 +64,11 @@ const ClassView: React.FC = () => {
                 if (!selectedVm && matchedEnv.vms.length > 0) {
                     setSelectedVm(matchedEnv.vms[0]);
                 }
+                setIsConnected(true);
             }
         } catch (err) {
             showToast('Failed to load environment', 'error');
+            setIsConnected(false);
         } finally {
             setIsLoading(false);
         }
@@ -68,37 +76,99 @@ const ClassView: React.FC = () => {
 
     useEffect(() => {
         fetchEnvironment();
-        const interval = setInterval(fetchEnvironment, 30000); // refresh states every 30s
+        const interval = setInterval(fetchEnvironment, 30000);
         return () => clearInterval(interval);
     }, [classId]);
+
+    // Session timer
+    useEffect(() => {
+        const timer = setInterval(() => setSessionTime(t => t + 1), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // Fullscreen handling
+    const toggleFullscreen = useCallback(() => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen();
+            setIsFullscreen(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const handler = () => setIsFullscreen(!!document.fullscreenElement);
+        document.addEventListener('fullscreenchange', handler);
+        return () => document.removeEventListener('fullscreenchange', handler);
+    }, []);
 
     const handleVmAction = async (action: string, vmId?: number) => {
         const targetVmId = vmId || selectedVm?.id;
         if (!targetVmId) return;
 
+        setActionLoading(action);
         try {
             await api.post(`/classes/environments/${classId}/vms/${targetVmId}/power`, { action });
-            showToast(`Task '${action}' started`, 'success');
-            // Optimistic update or wait for refresh
+            showToast(`${action.charAt(0).toUpperCase() + action.slice(1)} initiated`, 'success');
             fetchEnvironment();
         } catch (err: any) {
             showToast(err.response?.data?.detail || 'Action failed', 'error');
         } finally {
+            setActionLoading(null);
         }
     };
 
     const handleBulkAction = async (action: string) => {
         if (!environment) return;
-        if (!window.confirm(`Apply '${action}' to ALL machines in this environment?`)) return;
-
+        setActionLoading(action);
         try {
             await api.post(`/classes/environments/${environment.id}/power`, { action });
-            showToast(`Bulk ${action} initialized`, 'success');
+            showToast(`Bulk ${action} initiated`, 'success');
             fetchEnvironment();
         } catch (err: any) {
             showToast('Bulk action failed', 'error');
         } finally {
+            setActionLoading(null);
         }
+    };
+
+    const handleRevert = async () => {
+        if (!environment) return;
+        if (!window.confirm('Revert all machines to initial state? This cannot be undone.')) return;
+        setActionLoading('revert');
+        try {
+            await api.post(`/classes/environments/${environment.id}/revert`);
+            showToast('Revert initiated', 'success');
+            fetchEnvironment();
+        } catch {
+            showToast('Revert failed', 'error');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const sendCtrlAltDel = () => {
+        // Post message to iframe for Ctrl+Alt+Del
+        if (consoleRef.current?.contentWindow) {
+            consoleRef.current.contentWindow.postMessage({ type: 'send-ctrl-alt-del' }, '*');
+            showToast('Sent Ctrl+Alt+Del', 'info');
+        }
+    };
+
+    const formatTime = (seconds: number) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const getAuthToken = () => {
+        const userToken = localStorage.getItem('token');
+        if (userToken) return userToken;
+        const guestToken = sessionStorage.getItem(`guest_token_${classId}`);
+        if (guestToken) return `guest-${guestToken}`;
+        return '';
     };
 
     if (isLoading) {
@@ -116,10 +186,10 @@ const ClassView: React.FC = () => {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
                 <div className="max-w-md w-full text-center space-y-6">
-                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                    <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl">
                         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                         <h2 className="text-xl font-bold text-white">No Environment Found</h2>
-                        <p className="text-slate-400 mt-2">You don't have an environment assigned for this class. Please contact your instructor.</p>
+                        <p className="text-slate-400 mt-2">You don't have an environment assigned for this class.</p>
                     </div>
                     <button onClick={() => navigate('/')} className="text-indigo-400 hover:text-white transition-colors">Go Back</button>
                 </div>
@@ -127,294 +197,331 @@ const ClassView: React.FC = () => {
         );
     }
 
-    const getAuthToken = () => {
-        const userToken = localStorage.getItem('token');
-        console.log('[ClassView] getAuthToken: userToken from localStorage =', userToken);
-        if (userToken) return userToken;
-        
-        const guestToken = sessionStorage.getItem(`guest_token_${classId}`);
-        console.log('[ClassView] getAuthToken: guestToken from sessionStorage =', guestToken);
-        if (guestToken) return `guest-${guestToken}`;
-        
-        console.warn('[ClassView] getAuthToken: NO TOKEN FOUND - authentication will fail');
-        return '';
-    };
-
     return (
         <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden">
-            {/* Top Navigation / Header */}
-            <header className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 shrink-0 z-20 shadow-lg">
-                <div className="flex items-center gap-4">
-                    <div className="p-2 bg-indigo-500/20 rounded-lg">
-                        <Monitor className="w-5 h-5 text-indigo-400" />
-                    </div>
-                    <div>
-                        <h1 className="text-white font-bold leading-none">{environment.name}</h1>
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1 font-bold">Training Classroom</p>
-                    </div>
+            {/* ===== TOP BAR: VM Tabs ===== */}
+            <header className="h-12 bg-slate-900 border-b border-slate-800 flex items-center px-2 shrink-0 z-20">
+                {/* Logo/Title */}
+                <div className="flex items-center gap-2 px-3 border-r border-slate-800 h-full">
+                    <Monitor className="w-4 h-4 text-indigo-400" />
+                    <span className="text-sm font-bold text-white hidden sm:inline">{environment.name}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <div className="hidden md:flex items-center gap-4 mr-6 pr-6 border-r border-slate-800">
-                        <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/20">
-                            <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
-                            <span className="text-[10px] text-green-400 font-bold uppercase">Connected</span>
-                        </div>
-                    </div>
-                    
-                    <div className="relative group">
-                        <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-all text-sm font-semibold shadow-lg shadow-indigo-500/10">
-                            <Power className="w-4 h-4" />
-                            Environment Control
+                {/* VM Tabs */}
+                <div className="flex-1 flex items-center gap-1 px-2 overflow-x-auto scrollbar-hide">
+                    {environment.vms.map(vm => (
+                        <button
+                            key={vm.id}
+                            onClick={() => setSelectedVm(vm)}
+                            className={clsx(
+                                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all shrink-0",
+                                selectedVm?.id === vm.id
+                                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                            )}
+                        >
+                            <div className={clsx(
+                                "w-2 h-2 rounded-full",
+                                vm.power_state === 'poweredOn' ? "bg-green-500" : "bg-red-500"
+                            )} />
+                            <span className="max-w-[120px] truncate">{vm.name}</span>
                         </button>
-                        <div className="absolute right-0 top-full mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all z-30 overflow-hidden">
-                            <div className="p-2 space-y-1">
-                                <button onClick={() => handleBulkAction('start')} className="w-full text-left px-4 py-3 hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg flex items-center gap-3 transition-colors">
-                                    <Play className="w-4 h-4 text-green-500" />
-                                    <span>Start All VMs</span>
-                                </button>
-                                <button onClick={() => handleBulkAction('stop')} className="w-full text-left px-4 py-3 hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg flex items-center gap-3 transition-colors">
-                                    <Square className="w-4 h-4 text-red-500" />
-                                    <span>Stop All VMs</span>
-                                </button>
-                                <button onClick={() => handleBulkAction('reset')} className="w-full text-left px-4 py-3 hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-lg flex items-center gap-3 transition-colors">
-                                    <RotateCcw className="w-4 h-4 text-amber-500" />
-                                    <span>Restart All VMs</span>
-                                </button>
-                                <div className="border-t border-slate-700 my-1"></div>
-                                <button 
-                                    onClick={() => {
-                                        if (window.confirm('Revert all machines to initial state? This cannot be undone.')) {
-                                             api.post(`/classes/environments/${environment.id}/revert`).then(() => showToast('Reverting initialized', 'success'));
-                                        }
-                                    }}
-                                    className="w-full text-left px-4 py-3 hover:bg-red-500/10 text-red-400 rounded-lg flex items-center gap-3 transition-colors"
-                                >
-                                    <RotateCcw className="w-4 h-4" />
-                                    <span>Revert Environment</span>
-                                </button>
-                            </div>
-                        </div>
+                    ))}
+                </div>
+
+                {/* Right Controls */}
+                <div className="flex items-center gap-1 px-2 border-l border-slate-800 h-full">
+                    {/* Connection Status */}
+                    <div className={clsx(
+                        "flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase",
+                        isConnected ? "text-green-400" : "text-red-400"
+                    )}>
+                        {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                        <span className="hidden sm:inline">{isConnected ? 'Connected' : 'Disconnected'}</span>
+                    </div>
+
+                    {/* Session Timer */}
+                    <div className="flex items-center gap-1.5 px-2 py-1 text-slate-400 text-xs font-mono">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatTime(sessionTime)}</span>
+                    </div>
+
+                    {/* User */}
+                    <div className="flex items-center gap-2 px-2 py-1 bg-slate-800 rounded text-xs">
+                        <User className="w-3 h-3 text-slate-400" />
+                        <span className="text-slate-300 font-medium hidden sm:inline">{user?.name || 'Guest'}</span>
                     </div>
                 </div>
             </header>
 
-            <div className="flex-1 flex overflow-hidden">
-                {/* VM Sidebar Tabs */}
-                <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
-                    <div className="p-4 border-b border-slate-800 bg-slate-900/50">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-3">Your Machines</p>
-                        <div className="space-y-1">
-                            {environment.vms.map(vm => (
-                                <button
-                                    key={vm.id}
-                                    onClick={() => setSelectedVm(vm)}
-                                    className={`w-full group relative flex items-center gap-3 p-3 rounded-xl transition-all ${
-                                        selectedVm?.id === vm.id 
-                                            ? 'bg-indigo-600/10 border border-indigo-500/30 text-white shadow-inner' 
-                                            : 'text-slate-400 hover:bg-slate-800 border border-transparent'
-                                    }`}
-                                >
-                                    <div className={`w-2 h-2 rounded-full shadow-lg ${vm.power_state === 'poweredOn' ? 'bg-green-500 shadow-green-500/50' : 'bg-red-500 shadow-red-500/50'}`} />
-                                    <div className="flex-1 text-left min-w-0">
-                                        <p className={`text-sm font-semibold truncate ${selectedVm?.id === vm.id ? 'text-indigo-300' : 'group-hover:text-slate-200'}`}>
-                                            {vm.name}
-                                        </p>
-                                        <p className="text-[10px] text-slate-500 truncate font-mono">
-                                            {vm.ip_address || 'Connecting...'}
-                                        </p>
-                                    </div>
-                                    <ChevronRight className={`w-4 h-4 transition-transform ${selectedVm?.id === vm.id ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`} />
-                                </button>
-                            ))}
-                        </div>
+            {/* ===== TOOLBAR ===== */}
+            <div className="h-10 bg-slate-800/80 border-b border-slate-700 flex items-center px-3 justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                    {/* Toggle Panel */}
+                    <button
+                        onClick={() => setShowLeftPanel(!showLeftPanel)}
+                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                        title={showLeftPanel ? "Hide Panel" : "Show Panel"}
+                    >
+                        {showLeftPanel ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+                    </button>
+
+                    <div className="w-px h-5 bg-slate-700" />
+
+                    {/* VM Actions */}
+                    {selectedVm && (
+                        <>
+                            <button
+                                onClick={() => handleVmAction(selectedVm.power_state === 'poweredOn' ? 'stop' : 'start')}
+                                disabled={actionLoading !== null}
+                                className={clsx(
+                                    "flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium transition-all",
+                                    selectedVm.power_state === 'poweredOn'
+                                        ? "text-red-400 hover:bg-red-500/10"
+                                        : "text-green-400 hover:bg-green-500/10"
+                                )}
+                            >
+                                {actionLoading === 'start' || actionLoading === 'stop' 
+                                    ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                    : <Power className="w-3.5 h-3.5" />
+                                }
+                                {selectedVm.power_state === 'poweredOn' ? 'Stop' : 'Start'}
+                            </button>
+                            <button
+                                onClick={() => handleVmAction('reset')}
+                                disabled={actionLoading !== null}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium text-amber-400 hover:bg-amber-500/10 transition-all"
+                            >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                Restart
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {/* Ctrl+Alt+Del */}
+                    <button
+                        onClick={sendCtrlAltDel}
+                        className="flex items-center gap-1.5 px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs font-medium text-slate-300 transition-all"
+                        title="Send Ctrl+Alt+Del"
+                    >
+                        <Keyboard className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Ctrl+Alt+Del</span>
+                    </button>
+
+                    {/* Display Scale */}
+                    <div className="flex items-center bg-slate-700 rounded overflow-hidden">
+                        {(['fit', '100', '125'] as const).map(scale => (
+                            <button
+                                key={scale}
+                                onClick={() => setDisplayScale(scale)}
+                                className={clsx(
+                                    "px-2 py-1 text-[10px] font-bold transition-colors",
+                                    displayScale === scale
+                                        ? "bg-indigo-600 text-white"
+                                        : "text-slate-400 hover:text-white"
+                                )}
+                            >
+                                {scale === 'fit' ? 'Fit' : `${scale}%`}
+                            </button>
+                        ))}
                     </div>
-                    
-                    <div className="flex-1 p-4 overflow-y-auto space-y-6">
-                        {selectedVm && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
-                                <div className="space-y-2">
-                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Selected VM Actions</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <button 
-                                            onClick={() => handleVmAction(selectedVm.power_state === 'poweredOn' ? 'stop' : 'start')}
-                                            className={`flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${
-                                                selectedVm.power_state === 'poweredOn' 
-                                                    ? 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20' 
-                                                    : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'
-                                            }`}
-                                        >
-                                            <Power className="w-4 h-4" />
-                                            <span className="text-xs font-bold">{selectedVm.power_state === 'poweredOn' ? 'Stop' : 'Start'}</span>
-                                        </button>
-                                        <button 
-                                            onClick={() => handleVmAction('reset')}
-                                            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 transition-all font-bold"
-                                        >
-                                            <RotateCcw className="w-4 h-4" />
-                                            <span className="text-xs">Restart</span>
-                                        </button>
+
+                    {/* Fullscreen */}
+                    <button
+                        onClick={toggleFullscreen}
+                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                        title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                    >
+                        {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                    </button>
+
+                    {/* Open in New Window */}
+                    <button
+                        onClick={() => window.open(`/api/classes/environments/${classId}/vms/${selectedVm?.id}/console?token=${getAuthToken()}`, '_blank')}
+                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                        title="Open in New Window"
+                    >
+                        <ExternalLink className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex-1 flex overflow-hidden">
+                {/* ===== LEFT PANEL ===== */}
+                {showLeftPanel && (
+                    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 animate-in slide-in-from-left-2 duration-200">
+                        {/* Overview */}
+                        <div className="p-3 border-b border-slate-800">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Server className="w-4 h-4 text-indigo-400" />
+                                <span className="text-xs font-bold text-white uppercase tracking-wide">Overview</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-slate-800/50 rounded-lg p-2">
+                                    <div className="text-[10px] text-slate-500 uppercase">VMs</div>
+                                    <div className="text-lg font-bold text-white">{environment.vms.length}</div>
+                                </div>
+                                <div className="bg-slate-800/50 rounded-lg p-2">
+                                    <div className="text-[10px] text-slate-500 uppercase">Online</div>
+                                    <div className="text-lg font-bold text-green-400">
+                                        {environment.vms.filter(v => v.power_state === 'poweredOn').length}
                                     </div>
                                 </div>
+                            </div>
+                        </div>
 
-                                <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl space-y-3">
-                                    <div className="flex items-center gap-2 text-slate-300">
-                                        <Info className="w-4 h-4 text-indigo-400" />
-                                        <span className="text-xs font-bold">VM Details</span>
+                        {/* Selected VM Details */}
+                        {selectedVm && (
+                            <div className="p-3 border-b border-slate-800 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Terminal className="w-4 h-4 text-indigo-400" />
+                                    <span className="text-xs font-bold text-white uppercase tracking-wide">VM Details</span>
+                                </div>
+                                <div className="space-y-2 text-xs">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">Name</span>
+                                        <span className="text-slate-200 font-medium truncate ml-2">{selectedVm.name}</span>
                                     </div>
-                                    <div className="space-y-2 text-[10px]">
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500">Operating System</span>
-                                            <span className="font-mono text-sm text-slate-300">{selectedVm.guest_os || 'Unknown'}</span>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">Status</span>
+                                        <span className={clsx(
+                                            "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase",
+                                            selectedVm.power_state === 'poweredOn' 
+                                                ? "bg-green-500/20 text-green-400" 
+                                                : "bg-red-500/20 text-red-400"
+                                        )}>
+                                            {selectedVm.power_state === 'poweredOn' ? 'Online' : 'Offline'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500">IP Address</span>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-indigo-400 font-mono text-[11px]">{selectedVm.ip_address || '—'}</span>
+                                            {selectedVm.ip_address && (
+                                                <button 
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(selectedVm.ip_address!);
+                                                        showToast('IP copied', 'success');
+                                                    }}
+                                                    className="text-slate-500 hover:text-indigo-400"
+                                                >
+                                                    <Copy className="w-3 h-3" />
+                                                </button>
+                                            )}
                                         </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-slate-500">Status</span>
-                                            <span className={`px-2 py-0.5 rounded ${selectedVm.power_state === 'poweredOn' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                {selectedVm.power_state}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-center group">
-                                            <span className="text-slate-500">IP Address</span>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-indigo-400 font-mono">{selectedVm.ip_address || '---'}</span>
-                                                {selectedVm.ip_address && <Copy className="w-3 h-3 text-slate-500 cursor-pointer hover:text-indigo-400" />}
-                                            </div>
-                                        </div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-500">OS</span>
+                                        <span className="text-slate-300 text-[11px]">{selectedVm.guest_os || 'Unknown'}</span>
                                     </div>
                                 </div>
                             </div>
                         )}
-                    </div>
 
-                    <div className="p-4 bg-slate-900 border-t border-slate-800">
-                        <div className="flex items-center gap-3 text-slate-400">
-                            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
-                                <User className="w-4 h-4" />
+                        {/* Quick Actions */}
+                        <div className="p-3 flex-1">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Zap className="w-4 h-4 text-amber-400" />
+                                <span className="text-xs font-bold text-white uppercase tracking-wide">Quick Actions</span>
                             </div>
-                            <div className="min-w-0">
-                                <p className="text-xs font-bold text-slate-200 truncate">{user?.name || 'Guest User'}</p>
-                                <p className="text-[10px] text-slate-500 uppercase tracking-tighter">Student Seat</p>
+                            <div className="space-y-1">
+                                <button
+                                    onClick={() => handleBulkAction('start')}
+                                    disabled={actionLoading !== null}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
+                                >
+                                    <Play className="w-3.5 h-3.5 text-green-400" />
+                                    Start All VMs
+                                </button>
+                                <button
+                                    onClick={() => handleBulkAction('stop')}
+                                    disabled={actionLoading !== null}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
+                                >
+                                    <Square className="w-3.5 h-3.5 text-red-400" />
+                                    Stop All VMs
+                                </button>
+                                <button
+                                    onClick={handleRevert}
+                                    disabled={actionLoading !== null}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
+                                >
+                                    <RotateCcw className="w-3.5 h-3.5" />
+                                    Revert to Snapshot
+                                </button>
                             </div>
                         </div>
-                    </div>
-                </aside>
 
-                {/* Main Console Area */}
-                <main className="flex-1 bg-black flex flex-col overflow-hidden relative group/main">
-                    {/* View Actions Overlay */}
-                    <div className="absolute top-4 right-4 z-10 flex items-center gap-2 opacity-0 group-hover/main:opacity-100 transition-opacity">
-                        <button 
-                            className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-2 text-slate-300 hover:text-white rounded-lg transition-all"
-                            onClick={() => window.open(`/api/classes/environments/${classId}/vms/${selectedVm?.id}/console?token=${getAuthToken()}`, '_blank')}
-                            title="Open in New Window"
-                        >
-                            <ExternalLink className="w-4 h-4" />
-                        </button>
-                        <button className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-2 text-slate-300 hover:text-white rounded-lg transition-all">
-                            <Maximize2 className="w-4 h-4" />
-                        </button>
-                    </div>
+                        {/* Help */}
+                        <div className="p-3 border-t border-slate-800">
+                            <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors">
+                                <Hand className="w-3.5 h-3.5" />
+                                Request Assistance
+                            </button>
+                        </div>
+                    </aside>
+                )}
 
-                    {/* Console Iframe */}
+                {/* ===== MAIN CONSOLE AREA ===== */}
+                <main className="flex-1 bg-black flex flex-col overflow-hidden relative">
                     {selectedVm ? (
-                        <div className="flex-1 flex flex-col">
-                            {/* Toolbar */}
-                            <div className="h-10 bg-slate-800/80 border-b border-slate-700 flex items-center px-4 justify-between">
-                                <div className="flex items-center gap-6">
-                                    <div className="flex items-center gap-2">
-                                        <Terminal className="w-4 h-4 text-indigo-400" />
-                                        <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">{selectedVm.name} Console</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 border-l border-slate-700 pl-6 space-x-2">
-                                        <button 
-                                            className={`text-[10px] font-bold px-3 py-1 rounded transition-colors ${activeTab === 'console' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                                            onClick={() => setActiveTab('console')}
-                                        >
-                                            CONSOLE
-                                        </button>
-                                        <button 
-                                            className={`text-[10px] font-bold px-3 py-1 rounded transition-colors ${activeTab === 'details' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                                            onClick={() => setActiveTab('details')}
-                                        >
-                                            INFO
-                                        </button>
-                                    </div>
+                        selectedVm.power_state === 'poweredOn' ? (
+                            <iframe 
+                                ref={consoleRef}
+                                src={`/api/classes/environments/${classId}/vms/${selectedVm.id}/console?token=${getAuthToken()}`}
+                                className={clsx(
+                                    "w-full h-full border-0",
+                                    displayScale === 'fit' && "object-contain",
+                                    displayScale === '100' && "scale-100 origin-top-left",
+                                    displayScale === '125' && "scale-125 origin-top-left"
+                                )}
+                                title="VM Console"
+                            />
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-900 to-slate-950">
+                                <div className="p-6 bg-slate-800/50 rounded-2xl border border-slate-700">
+                                    <Power className="w-12 h-12 text-slate-600" />
                                 </div>
-                            </div>
-
-                            {activeTab === 'console' ? (
-                                <div className="flex-1 bg-[#1a1a2e] relative group">
-                                    {selectedVm.power_state === 'poweredOn' ? (
-                                        <iframe 
-                                            src={`/api/classes/environments/${classId}/vms/${selectedVm.id}/console?token=${getAuthToken()}`}
-                                            className="w-full h-full border-0"
-                                            title="VM Console"
-                                        />
+                                <div className="text-center">
+                                    <p className="text-slate-300 font-medium mb-1">VM is powered off</p>
+                                    <p className="text-slate-500 text-sm">{selectedVm.name}</p>
+                                </div>
+                                <button 
+                                    onClick={() => handleVmAction('start')}
+                                    disabled={actionLoading === 'start'}
+                                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2"
+                                >
+                                    {actionLoading === 'start' ? (
+                                        <RefreshCw className="w-4 h-4 animate-spin" />
                                     ) : (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-900/40 backdrop-blur-sm z-10 transition-all">
-                                            <div className="p-4 bg-slate-800 rounded-full border border-slate-700 shadow-xl">
-                                                <Power className="w-8 h-8 text-slate-600" />
-                                            </div>
-                                            <p className="text-slate-400 font-medium">VM is powered off</p>
-                                            <button 
-                                                onClick={() => handleVmAction('start')}
-                                                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
-                                            >
-                                                Power On
-                                            </button>
-                                        </div>
+                                        <Play className="w-4 h-4" />
                                     )}
-                                </div>
-                            ) : (
-                                <div className="flex-1 bg-slate-900 p-8">
-                                    <div className="max-w-4xl mx-auto space-y-8">
-                                        <h2 className="text-2xl font-bold text-white mb-6">Diagnostic Overview</h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="card p-6 border-indigo-500/20 bg-indigo-500/5">
-                                                <h3 className="text-indigo-400 font-bold mb-4 flex items-center gap-2">
-                                                    <Server className="w-4 h-4" />
-                                                    VM Identity
-                                                </h3>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Internal MOID</label>
-                                                        <p className="font-mono text-sm text-slate-300">{selectedVm.moid}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Network Context</label>
-                                                        <p className="font-mono text-sm text-slate-300">{selectedVm.ip_address || 'Not Assigned'}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="card p-6 border-slate-700 bg-slate-800/30">
-                                                <h3 className="text-slate-300 font-bold mb-4 flex items-center gap-2">
-                                                    <Settings className="w-4 h-4" />
-                                                    Configuration
-                                                </h3>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Power Status</label>
-                                                        <p className="text-sm font-bold text-green-400 uppercase">{selectedVm.power_state}</p>
-                                                    </div>
-                                                    <div>
-                                                        <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Guest Services</label>
-                                                        <p className="text-sm text-slate-300">VMware Tools Installed</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                    Power On
+                                </button>
+                            </div>
+                        )
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
-                             <LayoutGrid className="w-16 h-16 mb-4 opacity-20" />
-                             <p>Select a VM to open console</p>
+                            <Monitor className="w-16 h-16 mb-4 opacity-20" />
+                            <p>Select a VM to open console</p>
                         </div>
                     )}
                 </main>
             </div>
+
+            {/* ===== BOTTOM STATUS BAR ===== */}
+            <footer className="h-7 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-3 text-[10px] shrink-0">
+                <div className="flex items-center gap-4 text-slate-500">
+                    <span>Environment: <span className="text-slate-300">{environment.name}</span></span>
+                    <span>VMs: <span className="text-slate-300">{environment.vms.length}</span></span>
+                </div>
+                <div className="flex items-center gap-4 text-slate-500">
+                    <span>Session: <span className="text-slate-300 font-mono">{formatTime(sessionTime)}</span></span>
+                    {selectedVm && <span>Current: <span className="text-indigo-400">{selectedVm.name}</span></span>}
+                </div>
+            </footer>
         </div>
     );
 };

@@ -19,8 +19,8 @@ router = APIRouter(prefix="/classes", tags=["classes"])
 logger = logging.getLogger("classes")
 
 # Import auth dependency
-from .auth import get_current_user
-from db.models import User
+from .auth import get_current_user, get_admin_user, get_instructor_user
+from db.models import User, UserRole
 
 # JSON backup directory
 BACKUP_DIR = Path("data/backups/classes")
@@ -106,7 +106,7 @@ def save_all_backups(db: Session):
 
 # CREATE
 @router.post("/", response_model=ClassRead)
-def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     # Validate status
     status = cls.status if cls.status in VALID_STATUSES else "draft"
     
@@ -180,7 +180,7 @@ def get_class(class_id: int, db: Session = Depends(get_db)):
 
 # UPDATE
 @router.put("/{class_id}", response_model=ClassRead)
-def update_class(class_id: int, cls: ClassUpdate, db: Session = Depends(get_db)):
+def update_class(class_id: int, cls: ClassUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     db_class = db.query(Class).filter(Class.id == class_id).first()
     if not db_class:
         raise HTTPException(status_code=404, detail="Class not found")
@@ -212,7 +212,7 @@ def update_class(class_id: int, cls: ClassUpdate, db: Session = Depends(get_db))
 # DELETE
 # DELETE
 @router.delete("/{class_id}")
-async def delete_class(class_id: int, db: Session = Depends(get_db)):
+async def delete_class(class_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     from fastapi.responses import StreamingResponse
     import json
     
@@ -330,7 +330,7 @@ def export_backup(db: Session = Depends(get_db)):
 
 # PROVISION CLASS (STREAMING)
 @router.post("/{class_id}/provision")
-async def provision_class(class_id: int, db: Session = Depends(get_db)):
+async def provision_class(class_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
     """Provision environments for the class with streaming status updates"""
     from fastapi.responses import StreamingResponse
     import json
@@ -756,7 +756,11 @@ def control_environment_power(env_id: int, body: VMPowerAction, db: Session = De
     # Get connection_id from template
     connection_id = env.class_.template.connection_id if env.class_ and env.class_.template else None
     
+    success_count = 0
+    errors = []
+    
     for vm in env.vms:
+
         try:
             result = vsphere_service.control_vm_power(vm.vm_moid, body.action, connection_id=connection_id)
             if result["success"]:
@@ -791,7 +795,11 @@ def revert_environment(env_id: int, db: Session = Depends(get_db)):
     # Get connection_id from template
     connection_id = env.class_.template.connection_id if env.class_ and env.class_.template else None
     
+    success_count = 0
+    errors = []
+    
     for vm in env.vms:
+
         try:
             result = vsphere_service.revert_vm(vm.vm_moid, connection_id=connection_id)
             if result["success"]:

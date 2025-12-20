@@ -10,15 +10,17 @@ interface ModalProps {
     maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';
     icon?: React.ReactNode;
     headerActions?: React.ReactNode;
+    closeOnClickOutside?: boolean; // Default false - only close via buttons
+    closeOnEscape?: boolean; // Default false - only close via buttons
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'md', icon, headerActions }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'md', icon, headerActions, closeOnClickOutside = false, closeOnEscape = false }) => {
     const modalRef = useRef<HTMLDivElement>(null);
 
-    // Close on escape key
+    // Close on escape key (only if enabled)
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape' && closeOnEscape) onClose();
         };
 
         if (isOpen) {
@@ -30,11 +32,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
             document.removeEventListener('keydown', handleEscape);
             document.body.style.overflow = 'unset';
         };
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, closeOnEscape]);
 
-    // Close on click outside (backdrop only)
+    // Close on click outside (backdrop only) - only if enabled
     const handleBackdropClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) {
+        if (closeOnClickOutside && e.target === e.currentTarget) {
             onClose();
         }
     };
@@ -58,6 +60,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-all duration-300 animate-in fade-in"
             onClick={handleBackdropClick}
         >
+
             <div 
                 ref={modalRef}
                 className={clsx(

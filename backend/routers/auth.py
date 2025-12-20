@@ -11,8 +11,9 @@ import bcrypt
 import random
 import string
 from services.email_service import email_service
-from typing import List
+from typing import List, Optional
 import datetime
+from db.models import UserRole
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -46,6 +47,22 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     # TODO: Implement real Azure AD token validation here
     # For now, fail other tokens
     raise credentials_exception
+
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role not in ["admin", "super_admin", "administrator"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin permissions required"
+        )
+    return current_user
+
+async def get_instructor_user(current_user: User = Depends(get_current_user)):
+    if current_user.role not in ["admin", "super_admin", "administrator", "instructor"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Instructor permissions required"
+        )
+    return current_user
 
 def verify_password(plain_password, hashed_password):
     if not hashed_password:
@@ -189,7 +206,8 @@ async def register(data: RegisterRequest, db: Session = Depends(get_db)):
         hashed_password=get_password_hash(data.password),
         is_active=True,
         is_email_confirmed=False,
-        confirmation_code=confirmation_code
+        confirmation_code=confirmation_code,
+        role=UserRole.STUDENT
     )
     db.add(new_user)
     db.commit()

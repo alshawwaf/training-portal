@@ -18,11 +18,12 @@ import Register from './pages/auth/Register';
 import VerifyEmail from './pages/auth/VerifyEmail';
 import AdminUsers from './pages/admin/Users';
 import ClassView from './pages/classes/ClassView';
+import InfrastructureExplorer from './pages/InfrastructureExplorer';
 // import GuestJoin from './pages/classes/GuestJoin'; // Legacy join page
 import JoinClass from './pages/JoinClass';
 import StudentClassViewer from './pages/StudentClassViewer';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode, allowGuest?: boolean }> = ({ children, allowGuest = false }) => {
   const { user, isLoading } = useAuth();
   const { classId } = useParams<{ classId: string }>();
   
@@ -37,11 +38,22 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     );
   }
   
-  // Check for guest access if not logged in
+  // Check for guest access
   const guestToken = classId ? sessionStorage.getItem(`guest_token_${classId}`) : null;
   
   if (!user && !guestToken) {
     return <Navigate to="/login" replace />;
+  }
+
+  // If user is a guest but the route doesn't allow guests, redirect to student dashboard
+  if (!user && guestToken && !allowGuest) {
+    return <Navigate to="/student/class" replace />;
+  }
+
+  // If user is logged in as a student, but tries to access admin routes (not allowGuest routes like dashboard)
+  // Dashboard is technically ProtectedRoute. We should probably force students to student portal.
+  if (user && user.role === 'student' && !allowGuest) {
+      return <Navigate to="/student/class" replace />;
   }
 
   return <Layout>{children}</Layout>;
@@ -88,7 +100,7 @@ const App: React.FC = () => {
             <Route path="/student/class" element={<StudentClassViewer />} />
             
             {/* Admin/Instructor Routes */}
-            <Route path="/classes/:classId/view" element={<ProtectedRoute><ClassView /></ProtectedRoute>} />
+            <Route path="/classes/:classId/view" element={<ProtectedRoute allowGuest={true}><ClassView /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
@@ -96,9 +108,10 @@ const App: React.FC = () => {
             <Route path="/monitoring/logs" element={<AdminRoute><Logs /></AdminRoute>} />
             <Route path="/monitoring/sessions" element={<AdminRoute><ActiveSessions /></AdminRoute>} />
             <Route path="/monitoring/console" element={<AdminRoute><InstructorConsole /></AdminRoute>} />
+            <Route path="/infrastructure" element={<AdminRoute><InfrastructureExplorer /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allowGuest={true}><Profile /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute allowGuest={true}><Notifications /></ProtectedRoute>} />
           </Routes>
         </ToastProvider>
       </AuthProvider>
