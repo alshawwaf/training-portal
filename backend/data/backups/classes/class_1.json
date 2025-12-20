@@ -7,13 +7,13 @@
     "template_id": 1,
     "max_users": 1,
     "passcode": "Cpwins!1",
-    "start_date": "2025-12-20T04:52:39.751000",
-    "end_date": "2025-12-27T04:52:39.751000",
+    "start_date": "2025-12-20T10:07:56.589000",
+    "end_date": "2025-12-27T10:07:56.589000",
     "status": "active",
     "description": "",
-    "created_at": "2025-12-20T04:53:04.705893",
-    "updated_at": "2025-12-20T04:53:04.705897"
+    "created_at": "2025-12-20T05:08:26.402685",
+    "updated_at": "2025-12-20T05:18:08.544995"
   },
-  "backup_timestamp": "2025-12-20T04:53:04.739791",
+  "backup_timestamp": "2025-12-20T05:18:08.559685",
   "version": 1
 }

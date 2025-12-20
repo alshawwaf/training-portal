@@ -145,11 +145,19 @@ def get_console_page(
     hostname = env_vm.ip_address
     
     # LOGIC FIX: If it's a vSphere VM, we almost ALWAYS want WebMKS for "Console" access
-    # unless the user explicitly requested SSH/RDP and we have an IP.
-    # If no IP is present, we MUST fallback to VNC/WebMKS.
+    # unless the user explicitly requested SSH/RDP and we have a USABLE IP.
+    # IPv6 link-local addresses (fe80::) are NOT usable for RDP/SSH connections.
+    # If no usable IP is present, we MUST fallback to VNC/WebMKS.
     
     is_vsphere = bool(env_vm.vm_moid)
-    force_webmks = is_vsphere and (final_protocol == "vnc" or not hostname)
+    
+    # Check if IP is usable for network connections (not IPv6 link-local)
+    has_usable_ip = hostname and not hostname.startswith("fe80:") and not hostname.startswith("::1")
+    
+    # Force WebMKS for vSphere VMs when:
+    # 1. VNC is explicitly requested, OR
+    # 2. No usable IP address is available for RDP/SSH
+    force_webmks = is_vsphere and (final_protocol == "vnc" or not has_usable_ip)
     
     if force_webmks:
         # vSphere VM - Use WebMKS via WebSocket proxy (NOT Guacamole)

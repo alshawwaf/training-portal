@@ -15850,3 +15850,36 @@ TimeoutError: [Errno 110] Connection timed out
 2025-12-20 04:43:41,009 - INFO - Generated WebMKS ticket for nyc-Student_1-pfSense. Ticket length: 16. URL available: True
 2025-12-20 04:43:41,010 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
 2025-12-20 04:43:41,011 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-20 04:49:27,895 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 04:49:32,040 - INFO - VSphereService: Configuration loaded from database
+2025-12-20 04:50:22,273 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 04:50:30,891 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 04:50:44,234 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-20 04:53:04,958 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 04:53:05,038 - INFO - Connecting to vSphere 192.168.10.10 (connection_id=1)
+2025-12-20 04:53:05,093 - INFO - Starting VM provisioning: template_moid=vm-2012, new_name=colo-Student_1-Spark
+2025-12-20 04:53:05,145 - INFO - Starting VM provisioning: template_moid=vm-2015, new_name=colo-Student_1-pfSense
+2025-12-20 04:53:05,204 - INFO - Found template VM: Spark
+2025-12-20 04:53:05,208 - INFO - Found template VM: pfSense
+2025-12-20 04:53:05,277 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 04:53:05,277 - INFO - Using datacenter compute resource pool: Resources
+2025-12-20 04:53:05,420 - INFO - Target folder ensured: SE_Training_Portal/colo/Student 1
+2025-12-20 04:53:05,433 - INFO - Cloning Spark to colo-Student_1-Spark in folder Student 1...
+2025-12-20 04:53:05,435 - INFO - Target folder ensured: SE_Training_Portal/colo/Student 1
+2025-12-20 04:53:05,467 - INFO - Cloning pfSense to colo-Student_1-pfSense in folder Student 1...
+2025-12-20 04:53:12,615 - INFO - VM provisioned successfully: colo-Student_1-pfSense, MOID: vm-5365, IP: None
+2025-12-20 04:53:12,623 - INFO - Creating initial snapshot for colo-Student_1-pfSense
+2025-12-20 04:54:10,359 - ERROR - Clone task failed: Could not complete network copy for file /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/Spark/Spark_1-000002.vmdk
+2025-12-20 04:54:43,526 - INFO - Acquiring WebMKS ticket for VM colo-Student_1-pfSense (MOID: vm-5365)
+2025-12-20 04:54:43,539 - INFO - VM Power State: poweredOn
+2025-12-20 04:54:43,562 - DEBUG - Ticket object type: <class 'pyVmomi.VmomiSupport.vim.VirtualMachine.Ticket'>
+2025-12-20 04:54:43,563 - DEBUG - Ticket attributes: ['Array', 'GetCertThumbprintList', 'GetCfgFile', 'GetDynamicProperty', 'GetDynamicType', 'GetHost', 'GetPort', 'GetSslCertificate', 'GetSslThumbprint', 'GetTicket', 'GetUrl', 'SetCertThumbprintList', 'SetCfgFile', 'SetDynamicProperty', 'SetDynamicType', 'SetHost', 'SetPort', 'SetSslCertificate', 'SetSslThumbprint', 'SetTicket', 'SetUrl', '_GetPropertyInfo', '_GetPropertyList', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_propInfo', '_propList', '_version', '_wsdlName', 'certThumbprintList', 'cfgFile', 'dynamicProperty', 'dynamicType', 'host', 'port', 'sslCertificate', 'sslThumbprint', 'ticket', 'url']
+2025-12-20 04:54:43,564 - DEBUG - Ticket.ticket value: 'f2caa6a592f94e1b' (length: 16)
+2025-12-20 04:54:43,565 - DEBUG - Ticket.host: 192.168.10.11
+2025-12-20 04:54:43,566 - DEBUG - Ticket.port: 443
+2025-12-20 04:54:43,567 - DEBUG - Ticket.cfgFile: /vmfs/volumes/67abd03f-29c4709d-06ef-c81f66e3d469/colo-Student_1-pfSense/colo-Student_1-pfSense.vmx
+2025-12-20 04:54:43,569 - DEBUG - Ticket.sslThumbprint: 14:F4:36:87:18:D8:6F:F2:01:58:4B:9F:56:59:7F:F3:9C:3F:B3:C6
+2025-12-20 04:54:43,569 - DEBUG - Ticket.url: wss://localhost.localdomain:443/ticket/f2caa6a592f94e1b
+2025-12-20 04:54:43,578 - INFO - Generated WebMKS ticket for colo-Student_1-pfSense. Ticket length: 16. URL available: True
+2025-12-20 04:54:43,582 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
+2025-12-20 04:54:43,583 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
