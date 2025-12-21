@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -55,53 +56,54 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
         '6xl': 'max-w-6xl',
     };
 
-    return (
+    // Use portal to render modal at document.body level
+    // This escapes the stacking context of parent elements
+    return ReactDOM.createPortal(
         <div 
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-all duration-300 animate-in fade-in"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-200 dark:bg-slate-900 transition-opacity duration-100"
             onClick={handleBackdropClick}
         >
-
             <div 
                 ref={modalRef}
                 className={clsx(
-                    "glass-light rounded-[2.5rem] border border-white/20 shadow-2xl w-full transform transition-all animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col relative overflow-hidden",
+                    "glass-light rounded-2xl border border-theme/30 shadow-xl w-full transition-transform duration-100 max-h-[90vh] flex flex-col relative overflow-hidden",
                     maxWidthClasses[maxWidth]
                 )}
             >
-                {/* Header Glow */}
-                <div className="absolute -top-24 -left-24 w-48 h-48 bg-blue-600/10 blur-[80px] pointer-events-none" />
-                
-                <div className="flex items-center justify-between p-8 border-b border-theme/50 flex-shrink-0 relative z-10 bg-secondary/10 backdrop-blur-xl">
-                    <div className="flex items-center gap-4">
+                {/* Header - Compact */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-theme/30 flex-shrink-0 bg-secondary/5">
+                    <div className="flex items-center gap-3">
                         {icon && (
-                            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-2xl shadow-inner group">
+                            <div className="p-2 bg-blue-500/10 border border-blue-500/20 rounded-xl">
                                 {icon}
                             </div>
                         )}
                         <div>
-                            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight drop-shadow-sm">{title}</h2>
-                            <p className="text-[11px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-[0.2em] mt-1.5 opacity-100 flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
+                            <h2 className="text-lg font-bold text-primary leading-tight">{title}</h2>
+                            <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mt-0.5 flex items-center gap-1">
+                                <span className="w-1 h-1 rounded-full bg-blue-500" />
                                 Action Required
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                         {headerActions}
                         <button 
                             onClick={onClose}
-                            className="p-2.5 bg-secondary/30 hover:bg-secondary/50 text-secondary hover:text-primary rounded-xl transition-all hover:rotate-90 duration-300 border border-theme/50"
+                            className="p-2 bg-secondary/20 hover:bg-secondary/40 text-secondary hover:text-primary rounded-lg transition-colors duration-100"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
                 
-                <div className="p-8 overflow-y-auto custom-scrollbar relative z-10">
+                {/* Content - Compact */}
+                <div className="p-5 overflow-y-auto custom-scrollbar">
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

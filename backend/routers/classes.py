@@ -40,6 +40,7 @@ class ClassCreate(BaseModel):
     end_date: datetime
     status: Optional[str] = "draft"
     description: Optional[str] = None
+    target_datastore: Optional[str] = None  # vSphere datastore for VM cloning
 
 class ClassUpdate(BaseModel):
     name: Optional[str] = None
@@ -51,6 +52,7 @@ class ClassUpdate(BaseModel):
     end_date: Optional[datetime] = None
     status: Optional[str] = None
     description: Optional[str] = None
+    target_datastore: Optional[str] = None
 
 # Template Info Schema
 class TemplateInfo(BaseModel):
@@ -76,6 +78,7 @@ class ClassRead(BaseModel):
     status: str
     description: Optional[str] = None
     join_token: Optional[str] = None  # Shareable link token
+    target_datastore: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     
@@ -128,6 +131,7 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: 
         end_date=cls.end_date,
         status=status,
         description=cls.description,
+        target_datastore=cls.target_datastore,
         instructor_id=current_user.id,  # Set to current user
         join_token=join_token
     )
@@ -409,6 +413,7 @@ async def provision_class(class_id: int, db: Session = Depends(get_db), current_
             async def provision_single_vm(env, tmpl_vm):
                 vm_name = f"{class_name}-{env.name}-{tmpl_vm.vm_name}".replace(" ", "_")
                 folder_path = ["SE_Training_Portal", class_name, env.name]
+                target_datastore = current_class.target_datastore  # Get from class
                 
                 # Wrapper to include metadata in result
                 def do_provision():
@@ -416,8 +421,10 @@ async def provision_class(class_id: int, db: Session = Depends(get_db), current_
                         vm_moid=tmpl_vm.vm_moid,
                         new_name=vm_name,
                         folder_path=folder_path,
+                        datastore_name=target_datastore,
                         connection_id=current_template.connection_id
                     )
+
 
                 if provisioning_mode == "parallel":
                     async with semaphore:
@@ -623,6 +630,28 @@ def delete_vm(class_id: int, vm_id: int, db: Session = Depends(get_db)):
     db.commit()
         
     return {"success": True, "message": "VM deleted"}
+
+# REVERT SINGLE VM
+@router.post("/environments/{class_id}/vms/{vm_id}/revert")
+def revert_vm(class_id: int, vm_id: int, db: Session = Depends(get_db)):
+    """Revert a specific VM to its initial snapshot"""
+    vm = db.query(EnvironmentVM).filter(EnvironmentVM.id == vm_id).first()
+    if not vm:
+        raise HTTPException(status_code=404, detail="VM not found")
+        
+    # Verify VM belongs to an environment of the class (security check)
+    env = db.query(ClassEnvironment).filter(ClassEnvironment.id == vm.env_id).first()
+    if not env or env.class_id != class_id:
+        raise HTTPException(status_code=403, detail="VM does not belong to this class")
+
+    # Get connection_id from template
+    connection_id = env.class_.template.connection_id if env and env.class_ and env.class_.template else None
+    result = vsphere_service.revert_vm(vm.vm_moid, connection_id=connection_id)
+    
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result["message"])
+        
+    return result
 
 
 # VMRC CONSOLE ACCESS (Hypervisor-level, works without IP)

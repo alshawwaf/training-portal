@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
     Monitor, Clock, Power, ChevronRight, 
-    LayoutGrid, Terminal, Shield, 
-    Activity, RefreshCw, Maximize2, Cpu, HardDrive,
-    LogOut
+    LayoutGrid, LogOut, Play, Square,
+    RotateCcw, Pause, ExternalLink, Maximize2,
+    Server, Cpu, Wifi, WifiOff, Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -16,6 +16,9 @@ interface VM {
     ip_address: string | null;
     role: string | null;
     os_type: string | null;
+    cpu_cores: number | null;
+    ram_mb: number | null;
+    disk_gb: number | null;
 }
 
 interface Environment {
@@ -48,14 +51,12 @@ const StudentClassViewer: React.FC = () => {
             const res = await api.get(`/student/environment?session_token=${token}`);
             setEnvironment(res.data);
             
-            // Auto-select first VM or keep selection
             if (res.data.vms.length > 0) {
                 if (!selectedVm) {
                     setSelectedVm(res.data.vms[0]);
                 } else {
                     const updated = res.data.vms.find((v: VM) => v.id === selectedVm.id);
                     if (updated) {
-                        // Only update if status or IP actually changed to avoid iframe reload jitters
                         if (updated.status !== selectedVm.status || updated.ip_address !== selectedVm.ip_address) {
                             setSelectedVm(updated);
                         }
@@ -109,7 +110,6 @@ const StudentClassViewer: React.FC = () => {
         try {
             const token = localStorage.getItem('student_session');
             await api.post(`/student/vm/${selectedVm.id}/power?session_token=${token}&action=${action}`);
-            // Force refresh
             fetchEnvironment();
         } catch (err) {
             console.error(`Action ${action} failed`, err);
@@ -120,12 +120,12 @@ const StudentClassViewer: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center">
                 <div className="relative">
-                    <div className="absolute inset-0 bg-blue-500/20 blur-3xl animate-pulse rounded-full" />
-                    <div className="relative w-16 h-16 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin shadow-2xl" />
+                    <div className="absolute inset-0 bg-blue-500/30 blur-[100px] rounded-full animate-pulse" />
+                    <div className="relative w-20 h-20 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
                 </div>
-                <p className="mt-8 text-blue-500 font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">Initializing Secure Lab</p>
+                <p className="mt-8 text-blue-400 font-bold text-sm tracking-wider animate-pulse">Initializing Lab Environment...</p>
             </div>
         );
     }
@@ -135,88 +135,108 @@ const StudentClassViewer: React.FC = () => {
     const isProvisioning = environment.status === 'provisioning';
 
     return (
-        <div className="fixed inset-0 bg-[#050505] flex flex-col overflow-hidden text-[#e2e8f0]">
-            {/* Header - Premium Minimalist */}
-            <header className="h-16 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 shrink-0 z-20">
-                <div className="flex items-center gap-6">
+        <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col overflow-hidden">
+            {/* Premium Header */}
+            <header className="h-16 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-6 shrink-0 z-20">
+                <div className="flex items-center gap-4">
+                    {/* Logo/Brand */}
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group">
-                            <Monitor className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-50" />
+                            <div className="relative w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <Monitor className="w-5 h-5 text-white" />
+                            </div>
                         </div>
                         <div>
-                            <h1 className="text-sm font-black tracking-tight text-white uppercase">{environment.class_name}</h1>
-                            <div className="flex items-center gap-4 mt-0.5">
-                                <span className="text-[9px] text-blue-500 font-black uppercase tracking-widest">Workspace</span>
-                                <div className="h-1 w-1 bg-white/20 rounded-full" />
-                                <span className="text-[9px] text-[#94a3b8] font-bold uppercase tracking-wider">Env #{environment.student_number}</span>
+                            <h1 className="text-base font-bold text-white">{environment.class_name}</h1>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-blue-400 font-medium">Lab Environment</span>
+                                <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                                <span className="text-xs text-slate-400">Station #{environment.student_number}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
+                    {/* Time Remaining */}
                     {environment.time_remaining && (
-                        <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/5">
-                            <Clock className="w-4 h-4 text-blue-400" />
-                            <span className="text-xs font-black font-mono text-white tracking-widest">{environment.time_remaining}</span>
+                        <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                            <Clock className="w-4 h-4 text-amber-400" />
+                            <span className="text-sm font-mono font-bold text-white">{environment.time_remaining}</span>
+                            <span className="text-xs text-slate-400">remaining</span>
                         </div>
                     )}
+                    
+                    {/* End Session */}
                     <button 
-                         onClick={() => { localStorage.removeItem('student_session'); navigate('/'); }}
-                         className="flex items-center gap-2 group px-4 py-2 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
+                        onClick={() => { localStorage.removeItem('student_session'); navigate('/'); }}
+                        className="flex items-center gap-2 px-4 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl border border-transparent hover:border-red-500/30 transition-all"
                     >
-                        <LogOut className="w-4 h-4 text-[#94a3b8] group-hover:text-red-500 transition-colors" />
-                        <span className="text-[10px] font-black text-[#94a3b8] group-hover:text-white uppercase tracking-widest">End Session</span>
+                        <LogOut className="w-4 h-4" />
+                        <span className="text-sm font-medium">End Session</span>
                     </button>
                 </div>
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-                {/* VM Sidebar - High Information Density */}
-                <aside className="w-80 bg-[#0a0a0a] border-r border-white/5 flex flex-col shrink-0">
-                    <div className="p-6">
+                {/* VM Sidebar */}
+                <aside className="w-80 bg-slate-900/50 backdrop-blur-sm border-r border-white/5 flex flex-col shrink-0">
+                    {/* VM List */}
+                    <div className="p-4">
                         <div className="flex items-center justify-between mb-4">
-                            <p className="text-[10px] text-[#475569] font-black uppercase tracking-[0.2em]">Lab Infrastructure</p>
-                            <Activity className="w-3 h-3 text-blue-500 animate-pulse" />
+                            <div className="flex items-center gap-2">
+                                <Server className="w-4 h-4 text-slate-400" />
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lab Machines</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                <span className="text-xs text-emerald-400">{environment.vms.filter(v => v.status === 'poweredOn').length} Online</span>
+                            </div>
                         </div>
                         
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                             {environment.vms.map(vm => (
                                 <button
                                     key={vm.id}
                                     onClick={() => setSelectedVm(vm)}
                                     className={clsx(
-                                        "w-full text-left group relative p-4 rounded-2xl transition-all duration-300 border",
+                                        "w-full text-left group relative p-3 rounded-xl transition-all duration-200 border",
                                         selectedVm?.id === vm.id 
-                                            ? "bg-blue-600/10 border-blue-500/30 text-white shadow-[0_0_20px_rgba(37,99,235,0.1)] ring-1 ring-blue-500/20" 
-                                            : "bg-[#0f0f0f] border-white/5 text-[#94a3b8] hover:border-white/10 hover:bg-[#141414]"
+                                            ? "bg-blue-500/10 border-blue-500/30 shadow-lg shadow-blue-500/10" 
+                                            : "bg-slate-800/30 border-slate-700/30 hover:border-slate-600/50 hover:bg-slate-800/50"
                                     )}
                                 >
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-3">
+                                        {/* Status Indicator */}
                                         <div className={clsx(
-                                            "relative w-3 h-3 rounded-full shadow-lg",
+                                            "relative flex items-center justify-center w-8 h-8 rounded-lg",
                                             vm.status === 'poweredOn' 
-                                                ? "bg-emerald-500 shadow-emerald-500/20" 
-                                                : "bg-[#1e293b] shadow-inner"
+                                                ? "bg-emerald-500/20" 
+                                                : "bg-slate-700/50"
                                         )}>
-                                            {vm.status === 'poweredOn' && (
-                                                <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-50"></span>
+                                            {vm.status === 'poweredOn' ? (
+                                                <Wifi className="w-4 h-4 text-emerald-400" />
+                                            ) : (
+                                                <WifiOff className="w-4 h-4 text-slate-500" />
                                             )}
                                         </div>
+                                        
                                         <div className="flex-1 min-w-0">
                                             <p className={clsx(
-                                                "text-xs font-black truncate uppercase tracking-tight",
-                                                selectedVm?.id === vm.id ? "text-white" : "group-hover:text-[#e2e8f0]"
+                                                "text-sm font-semibold truncate",
+                                                selectedVm?.id === vm.id ? "text-white" : "text-slate-300 group-hover:text-white"
                                             )}>
                                                 {vm.name}
                                             </p>
-                                            <p className="text-[9px] text-[#475569] font-mono mt-1 font-bold">
-                                                {vm.ip_address || 'SYNCING...'}
+                                            <p className="text-xs text-slate-500 font-mono">
+                                                {vm.ip_address || 'Connecting...'}
                                             </p>
                                         </div>
+                                        
                                         <ChevronRight className={clsx(
-                                            "w-4 h-4 transition-all duration-300 transform",
-                                            selectedVm?.id === vm.id ? "translate-x-0 opacity-100 text-blue-500" : "-translate-x-2 opacity-0"
+                                            "w-4 h-4 transition-all duration-200",
+                                            selectedVm?.id === vm.id ? "text-blue-400 translate-x-0" : "text-slate-600 -translate-x-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-0"
                                         )} />
                                     </div>
                                 </button>
@@ -224,117 +244,135 @@ const StudentClassViewer: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
-                        {selectedVm && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-left-2 duration-500">
-                                {/* Advanced Controls */}
-                                <div className="space-y-3">
-                                    <p className="text-[10px] text-[#475569] font-black uppercase tracking-[0.2em]">Management</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button 
-                                            onClick={() => handleVmAction('revert')}
-                                            disabled={!!actionLoading}
-                                            className="group flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#0f0f0f] border border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all"
-                                        >
-                                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                                <RefreshCw className="w-5 h-5 text-blue-500" />
-                                            </div>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-[#94a3b8] group-hover:text-blue-500 transition-colors">Revert</span>
-                                        </button>
-                                        
-                                        <button 
-                                            onClick={() => handleVmAction(selectedVm.status === 'poweredOn' ? 'stop' : 'start')}
-                                            disabled={!!actionLoading}
-                                            className={clsx(
-                                                "group flex flex-col items-center gap-2 p-4 rounded-2xl transition-all border",
-                                                selectedVm.status === 'poweredOn'
-                                                    ? "bg-red-500/5 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40"
-                                                    : "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/40"
-                                            )}
-                                        >
-                                            <div className={clsx(
-                                                "w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform",
-                                                selectedVm.status === 'poweredOn' ? "bg-red-500/10" : "bg-emerald-500/10"
+                    {/* Selected VM Controls */}
+                    {selectedVm && (
+                        <div className="flex-1 p-4 border-t border-slate-700/30 animate-in fade-in slide-in-from-left-2 duration-300">
+                            <div className="space-y-4">
+                                {/* VM Info Card */}
+                                <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className={clsx(
+                                            "w-10 h-10 rounded-lg flex items-center justify-center",
+                                            selectedVm.status === 'poweredOn' ? "bg-emerald-500/20" : "bg-slate-700"
+                                        )}>
+                                            <Cpu className={clsx(
+                                                "w-5 h-5",
+                                                selectedVm.status === 'poweredOn' ? "text-emerald-400" : "text-slate-400"
+                                            )} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-white">{selectedVm.name}</p>
+                                            <p className={clsx(
+                                                "text-xs font-medium",
+                                                selectedVm.status === 'poweredOn' ? "text-emerald-400" : "text-slate-500"
                                             )}>
-                                                <Power className={clsx("w-5 h-5", selectedVm.status === 'poweredOn' ? "text-red-500" : "text-emerald-500")} />
-                                            </div>
-                                            <span className={clsx(
-                                                "text-[9px] font-black uppercase tracking-widest",
-                                                selectedVm.status === 'poweredOn' ? "text-red-500/70 group-hover:text-red-500" : "text-emerald-500/70 group-hover:text-emerald-500"
-                                            )}>
-                                                {actionLoading ? '...' : (selectedVm.status === 'poweredOn' ? 'Power Off' : 'Power On')}
-                                            </span>
-                                        </button>
+                                                {selectedVm.status === 'poweredOn' ? '● Online' : '○ Offline'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-2 text-xs">
+                                        <div className="bg-slate-900/50 rounded-lg p-2 text-center">
+                                            <span className="text-slate-500 block">CPU</span>
+                                            <p className="text-white font-bold">{selectedVm.cpu_cores || '—'} <span className="text-slate-500 font-normal">vCPU</span></p>
+                                        </div>
+                                        <div className="bg-slate-900/50 rounded-lg p-2 text-center">
+                                            <span className="text-slate-500 block">RAM</span>
+                                            <p className="text-white font-bold">{selectedVm.ram_mb ? `${Math.round(selectedVm.ram_mb / 1024)}` : '—'} <span className="text-slate-500 font-normal">GB</span></p>
+                                        </div>
+                                        <div className="bg-slate-900/50 rounded-lg p-2 text-center">
+                                            <span className="text-slate-500 block">Disk</span>
+                                            <p className="text-white font-bold">{selectedVm.disk_gb || '—'} <span className="text-slate-500 font-normal">GB</span></p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* VM Specs */}
-                                <div className="p-5 bg-gradient-to-br from-[#0f0f0f] to-[#070707] border border-white/5 rounded-2xl space-y-4">
-                                    <div className="flex items-center gap-2 text-white">
-                                        <Shield className="w-4 h-4 text-blue-500" />
-                                        <span className="text-[10px] font-black uppercase tracking-[0.15em]">System details</span>
+
+                                {/* Power Controls */}
+                                <div>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Power Controls</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button 
+                                            onClick={() => handleVmAction('start')}
+                                            disabled={!!actionLoading || selectedVm.status === 'poweredOn'}
+                                            className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <Play className="w-3.5 h-3.5" />
+                                            Start
+                                        </button>
+                                        <button 
+                                            onClick={() => handleVmAction('stop')}
+                                            disabled={!!actionLoading || selectedVm.status !== 'poweredOn'}
+                                            className="flex items-center justify-center gap-2 px-3 py-2.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <Square className="w-3.5 h-3.5" />
+                                            Stop
+                                        </button>
+                                        <button 
+                                            onClick={() => handleVmAction('suspend')}
+                                            disabled={!!actionLoading || selectedVm.status !== 'poweredOn'}
+                                            className="flex items-center justify-center gap-2 px-3 py-2.5 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <Pause className="w-3.5 h-3.5" />
+                                            Suspend
+                                        </button>
+                                        <button 
+                                            onClick={() => handleVmAction('revert')}
+                                            disabled={!!actionLoading}
+                                            className="flex items-center justify-center gap-2 px-3 py-2.5 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <RotateCcw className="w-3.5 h-3.5" />
+                                            Reset
+                                        </button>
                                     </div>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Cpu className="w-3.5 h-3.5 text-[#475569]" />
-                                                <span className="text-[10px] font-bold text-[#475569] uppercase">Role</span>
-                                            </div>
-                                            <span className="text-[11px] font-black text-white">{selectedVm.role || 'GUEST'}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <HardDrive className="w-3.5 h-3.5 text-[#475569]" />
-                                                <span className="text-[10px] font-bold text-[#475569] uppercase">Platform</span>
-                                            </div>
-                                            <span className="text-[11px] font-black text-white">{selectedVm.os_type || 'STANDARD'}</span>
-                                        </div>
-                                    </div>
+                                    {actionLoading && (
+                                        <p className="text-xs text-blue-400 mt-2 animate-pulse text-center">Processing {actionLoading}...</p>
+                                    )}
                                 </div>
+
+                                {/* Console Actions */}
+                                {consoleUrl && (
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Console</p>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => window.open(consoleUrl, '_blank')}
+                                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 rounded-lg text-xs font-bold transition-colors"
+                                            >
+                                                <ExternalLink className="w-3.5 h-3.5" />
+                                                Pop Out
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    const iframe = document.querySelector('iframe');
+                                                    if (iframe) iframe.requestFullscreen?.();
+                                                }}
+                                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 rounded-lg text-xs font-bold transition-colors"
+                                            >
+                                                <Maximize2 className="w-3.5 h-3.5" />
+                                                Fullscreen
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </aside>
 
                 {/* Main Console Area */}
                 <main className="flex-1 bg-black flex flex-col overflow-hidden relative">
-                    {/* Console Header/Toolbar */}
-                    <div className="h-10 bg-[#0a0a0a] border-b border-white/5 flex items-center px-4 justify-between shrink-0">
-                        <div className="flex items-center gap-3">
-                            <Terminal className="w-3.5 h-3.5 text-blue-500" />
-                            <span className="text-[10px] font-black text-[#94a3b8] uppercase tracking-[0.2em]">
-                                {selectedVm ? `${selectedVm.name} Connection` : 'Select terminal'}
-                            </span>
-                        </div>
-                        {selectedVm && consoleUrl && (
-                            <div className="flex items-center gap-2">
-                                <button className="p-1 px-2 text-[9px] font-black text-blue-500 hover:text-white transition-colors uppercase tracking-widest border border-blue-500/20 rounded hover:bg-blue-600/10">
-                                    Adaptive DPI
-                                </button>
-                                <div className="w-[1px] h-3 bg-white/10 mx-1" />
-                                <button 
-                                    onClick={() => window.open(consoleUrl, '_blank')}
-                                    className="flex items-center gap-2 text-[9px] font-black p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded transition-all shadow-lg shadow-blue-500/20"
-                                >
-                                    <Maximize2 className="w-3 h-3" />
-                                    <span className="tracking-widest capitalize">POP-OUT</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Console Content Area */}
-                    <div className="flex-1 bg-[#050505] relative overflow-hidden">
+                    <div className="flex-1 relative overflow-hidden">
                         {isProvisioning ? (
-                             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
                                 <div className="mb-8 relative">
-                                    <div className="absolute inset-0 bg-blue-500/20 blur-3xl animate-pulse rounded-full" />
-                                    <div className="w-24 h-24 border-4 border-blue-500/10 border-t-blue-500 rounded-full animate-spin relative" />
-                                    <Activity className="absolute inset-0 m-auto w-8 h-8 text-blue-500 animate-pulse" />
+                                    <div className="absolute inset-0 bg-blue-500/30 blur-[100px] rounded-full animate-pulse" />
+                                    <div className="relative w-24 h-24 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                                    <Zap className="absolute inset-0 m-auto w-8 h-8 text-blue-400" />
                                 </div>
-                                <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Provisioning Lab...</h3>
-                                <p className="text-sm text-[#94a3b8] font-medium max-w-sm">We are preparing your dedicated environment on the cloud infrastructure. This usually takes 1-2 minutes.</p>
-                             </div>
+                                <h3 className="text-2xl font-bold text-white mb-3">Provisioning Your Lab</h3>
+                                <p className="text-slate-400 max-w-md">We're setting up your dedicated environment. This typically takes 1-2 minutes.</p>
+                            </div>
                         ) : selectedVm ? (
                             selectedVm.status === 'poweredOn' ? (
                                 consoleUrl ? (
@@ -345,40 +383,38 @@ const StudentClassViewer: React.FC = () => {
                                         allowFullScreen
                                     />
                                 ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                                        <div className="w-10 h-10 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-                                        <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Negotiating Console...</p>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                                        <div className="w-12 h-12 border-3 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                                        <p className="text-sm text-blue-400 font-medium">Connecting to console...</p>
                                     </div>
                                 )
                             ) : (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-8">
-                                    <div className="relative group">
-                                        <div className="absolute inset-0 bg-emerald-500/20 group-hover:bg-emerald-500/30 blur-3xl animate-pulse rounded-full transition-colors" />
-                                        <div className="p-8 bg-[#0a0a0a] rounded-[2rem] border border-white/5 shadow-2xl relative transition-transform group-hover:scale-105 duration-500">
-                                            <Power className="w-16 h-16 text-emerald-500 opacity-20 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                                    <div className="relative group mb-8">
+                                        <div className="absolute inset-0 bg-emerald-500/20 blur-[80px] rounded-full group-hover:bg-emerald-500/30 transition-colors" />
+                                        <div className="relative p-8 bg-slate-800/50 rounded-3xl border border-slate-700/50 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+                                            <Power className="w-16 h-16 text-slate-600 group-hover:text-emerald-400 transition-colors" />
                                         </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <h3 className="text-2xl font-black text-white uppercase tracking-tight">System Offline</h3>
-                                        <p className="text-sm text-[#94a3b8] font-medium max-w-sm">The selected machine is currently powered off. Start it to begin your training session.</p>
-                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-3">Machine Offline</h3>
+                                    <p className="text-slate-400 max-w-md mb-8">This virtual machine is powered off. Click below to start your session.</p>
                                     <button 
                                         onClick={() => handleVmAction('start')}
                                         disabled={!!actionLoading}
-                                        className="px-10 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 flex items-center gap-3"
+                                        className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-2xl shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                                     >
                                         <Power className="w-5 h-5" />
-                                        Wake Environment
+                                        Start Machine
                                     </button>
                                 </div>
                             )
                         ) : (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-[#475569] p-8 text-center">
-                                <div className="p-8 bg-[#0a0a0a] rounded-[2rem] border border-white/5 border-dashed mb-6">
-                                    <LayoutGrid className="w-16 h-16 opacity-10" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 p-8 text-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                                <div className="p-8 bg-slate-800/30 rounded-3xl border border-slate-700/30 border-dashed mb-6">
+                                    <LayoutGrid className="w-16 h-16 text-slate-700" />
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em]">Selection Required</p>
-                                <p className="text-[11px] font-bold mt-2 opacity-50">Choose a terminal from the sidebar to establish a connection</p>
+                                <p className="text-lg font-semibold text-slate-400">Select a Machine</p>
+                                <p className="text-sm text-slate-500 mt-2">Choose a virtual machine from the sidebar to get started</p>
                             </div>
                         )}
                     </div>

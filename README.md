@@ -19,13 +19,15 @@ A professional training platform leveraging **Proxmox VE** for backend virtualiz
 | **User Registration** | Self-service signup with mandatory domain validation and email verification |
 | **RBAC** | Granular permission system with default roles (Admin, Instructor, Student) |
 | **Class Management** | Create, configure, and manage training classes with customizable parameters |
-| **Templates Management** | Define multi-provider environments (Proxmox, AWS, Azure, etc.) for labs |
-| **Virtual Environments** | Automated provisioning of environments for each student (Proxmox & vSphere) |
+| **Templates Management** | Define multi-provider environments (Proxmox, vSphere) for labs |
+| **Datastore Selection** | Choose target datastore for VM cloning per class (vSphere) |
+| **Virtual Environments** | Automated provisioning of environments for each student |
+| **VM Metrics Display** | Real-time CPU, RAM, and disk info for each VM |
 | **My Workspace** | Dedicated student view for managing assigned environments and VMs |
-| **Console Access** | Built-in HTML5 console for all VMs using **noVNC** (raw VNC support) |
+| **Browser Console Access** | Built-in HTML5 console via WebMKS/Guacamole (no client install) |
 | **Monitoring Dashboard** | Admin-level oversight of all active classes and environments |
 | **Environment Control** | Start, stop, revert, and access VMs with one click |
-| **Modern Dark UI** | Premium dark-themed interface with Check Point branding |
+| **Modern Dark/Light UI** | Premium themed interface with Check Point branding |
 | **Invitation System** | Secure user invitation with mandatory first-login password changes |
 | **Docker Ready** | Full Docker Compose setup for easy deployment |
 

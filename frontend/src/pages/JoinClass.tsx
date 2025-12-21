@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { LogIn, Lock, Mail, User, Calendar, AlertCircle, Loader2, GraduationCap } from 'lucide-react';
+import { LogIn, Lock, Mail, User, AlertCircle, Loader2, GraduationCap } from 'lucide-react';
 import api from '../api';
 
 interface ClassInfo {

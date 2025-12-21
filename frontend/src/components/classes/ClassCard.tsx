@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Calendar,
   Users,
   Layers,
   Eye,
@@ -8,16 +7,17 @@ import {
   Trash2,
   Sparkles,
   Clock,
-  Key,
   Pause,
   RotateCcw,
-  Power,
   Play,
+  Square,
   RefreshCw,
-  ChevronDown,
-  ChevronRight,
   Link2,
   Copy,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Zap,
 } from "lucide-react";
 import { getProviderIcon } from "../ProviderIcons";
 import clsx from "clsx";
@@ -45,7 +45,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   onRefresh,
 }) => {
   const { showToast } = useToast();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   
   // Status Modal State
   const [showProvisionModal, setShowProvisionModal] = useState(false);
@@ -172,147 +172,207 @@ const ClassCard: React.FC<ClassCardProps> = ({
     }
   };
 
+  // Status color mapping for the glow effect
+  const statusGlow = {
+    active: 'from-emerald-500/20 to-teal-500/10',
+    draft: 'from-slate-500/20 to-gray-500/10',
+    upcoming: 'from-blue-500/20 to-indigo-500/10',
+    completed: 'from-purple-500/20 to-fuchsia-500/10',
+    archived: 'from-gray-500/20 to-slate-500/10',
+  };
+
   return (
     <>
-      <div className="bg-secondary/20 rounded-lg border border-theme hover:border-blue-500/40 transition-all group overflow-hidden">
-        {/* Compact Header */}
-        <div 
-          className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-secondary/10 transition-colors"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <button className="text-secondary p-0.5">
-            {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-          </button>
-
-          <div className="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <ProviderIcon className="w-4 h-4 text-blue-400" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-primary truncate">{cls.name}</h3>
-            <span className="text-xs text-secondary">{cls.template?.name || 'No Template'} • {formatDate(cls.start_date)} - {formatDate(cls.end_date)}</span>
-          </div>
-
-          {/* Stats */}
-          <div className="hidden sm:flex items-center gap-1.5">
-            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-secondary/20 rounded text-xs">
-              <Users className="w-3 h-3 text-blue-400" />
-              <span className="text-primary font-medium">{cls.max_users}</span>
+      <div className="group relative bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-blue-500/5 dark:hover:shadow-blue-500/10">
+        {/* Gradient glow on hover */}
+        <div className={clsx(
+          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-br",
+          statusGlow[cls.status as keyof typeof statusGlow] || statusGlow.draft
+        )} />
+        
+        {/* Main Header */}
+        <div className="relative p-4">
+          <div className="flex items-start gap-3">
+            {/* Provider Icon with gradient background */}
+            <div className="relative flex-shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                <ProviderIcon className="w-5 h-5 text-white" />
+              </div>
             </div>
-            {daysRemaining > 0 && cls.status === 'active' && (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-fuchsia-500/10 rounded text-xs">
-                <Clock className="w-3 h-3 text-fuchsia-400" />
-                <span className="text-fuchsia-400 font-medium">{daysRemaining}d</span>
+            
+            {/* Title & Meta */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-base font-bold text-gray-900 dark:text-white truncate">
+                  {cls.name}
+                </h3>
+                <div className={clsx(
+                  "flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide",
+                  config.bgColor || "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                )}>
+                  {config.label}
+                </div>
+              </div>
+              
+              {/* Meta row */}
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {formatDate(cls.start_date)} — {formatDate(cls.end_date)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Users className="w-3 h-3" />
+                  {cls.max_users} seats
+                </span>
+                {daysRemaining > 0 && cls.status === 'active' && (
+                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                    <Clock className="w-3 h-3" />
+                    {daysRemaining}d left
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={() => onView(cls)} 
+                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" 
+                title="View Details"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => onEdit(cls)} 
+                className="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors" 
+                title="Edit Class"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setIsExpanded(!isExpanded)} 
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Description (if exists, always show) */}
+          {cls.description && (
+            <p className="mt-2 text-sm text-gray-600 dark:text-slate-400 line-clamp-2">
+              {cls.description}
+            </p>
+          )}
+
+          {/* Inline Quick Stats */}
+          <div className="flex items-center gap-2 mt-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-slate-700/50 rounded-lg">
+              <Layers className="w-3 h-3 text-gray-500 dark:text-slate-400" />
+              <span className="text-xs font-medium text-gray-700 dark:text-slate-300">{cls.template?.name || 'No Template'}</span>
+            </div>
+            {cls.passcode && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 rounded-lg">
+                <Zap className="w-3 h-3 text-blue-500" />
+                <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">{cls.passcode}</span>
               </div>
             )}
-          </div>
-
-          {/* Status Badge */}
-          <div className={clsx(
-            "px-2 py-0.5 rounded text-[9px] font-bold uppercase",
-            cls.status === 'active' 
-              ? "bg-fuchsia-500/15 text-fuchsia-400" 
-              : cls.status === 'draft'
-              ? "bg-blue-500/15 text-blue-400"
-              : cls.status === 'completed'
-              ? "bg-slate-500/15 text-slate-400"
-              : "bg-gray-500/15 text-gray-400"
-          )}>
-            {config.label}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
-            <button onClick={() => onView(cls)} className="p-1.5 text-secondary hover:text-blue-400 hover:bg-blue-500/10 rounded transition-colors">
-              <Eye className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => onEdit(cls)} className="p-1.5 text-secondary hover:text-amber-400 hover:bg-amber-500/10 rounded transition-colors">
-              <Edit className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
 
-        {/* Expanded Content */}
+        {/* Expanded Section */}
         {isExpanded && (
-          <div className="border-t border-theme bg-secondary/10 px-3 py-2 space-y-3 animate-in slide-in-from-top-1 duration-150">
-            {cls.description && (
-              <p className="text-xs text-secondary pl-2 border-l-2 border-blue-500/30">{cls.description}</p>
-            )}
-
-            {/* Details Grid - Compact */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <div className="bg-secondary/20 px-2 py-1.5 rounded text-xs">
-                <div className="flex items-center gap-1 text-secondary mb-0.5"><Layers className="w-3 h-3" /> Template</div>
-                <div className="font-medium text-primary truncate">{cls.template?.name || '—'}</div>
+          <div className="relative border-t border-gray-100 dark:border-slate-700/50 animate-in slide-in-from-top-2 duration-200">
+            {/* Fleet Control Bar */}
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/50">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Fleet Control</span>
               </div>
-              <div className="bg-secondary/20 px-2 py-1.5 rounded text-xs">
-                <div className="flex items-center gap-1 text-secondary mb-0.5"><Calendar className="w-3 h-3" /> Schedule</div>
-                <div className="font-medium text-primary">{formatDate(cls.start_date)} — {formatDate(cls.end_date)}</div>
-              </div>
-              <div className="bg-secondary/20 px-2 py-1.5 rounded text-xs">
-                <div className="flex items-center gap-1 text-secondary mb-0.5"><Key className="w-3 h-3" /> Passcode</div>
-                <div className="font-mono font-medium text-primary">{cls.passcode || '—'}</div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleStartAll} 
+                  disabled={isLoading !== null}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                >
+                  {isLoading === 'start' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+                  Start
+                </button>
+                <button 
+                  onClick={handleStopAll} 
+                  disabled={isLoading !== null}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                >
+                  {isLoading === 'stop' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5" />}
+                  Stop
+                </button>
+                <button 
+                  onClick={handleSuspendAll} 
+                  disabled={isLoading !== null}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                >
+                  {isLoading === 'suspend' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Pause className="w-3.5 h-3.5" />}
+                  Suspend
+                </button>
+                <button 
+                  onClick={handleRevertAll} 
+                  disabled={isLoading !== null}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                >
+                  {isLoading === 'revert' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                  Revert
+                </button>
               </div>
             </div>
 
-            {/* Student Access - Compact */}
+            {/* Student Access URL */}
             {joinUrl && (
-              <div className="bg-fuchsia-500/10 p-2 rounded border border-fuchsia-500/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <Link2 className="w-3.5 h-3.5 text-fuchsia-400" />
-                  <span className="text-xs font-bold text-fuchsia-400">Student Access</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="text" readOnly value={joinUrl} 
-                    className="flex-1 px-2 py-1 bg-slate-900/50 border border-fuchsia-500/20 rounded text-xs text-white font-mono truncate"
-                  />
-                  <button onClick={copyJoinLink} className="flex items-center gap-1 px-2 py-1 bg-fuchsia-500 text-white rounded text-xs font-medium hover:bg-fuchsia-600 shrink-0">
-                    <Copy className="w-3 h-3" /> Copy
+              <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/5 dark:to-indigo-500/5 border-t border-blue-100 dark:border-blue-500/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Link2 className="w-4 h-4 text-blue-500" />
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-400">Student Join Link</span>
+                  </div>
+                  <button 
+                    onClick={copyJoinLink} 
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold transition-colors"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copy
                   </button>
                 </div>
+                <div className="mt-2 px-3 py-2 bg-white dark:bg-slate-800 rounded-lg border border-blue-200 dark:border-blue-500/30">
+                  <code className="text-xs text-gray-600 dark:text-slate-300 break-all">{joinUrl}</code>
+                </div>
               </div>
             )}
 
-            {/* Power Operations - Compact */}
-            <div className="flex items-center gap-1 flex-wrap">
-              <span className="text-[9px] font-bold text-secondary uppercase mr-1">Power:</span>
-              <button onClick={handleStartAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'start' ? "bg-fuchsia-500/20 text-fuchsia-400" : "bg-secondary/20 text-secondary hover:text-fuchsia-400 hover:bg-fuchsia-500/10")}>
-                {isLoading === 'start' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />} Start
-              </button>
-              <button onClick={handleStopAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'stop' ? "bg-red-500/20 text-red-400" : "bg-secondary/20 text-secondary hover:text-red-400 hover:bg-red-500/10")}>
-                {isLoading === 'stop' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Power className="w-3 h-3" />} Stop
-              </button>
-              <button onClick={handleSuspendAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'suspend' ? "bg-amber-500/20 text-amber-400" : "bg-secondary/20 text-secondary hover:text-amber-400 hover:bg-amber-500/10")}>
-                {isLoading === 'suspend' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Pause className="w-3 h-3" />} Suspend
-              </button>
-              <button onClick={handleRevertAll} disabled={isLoading !== null} className={clsx("flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all", isLoading === 'revert' ? "bg-purple-500/20 text-purple-400" : "bg-secondary/20 text-secondary hover:text-purple-400 hover:bg-purple-500/10")}>
-                {isLoading === 'revert' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />} Revert
-              </button>
-            </div>
-
-            {/* Action Buttons - Compact */}
-            <div className="flex items-center justify-between pt-2 border-t border-theme">
+            {/* Footer Actions */}
+            <div className="px-4 py-3 flex items-center justify-between border-t border-gray-100 dark:border-slate-700/50">
               <button
                 onClick={handleOpenProvision}
-                disabled={!["active", "draft"].includes(cls.status)}
+                disabled={!["active", "draft", "upcoming"].includes(cls.status)}
                 className={clsx(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-all",
-                  ["active", "draft"].includes(cls.status)
-                    ? "bg-fuchsia-600 text-white hover:bg-fuchsia-500"
-                    : "bg-secondary/20 text-secondary/40 cursor-not-allowed"
+                  "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                  ["active", "draft", "upcoming"].includes(cls.status)
+                    ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-400 cursor-not-allowed"
                 )}
               >
-                <Sparkles className="w-3.5 h-3.5" /> Provision
+                <Sparkles className="w-4 h-4" />
+                Build Fleet
               </button>
-              <button onClick={handleOpenDeletion} className="flex items-center gap-1 px-2 py-1.5 text-secondary hover:text-red-400 hover:bg-red-500/10 rounded text-[10px] font-medium">
-                <Trash2 className="w-3.5 h-3.5" /> Delete
+              <button 
+                onClick={handleOpenDeletion} 
+                className="flex items-center gap-1.5 px-3 py-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-xs font-medium transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
               </button>
             </div>
           </div>
         )}
       </div>
-
 
       {/* Status Modals */}
       <ProvisioningStatusModal

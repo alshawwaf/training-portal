@@ -140,7 +140,8 @@ class VSphereService:
 
         except Exception as e:
             vsphere_logger.error(f"Failed to connect to vSphere {h}: {e}", exc_info=True)
-            return {"success": False, "message": str(e)}
+            friendly_message = self._get_friendly_error_message(str(e))
+            return {"success": False, "message": friendly_message}
 
     def test_connection(self, host: str, user: str, password: str, 
                         port: int = 443, verify_ssl: bool = False) -> Dict[str, Any]:
@@ -169,7 +170,53 @@ class VSphereService:
                  "fullName": about.fullName
              }
         except Exception as e:
-            return {"success": False, "message": str(e)}
+            # Parse common vSphere errors into user-friendly messages
+            error_str = str(e)
+            friendly_message = self._get_friendly_error_message(error_str)
+            return {"success": False, "message": friendly_message}
+    
+    def _get_friendly_error_message(self, error: str) -> str:
+        """Convert technical vSphere errors to user-friendly messages."""
+        error_lower = error.lower()
+        
+        # Authentication errors
+        if "invalidlogin" in error_lower or "incorrect user name or password" in error_lower:
+            return "Invalid username or password. Please check your credentials."
+        
+        # Connection errors
+        if "connection refused" in error_lower:
+            return "Connection refused. Please verify the host address and port are correct."
+        if "timed out" in error_lower or "timeout" in error_lower:
+            return "Connection timed out. The server may be unreachable or behind a firewall."
+        if "name resolution" in error_lower or "getaddrinfo" in error_lower or "nodename nor servname" in error_lower:
+            return "Cannot resolve hostname. Please check the server address."
+        if "ssl" in error_lower and ("certificate" in error_lower or "handshake" in error_lower):
+            return "SSL/TLS error. Try enabling 'Verify SSL' or check the server's certificate."
+        if "connection reset" in error_lower:
+            return "Connection was reset by the server. The server may not be running or is rejecting connections."
+        if "no route to host" in error_lower:
+            return "No route to host. The server is not reachable from this network."
+        
+        # Permission errors
+        if "permission" in error_lower or "not authorized" in error_lower:
+            return "Permission denied. The user may not have sufficient privileges."
+        
+        # Generic fallback - extract the most useful part
+        # Try to find the 'msg' field in vmodl errors
+        import re
+        msg_match = re.search(r"msg\s*=\s*'([^']+)'", error)
+        if msg_match:
+            return msg_match.group(1)
+        
+        # If error is very long, truncate it
+        if len(error) > 150:
+            # Try to get just the first line or up to first bracket
+            first_line = error.split('\n')[0].split('{')[0].strip()
+            if first_line:
+                return first_line
+            return error[:150] + "..."
+        
+        return error
 
     def get_session(self, connection_id: Optional[int] = None) -> Optional[vim.ServiceInstance]:
         """Get or create session for a specific connection_id."""
@@ -343,6 +390,53 @@ class VSphereService:
             vsphere_logger.error(f"Error getting hosts: {e}")
             return []
 
+    def get_datastores(self, connection_id: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get list of datastores with capacity and free space."""
+        si = self.get_session(connection_id)
+        if not si:
+            return []
+
+        try:
+            content = si.content
+            container = content.viewManager.CreateContainerView(
+                content.rootFolder, [vim.Datastore], True
+            )
+            datastores = []
+            for ds in container.view:
+                try:
+                    summary = ds.summary
+                    capacity_gb = round(summary.capacity / (1024**3), 1) if summary.capacity else 0
+                    free_gb = round(summary.freeSpace / (1024**3), 1) if summary.freeSpace else 0
+                    used_gb = capacity_gb - free_gb
+                    used_percent = round((used_gb / capacity_gb) * 100, 1) if capacity_gb > 0 else 0
+                    
+                    datastores.append({
+                        "name": ds.name,
+                        "moid": ds._moId,
+                        "type": summary.type,  # VMFS, NFS, vsan, etc.
+                        "capacity_gb": capacity_gb,
+                        "free_gb": free_gb,
+                        "used_gb": used_gb,
+                        "used_percent": used_percent,
+                        "accessible": summary.accessible,
+                        "maintenance_mode": summary.maintenanceMode if hasattr(summary, 'maintenanceMode') else None
+                    })
+                except Exception as ds_err:
+                    vsphere_logger.warning(f"Error reading datastore {ds.name}: {ds_err}")
+                    datastores.append({
+                        "name": ds.name,
+                        "moid": ds._moId,
+                        "type": "unknown",
+                        "capacity_gb": 0,
+                        "free_gb": 0,
+                        "accessible": False
+                    })
+            container.Destroy()
+            return datastores
+        except Exception as e:
+            vsphere_logger.error(f"Error getting datastores: {e}")
+            return []
+
 
     def sync_inventory(self, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """Fetch all inventory and save to JSON cache."""
@@ -430,9 +524,17 @@ class VSphereService:
             current = self.ensure_folder(current, name)
         return current
 
-    def provision_vm(self, vm_moid: str, new_name: str, resource_pool: str = None, folder_path: List[str] = None, connection_id: Optional[int] = None) -> Dict[str, Any]:
+    def provision_vm(self, vm_moid: str, new_name: str, resource_pool: str = None, folder_path: List[str] = None, datastore_name: Optional[str] = None, connection_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Clone a VM from a template.
+        
+        Args:
+            vm_moid: MOID of the template/source VM
+            new_name: Name for the cloned VM
+            resource_pool: (unused, auto-detected)
+            folder_path: Optional folder path for the VM
+            datastore_name: Optional datastore name for cloning (uses template's if not specified)
+            connection_id: vSphere connection to use
         """
         # Validate we are connected
         si = self.get_session(connection_id)
@@ -441,7 +543,7 @@ class VSphereService:
              return {"success": False, "message": "Not connected to vSphere"}
 
         try:
-            vsphere_logger.info(f"Starting VM provisioning: template_moid={vm_moid}, new_name={new_name}")
+            vsphere_logger.info(f"Starting VM provisioning: template_moid={vm_moid}, new_name={new_name}, datastore={datastore_name}")
             content = si.content
             template_vm = self._get_obj([vim.VirtualMachine], vm_moid, si)
 
@@ -480,12 +582,25 @@ class VSphereService:
 
             # Basic Clone Spec
             relospec = vim.vm.RelocateSpec()
-            relospec.pool = resource_pool  # REQUIRED for cloning 
+            relospec.pool = resource_pool  # REQUIRED for cloning
+            
+            # Set target datastore if specified
+            if datastore_name:
+                try:
+                    datastore = self._get_obj_by_name([vim.Datastore], datastore_name, si)
+                    if datastore:
+                        relospec.datastore = datastore
+                        vsphere_logger.info(f"Using target datastore: {datastore_name}")
+                    else:
+                        vsphere_logger.warning(f"Datastore '{datastore_name}' not found, using template's datastore")
+                except Exception as ds_err:
+                    vsphere_logger.warning(f"Error finding datastore: {ds_err}")
 
             clonespec = vim.vm.CloneSpec()
             clonespec.location = relospec
             clonespec.powerOn = True # Power on after clone
             clonespec.template = False 
+
             
             # Target Folder Strategy:
             target_folder = None
@@ -537,7 +652,23 @@ class VSphereService:
                 if new_vm.guest:
                     ip = new_vm.guest.ipAddress
                 
-                vsphere_logger.info(f"VM provisioned successfully: {new_vm.name}, MOID: {new_vm._moId}, IP: {ip}")
+                # Extract hardware specs
+                cpu_cores = None
+                ram_mb = None
+                disk_gb = None
+                
+                if new_vm.config and new_vm.config.hardware:
+                    cpu_cores = new_vm.config.hardware.numCPU
+                    ram_mb = new_vm.config.hardware.memoryMB
+                    
+                    # Calculate total disk from all virtual disks
+                    total_disk_kb = 0
+                    for device in new_vm.config.hardware.device:
+                        if isinstance(device, vim.vm.device.VirtualDisk):
+                            total_disk_kb += device.capacityInKB
+                    disk_gb = int(total_disk_kb / 1024 / 1024) if total_disk_kb > 0 else None
+                
+                vsphere_logger.info(f"VM provisioned successfully: {new_vm.name}, MOID: {new_vm._moId}, IP: {ip}, CPU: {cpu_cores}, RAM: {ram_mb}MB, Disk: {disk_gb}GB")
 
 
                 # Create Initial Snapshot
@@ -558,8 +689,12 @@ class VSphereService:
                     "message": "VM Provisioned Successfully",
                     "vm_name": new_vm.name,
                     "vm_moid": new_vm._moId,
-                    "ip_address": ip
+                    "ip_address": ip,
+                    "cpu_cores": cpu_cores,
+                    "ram_mb": ram_mb,
+                    "disk_gb": disk_gb
                 }
+
             else:
                  vsphere_logger.error(f"Clone task failed: {result['message']}")
                  return {"success": False, "message": result["message"]}
@@ -930,6 +1065,22 @@ class VSphereService:
         
         container.Destroy()
         return obj
+
+    def _get_obj_by_name(self, vim_type_list, name: str, si: vim.ServiceInstance):
+        """Find a vSphere object by name."""
+        try:
+            content = si.content
+            for vim_type in vim_type_list:
+                container = content.viewManager.CreateContainerView(content.rootFolder, [vim_type], True)
+                for obj in container.view:
+                    if obj.name == name:
+                        container.Destroy()
+                        return obj
+                container.Destroy()
+            return None
+        except Exception as e:
+            vsphere_logger.error(f"Error finding object by name '{name}': {e}")
+            return None
 
     def _get_or_create_folder(self, parent_folder, folder_name):
         """

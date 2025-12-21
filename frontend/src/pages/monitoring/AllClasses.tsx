@@ -6,6 +6,7 @@ import {
     RefreshCw, Download, Search, Filter, Calendar,
     TrendingUp
 } from 'lucide-react';
+import clsx from 'clsx';
 
 // Import Shared Components
 import ClassDetailsModal from '../../components/classes/ClassDetailsModal';
@@ -13,14 +14,7 @@ import EditClassModal from '../../components/classes/EditClassModal';
 
 // Import Types
 import type { ClassModel, Template } from '../../types/class';
-
-// Status Config
-const statusColors: Record<string, { bg: string; text: string; dot: string }> = {
-    draft: { bg: 'bg-gray-500/10', text: 'text-gray-400', dot: 'bg-gray-500' },
-    active: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-500' },
-    completed: { bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500' },
-    cancelled: { bg: 'bg-rose-500/10', text: 'text-rose-400', dot: 'bg-rose-500' },
-};
+import { statusConfig } from '../../types/class';
 
 const AllClasses: React.FC = () => {
     const { showToast } = useToast();
@@ -244,7 +238,7 @@ const AllClasses: React.FC = () => {
                         </thead>
                         <tbody className="divide-y border-theme">
                             {filteredClasses.map(cls => {
-                                const statusStyle = statusColors[cls.status] || statusColors.draft;
+                                const config = statusConfig[cls.status] || statusConfig.draft;
                                 return (
                                     <tr key={cls.id} className="hover:bg-secondary/30 transition-colors group">
                                         <td className="p-4">
@@ -261,9 +255,13 @@ const AllClasses: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
-                                                {cls.status.charAt(0).toUpperCase() + cls.status.slice(1)}
+                                            <span className={clsx(
+                                                "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest border",
+                                                config.bgColor,
+                                                config.color
+                                            )}>
+                                                <span className={clsx("w-1.5 h-1.5 rounded-full", config.color.replace('text-', 'bg-'))} />
+                                                {config.label}
                                             </span>
                                         </td>
                                         <td className="p-4">

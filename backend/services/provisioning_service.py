@@ -50,7 +50,8 @@ class ProvisioningService:
             folder_path = ["SE_Training_Portal", db_class.name, env.name]
             
             try:
-                # Provision VM
+                # Provision VM - use class's target datastore if specified
+                target_datastore = db_class.target_datastore
                 loop = asyncio.get_event_loop()
                 result = await loop.run_in_executor(
                     None, 
@@ -58,6 +59,7 @@ class ProvisioningService:
                         vm_moid=tmpl_vm.vm_moid,
                         new_name=vm_name,
                         folder_path=folder_path,
+                        datastore_name=target_datastore,
                         connection_id=template.connection_id
                     )
                 )
@@ -72,10 +74,14 @@ class ProvisioningService:
                         access_protocol=tmpl_vm.access_protocol,
                         access_port=tmpl_vm.access_port,
                         role=tmpl_vm.is_primary and "Primary" or None,
-                        status="poweredOn" # Service powers it on by default
+                        status="poweredOn", # Service powers it on by default
+                        cpu_cores=result.get("cpu_cores"),
+                        ram_mb=result.get("ram_mb"),
+                        disk_gb=result.get("disk_gb")
                     )
                     db.add(env_vm)
                     provisioned_vms.append(env_vm)
+
                 else:
                     errors.append(f"Failed to provision {vm_name}: {result.get('message')}")
             except Exception as e:

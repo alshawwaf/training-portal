@@ -46,6 +46,9 @@ class VMInfo(BaseModel):
     os_type: Optional[str]
     status: Optional[str]
     ip_address: Optional[str]
+    cpu_cores: Optional[int] = None
+    ram_mb: Optional[int] = None
+    disk_gb: Optional[int] = None
 
 class EnvironmentResponse(BaseModel):
     id: int
@@ -219,28 +222,41 @@ def get_student_environment(session_token: str, db: Session = Depends(get_db)):
                     vm.status = new_status
                     db.add(vm)
             
-            # Fetch live IP if powered on
+            # Fetch live IP and specs if powered on
             if vm.status == "poweredOn":
-                # Get live details
                 try:
-                    # We need a method to get live IP, or use get_vms if efficient?
-                    # Let's check vsphere_service for a better way. 
-                    # For now, let's assume we can get it via a custom helper or the existing get_session.
                     si = vsphere_service.get_session(connection_id)
                     from pyVmomi import vim
                     vm_obj = vsphere_service._get_obj([vim.VirtualMachine], vm.vm_moid, si)
-                    if vm_obj and vm_obj.guest and vm_obj.guest.ipAddress:
-                        if vm.ip_address != vm_obj.guest.ipAddress:
-                            vm.ip_address = vm_obj.guest.ipAddress
+                    if vm_obj:
+                        # Sync IP
+                        if vm_obj.guest and vm_obj.guest.ipAddress:
+                            if vm.ip_address != vm_obj.guest.ipAddress:
+                                vm.ip_address = vm_obj.guest.ipAddress
+                                db.add(vm)
+                        
+                        # Sync hardware specs if missing
+                        if (vm.cpu_cores is None or vm.ram_mb is None) and vm_obj.config and vm_obj.config.hardware:
+                            vm.cpu_cores = vm_obj.config.hardware.numCPU
+                            vm.ram_mb = vm_obj.config.hardware.memoryMB
+                            
+                            # Calculate disk
+                            total_disk_kb = 0
+                            for device in vm_obj.config.hardware.device:
+                                if isinstance(device, vim.vm.device.VirtualDisk):
+                                    total_disk_kb += device.capacityInKB
+                            if total_disk_kb > 0:
+                                vm.disk_gb = int(total_disk_kb / 1024 / 1024)
                             db.add(vm)
                 except:
                     pass
         except Exception as e:
             logger.warning(f"Failed to sync state for VM {vm.vm_name}: {e}")
 
+
     db.commit()
 
-    # Re-fetch for response
+    # Re-fetch for response with hardware specs
     vm_list = [
         VMInfo(
             id=vm.id,
@@ -248,7 +264,10 @@ def get_student_environment(session_token: str, db: Session = Depends(get_db)):
             role=vm.role,
             os_type=vm.os_type,
             status=vm.status or "unknown",
-            ip_address=vm.ip_address
+            ip_address=vm.ip_address,
+            cpu_cores=vm.cpu_cores,
+            ram_mb=vm.ram_mb,
+            disk_gb=vm.disk_gb
         )
         for vm in db_vms
     ]

@@ -308,3 +308,175 @@ async def get_inventory(connection_id: int, db: Session = Depends(get_db), curre
              return {"success": False, "message": f"Inventory not supported for {connection.provider}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{connection_id}/datastores")
+async def get_datastores(connection_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_admin_user)):
+    """Get list of datastores with capacity and free space for a vSphere connection."""
+    connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    if connection.provider.lower() != "vsphere":
+        raise HTTPException(status_code=400, detail="Datastores only supported for vSphere")
+    
+    try:
+        from services.vsphere_service import vsphere_service
+        datastores = vsphere_service.get_datastores(connection_id=connection_id)
+        return {"success": True, "datastores": datastores}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============== VM Actions ==============
+
+class VMPowerRequest(BaseModel):
+    action: str  # start, stop, suspend, reset
+
+class VMCloneRequest(BaseModel):
+    new_name: str
+
+@router.post("/{connection_id}/vms/{vm_moid}/power")
+async def vm_power_action(
+    connection_id: int, 
+    vm_moid: str, 
+    request: VMPowerRequest,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_admin_user)
+):
+    """Control VM power state (start, stop, suspend, reset)."""
+    connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    if connection.provider.lower() != "vsphere":
+        raise HTTPException(status_code=400, detail="VM power control only supported for vSphere")
+    
+    try:
+        svc = VSphereService()
+        svc.host = connection.host
+        svc.user = connection.user
+        svc.password = connection.password
+        svc.port = connection.port
+        svc.verify_ssl = connection.verify_ssl
+        
+        result = svc.control_vm_power(vm_moid, request.action)
+        
+        logging_service.log_action(
+            db,
+            action=f"VM_{request.action.upper()}",
+            entity_name=vm_moid,
+            source="VSPHERE",
+            level="SUCCESS" if result.get("success") else "ERROR",
+            details=result.get("message", ""),
+            user_id=current_user.id
+        )
+        
+        return result
+    except Exception as e:
+        logging_service.log_action(
+            db,
+            action=f"VM_{request.action.upper()}",
+            entity_name=vm_moid,
+            source="VSPHERE",
+            level="ERROR",
+            details=str(e),
+            user_id=current_user.id
+        )
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/{connection_id}/vms/{vm_moid}/clone")
+async def vm_clone(
+    connection_id: int, 
+    vm_moid: str, 
+    request: VMCloneRequest,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_admin_user)
+):
+    """Clone a VM."""
+    connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    if connection.provider.lower() != "vsphere":
+        raise HTTPException(status_code=400, detail="VM cloning only supported for vSphere")
+    
+    try:
+        svc = VSphereService()
+        svc.host = connection.host
+        svc.user = connection.user
+        svc.password = connection.password
+        svc.port = connection.port
+        svc.verify_ssl = connection.verify_ssl
+        
+        result = svc.clone_vm(vm_moid, request.new_name)
+        
+        logging_service.log_action(
+            db,
+            action="VM_CLONE",
+            entity_name=f"{vm_moid} -> {request.new_name}",
+            source="VSPHERE",
+            level="SUCCESS" if result.get("success") else "ERROR",
+            details=result.get("message", ""),
+            user_id=current_user.id
+        )
+        
+        return result
+    except Exception as e:
+        logging_service.log_action(
+            db,
+            action="VM_CLONE",
+            entity_name=vm_moid,
+            source="VSPHERE",
+            level="ERROR",
+            details=str(e),
+            user_id=current_user.id
+        )
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/{connection_id}/vms/{vm_moid}")
+async def vm_delete(
+    connection_id: int, 
+    vm_moid: str,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_admin_user)
+):
+    """Delete a VM."""
+    connection = db.query(InfrastructureConnection).filter(InfrastructureConnection.id == connection_id).first()
+    if not connection:
+        raise HTTPException(status_code=404, detail="Connection not found")
+    
+    if connection.provider.lower() != "vsphere":
+        raise HTTPException(status_code=400, detail="VM deletion only supported for vSphere")
+    
+    try:
+        svc = VSphereService()
+        svc.host = connection.host
+        svc.user = connection.user
+        svc.password = connection.password
+        svc.port = connection.port
+        svc.verify_ssl = connection.verify_ssl
+        
+        result = svc.delete_vm(vm_moid)
+        
+        logging_service.log_action(
+            db,
+            action="VM_DELETE",
+            entity_name=vm_moid,
+            source="VSPHERE",
+            level="SUCCESS" if result.get("success") else "ERROR",
+            details=result.get("message", ""),
+            user_id=current_user.id
+        )
+        
+        return result
+    except Exception as e:
+        logging_service.log_action(
+            db,
+            action="VM_DELETE",
+            entity_name=vm_moid,
+            source="VSPHERE",
+            level="ERROR",
+            details=str(e),
+            user_id=current_user.id
+        )
+        raise HTTPException(status_code=500, detail=str(e))

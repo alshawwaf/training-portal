@@ -8,6 +8,16 @@ import { useToast } from '../../context/ToastContext';
 import api from '../../api';
 import clsx from 'clsx';
 
+interface Datastore {
+    name: string;
+    moid: string;
+    type: string;
+    capacity_gb: number;
+    free_gb: number;
+    used_percent: number;
+    accessible: boolean;
+}
+
 interface CreateClassModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -37,6 +47,9 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
     const [form, setForm] = useState(defaultForm);
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>(new Date(Date.now() + 7*24*60*60*1000));
+    const [datastores, setDatastores] = useState<Datastore[]>([]);
+    const [loadingDatastores, setLoadingDatastores] = useState(false);
+    const [selectedDatastore, setSelectedDatastore] = useState<string>('');
 
     // Reset form when opening
     React.useEffect(() => {
@@ -45,8 +58,35 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
              setStartDate(new Date());
              setEndDate(new Date(Date.now() + 7*24*60*60*1000));
              setIsTemplateDropdownOpen(false);
+             setDatastores([]);
+             setSelectedDatastore('');
         }
     }, [isOpen]);
+
+    // Fetch datastores when template is selected
+    React.useEffect(() => {
+        const fetchDatastores = async () => {
+            if (!form.template_id) {
+                setDatastores([]);
+                return;
+            }
+            const template = templates.find(t => t.id.toString() === form.template_id);
+            if (!template?.connection_id) return;
+
+            setLoadingDatastores(true);
+            try {
+                const res = await api.get(`/infrastructure-connections/${template.connection_id}/datastores`);
+                if (res.data.success) {
+                    setDatastores(res.data.datastores || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch datastores:', err);
+            } finally {
+                setLoadingDatastores(false);
+            }
+        };
+        fetchDatastores();
+    }, [form.template_id, templates]);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,7 +102,8 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                 ...form,
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
-                template_id: Number(form.template_id)
+                template_id: Number(form.template_id),
+                target_datastore: selectedDatastore || null
             };
 
             const res = await api.post('/classes/', payload);
@@ -105,9 +146,9 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
             onClose={onClose}
             title="Create New Class"
             icon={<Sparkles className="w-4 h-4 text-blue-400" />}
-            maxWidth="md"
+            maxWidth="sm"
         >
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="space-y-3">
                 {/* Row 1: Name + Passcode */}
                 <div className="flex gap-3">
                     <div className="flex-1">
@@ -116,7 +157,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                             type="text"
                             value={form.name}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm font-medium placeholder:text-gray-400"
+                            className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm font-medium placeholder:text-gray-400"
                             placeholder="e.g. Advanced Cybersecurity"
                             required
                             autoFocus
@@ -145,7 +186,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                         type="text"
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm placeholder:text-gray-400"
+                        className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm placeholder:text-gray-400"
                         placeholder="Brief description..."
                     />
                 </div>
@@ -159,7 +200,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                             onChange={(date) => date && setStartDate(date)}
                             showTimeSelect
                             dateFormat="MM/dd/yy"
-                            className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm"
+                            className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm"
                         />
                     </div>
                     <div className="flex-1">
@@ -170,7 +211,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                             showTimeSelect
                             dateFormat="MM/dd/yy"
                             minDate={startDate}
-                            className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm"
+                            className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm"
                         />
                     </div>
                 </div>
@@ -185,8 +226,8 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                             className={clsx(
                                 "w-full flex items-center justify-between px-3 py-2 rounded-lg border transition-all",
                                 isTemplateDropdownOpen 
-                                    ? "bg-white dark:bg-slate-800 border-blue-500/50 shadow-lg" 
-                                    : "bg-gray-100 dark:bg-slate-800 border-gray-300 dark:border-slate-600 hover:border-blue-400"
+                                    ? "bg-white dark:bg-slate-900 border-blue-500/50 shadow-lg" 
+                                    : "bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 hover:border-blue-400"
                             )}
                         >
                             <div className="flex items-center gap-2">
@@ -199,7 +240,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                 <div className="text-left">
                                     {selectedTemplate ? (
                                         <>
-                                            <div className="text-sm font-medium text-gray-900 dark:text-white">{selectedTemplate.name}</div>
+                                            <div className="text-sm font-medium text-slate-900 dark:text-white">{selectedTemplate.name}</div>
                                             <div className="text-[10px] text-blue-500">{selectedTemplate.provider}</div>
                                         </>
                                     ) : (
@@ -211,7 +252,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                         </button>
 
                         {isTemplateDropdownOpen && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg shadow-xl z-50 overflow-hidden">
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
                                 <div className="max-h-48 overflow-y-auto">
                                     {templates.map(template => {
                                         const ItemIcon = getProviderIcon(template.provider);
@@ -227,17 +268,17 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                                                     "w-full flex items-center gap-3 px-3 py-2 transition-colors",
                                                     form.template_id === template.id.toString()
                                                         ? "bg-blue-50 dark:bg-blue-500/10" 
-                                                        : "hover:bg-gray-50 dark:hover:bg-slate-700"
+                                                        : "hover:bg-slate-50 dark:hover:bg-slate-800"
                                                 )}
                                             >
                                                 <div className={clsx(
                                                     "w-7 h-7 rounded-lg flex items-center justify-center",
-                                                    form.template_id === template.id.toString() ? "bg-blue-500 text-white" : "bg-gray-100 dark:bg-slate-700 text-secondary"
+                                                    form.template_id === template.id.toString() ? "bg-blue-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-secondary"
                                                 )}>
                                                     <ItemIcon className="w-3.5 h-3.5" />
                                                 </div>
                                                 <div className="flex-1 text-left">
-                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">{template.name}</div>
+                                                    <div className="text-sm font-medium text-slate-900 dark:text-white">{template.name}</div>
                                                     <div className="text-[10px] text-secondary">{template.description || template.provider}</div>
                                                 </div>
                                                 {form.template_id === template.id.toString() && (
@@ -268,42 +309,57 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({ isOpen, onClose, on
                     </label>
                 </div>
 
-                {/* Footer Actions */}
-                <div className="flex items-center gap-3 pt-3 border-t border-gray-200 dark:border-slate-700">
+                {/* Row 6: Target Datastore (only show when template is selected) */}
+                {form.template_id && (
+                    <div>
+                        <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">
+                            Target Datastore (optional)
+                        </label>
+                        <select
+                            value={selectedDatastore}
+                            onChange={(e) => setSelectedDatastore(e.target.value)}
+                            disabled={loadingDatastores}
+                            className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white text-sm"
+                        >
+                            <option value="">Use template's datastore</option>
+                            {datastores.filter(ds => ds.accessible).map(ds => (
+                                <option key={ds.moid} value={ds.name}>
+                                    {ds.name} ({ds.type}) — {ds.free_gb.toFixed(0)} GB free of {ds.capacity_gb.toFixed(0)} GB
+                                </option>
+                            ))}
+                        </select>
+                        {loadingDatastores && (
+                            <p className="text-xs text-secondary mt-1">Loading datastores...</p>
+                        )}
+                    </div>
+                )}
+
+                {/* Footer Actions - Compact */}
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         Cancel
                     </button>
                     
-                    <div className="flex-1 flex items-center justify-end gap-2">
+                    <div className="flex items-center gap-2">
                         <select
                             value={form.status === 'active' ? 'now' : 'later'}
                             onChange={(e) => setForm({ ...form, status: e.target.value === 'now' ? 'active' : 'draft' })}
-                            className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white"
+                            className="px-2 py-1.5 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded text-xs font-medium text-gray-900 dark:text-white"
                         >
                             <option value="now">Provision Now</option>
-                            <option value="later">Provision Later (Draft)</option>
+                            <option value="later">Provision Later</option>
                         </select>
 
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium text-sm shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] disabled:opacity-50"
+                            className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-semibold transition-all disabled:opacity-50"
                         >
-                            {isSubmitting ? (
-                                <>
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Creating...
-                                </>
-                            ) : (
-                                <>
-                                    <Check className="w-4 h-4" />
-                                    Create Class
-                                </>
-                            )}
+                            {isSubmitting ? 'Creating...' : 'Create Class'}
                         </button>
                     </div>
                 </div>

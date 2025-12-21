@@ -5,6 +5,7 @@ from db.models import User, Group, UserGroup, Permission, GroupPermission
 import logging
 import random
 import string
+import datetime
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 from services.email_service import email_service
@@ -23,6 +24,8 @@ class UserRead(BaseModel):
     is_active: bool
     is_email_confirmed: bool
     must_change_password: bool
+    last_login: Optional[datetime.datetime] = None
+    invited_at: Optional[datetime.datetime] = None
     
     class Config:
         from_attributes = True
@@ -80,13 +83,15 @@ async def invite_user(invite: UserInvite, db: Session = Depends(get_db), admin: 
     # Generate random temp password
     temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
     
+    import datetime
     new_user = User(
         name=invite.name,
         email=invite.email,
         hashed_password=get_password_hash(temp_password),
         is_email_confirmed=True, # Pre-confirmed since admin invited them
         password_reset_required=invite.require_password_change,
-        role="instructor" # Default role, can be refined with groups
+        role="instructor", # Default role, can be refined with groups
+        invited_at=datetime.datetime.utcnow()
     )
     db.add(new_user)
     db.flush()

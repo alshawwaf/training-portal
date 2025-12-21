@@ -37,6 +37,7 @@ class User(Base):
     confirmation_code = Column(String, nullable=True)
     password_reset_required = Column(Boolean, default=False)
     last_login = Column(DateTime, nullable=True)
+    invited_at = Column(DateTime, nullable=True)
     @hybrid_property
     def must_change_password(self):
         return self.password_reset_required
@@ -109,8 +110,10 @@ class Class(Base):
     description = Column(Text, nullable=True)
     join_token = Column(String, unique=True, index=True, nullable=True)  # UUID for shareable join link
     allow_multi_env = Column(Boolean, default=False) # Allow same student to have multiple environments
+    target_datastore = Column(String, nullable=True)  # vSphere datastore name for cloning VMs
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
     
     instructor = relationship("User", back_populates="classes")
     template = relationship("Template")
@@ -276,7 +279,13 @@ class EnvironmentVM(Base):
     os_type = Column(String, nullable=True) # e.g. "windows", "linux"
     status = Column(String, default="poweredOff") # poweredOn, poweredOff
     
+    # VM Hardware Specs
+    cpu_cores = Column(Integer, nullable=True)  # Number of vCPUs
+    ram_mb = Column(Integer, nullable=True)     # RAM in MB
+    disk_gb = Column(Integer, nullable=True)    # Total disk in GB
+    
     environment = relationship("ClassEnvironment", back_populates="vms")
+
 
 
 class ActionLog(Base):

@@ -401,18 +401,6 @@ const Templates: React.FC = () => {
                             ? "Try refining your keywords or clear the search to see all templates."
                             : "Blueprints define the structure, network, and resources for your training environments."}
                     </p>
-                    {!searchTerm && (
-                        <button
-                            onClick={() => { 
-                                resetForm(); 
-                                setProviderModalOpen(true); 
-                            }}
-                            className="btn-primary"
-                        >
-                            <Plus className="w-5 h-5" />
-                            Initialize Catalog
-                        </button>
-                    )}
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -442,7 +430,7 @@ const Templates: React.FC = () => {
                             <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Name</label>
                             <input
                                 type="text"
-                                className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-gray-900 dark:text-white text-sm font-medium"
+                                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 text-sm font-medium"
                                 placeholder="e.g. Enterprise Lab v3"
                                 value={form.name}
                                 onChange={e => setForm({...form, name: e.target.value})}
@@ -469,14 +457,14 @@ const Templates: React.FC = () => {
                     <div className="flex gap-3">
                         <div className="w-28">
                             <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Provider</label>
-                            <div className="px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white">
+                            <div className="px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-900 dark:text-slate-100">
                                 {form.provider}
                             </div>
                         </div>
                         <div className="flex-1">
                             <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Connection</label>
                             <select
-                                className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white"
+                                className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-900 dark:text-slate-100"
                                 value={form.connection_id || ''}
                                 onChange={e => {
                                     setForm({...form, connection_id: e.target.value ? parseInt(e.target.value) : null});
@@ -496,7 +484,7 @@ const Templates: React.FC = () => {
                     <div>
                         <label className="text-[9px] font-bold text-secondary uppercase mb-1 block">Description (optional)</label>
                         <textarea
-                            className="w-full px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm text-gray-900 dark:text-white min-h-[60px] resize-none"
+                            className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-100 min-h-[60px] resize-none"
                             placeholder="Brief description..."
                             value={form.description}
                             onChange={e => setForm({...form, description: e.target.value})}
@@ -504,7 +492,7 @@ const Templates: React.FC = () => {
                     </div>
 
                     {/* VMs Section */}
-                    <div className="border-t border-gray-200 dark:border-slate-700 pt-3">
+                    <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold text-primary">VMs ({selectedVMs.length})</span>
                             <button 
@@ -554,23 +542,23 @@ const Templates: React.FC = () => {
                 </div>
             </Modal>
 
-            {/* VM Selector Modal */}
+            {/* VM Selector Modal - Compact Table Design */}
             <Modal 
                 isOpen={vmSelectorOpen} 
                 onClose={() => setVmSelectorOpen(false)} 
                 title="Select VMs"
                 icon={<Server className="w-4 h-4 text-purple-500" />}
-                maxWidth="lg"
+                maxWidth="md"
             >
-                <div className="space-y-3">
-                    {/* Search & Sync Row */}
+                <div className="space-y-2">
+                    {/* Search & Sync Row - Compact */}
                     <div className="flex items-center gap-2">
                         <div className="relative flex-1">
-                            <Search className="w-3.5 h-3.5 text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
+                            <Search className="w-3 h-3 text-secondary absolute left-2 top-1/2 -translate-y-1/2" />
                             <input 
                                 type="text"
-                                placeholder={`Filter ${form.provider} inventory...`}
-                                className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg text-sm"
+                                placeholder="Filter VMs..."
+                                className="w-full pl-7 pr-2 py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-white"
                                 value={inventorySearch}
                                 onChange={e => setInventorySearch(e.target.value)}
                             />
@@ -578,39 +566,87 @@ const Templates: React.FC = () => {
                         <button 
                             onClick={syncInventory}
                             disabled={loadingInventory}
-                            className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg text-xs font-medium transition-all"
+                            className="p-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 rounded text-xs transition-all"
                         >
                             <RefreshCw className={clsx("w-3.5 h-3.5", loadingInventory && "animate-spin")} />
-                            Refresh
                         </button>
                     </div>
 
-                    {/* VM List */}
-                    <div className="max-h-80 overflow-y-auto space-y-1 border border-gray-200 dark:border-slate-700 rounded-lg p-1">
+                    {/* Compact Table */}
+                    <div className="max-h-64 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-900/50">
                         {loadingInventory ? (
-                            [1,2,3,4].map(i => <div key={i} className="h-12 bg-gray-100 dark:bg-slate-800 animate-pulse rounded-lg" />)
+                            <div className="p-4 text-center text-xs text-secondary">Loading inventory...</div>
                         ) : filteredInventoryVMs.length > 0 ? (
-                            filteredInventoryVMs.map((vm: InventoryVM) => (
-                                <InventoryVMRow 
-                                    key={vm.moid} 
-                                    vm={vm} 
-                                    isSelected={selectedVMs.some(v => v.vm_moid === vm.moid)}
-                                    onToggle={() => toggleVMSelection(vm)}
-                                />
-                            ))
+                            <table className="w-full text-xs">
+                                <thead className="sticky top-0 bg-slate-100 dark:bg-slate-800">
+                                    <tr className="border-b border-slate-200 dark:border-slate-700">
+                                        <th className="w-8 p-1.5"></th>
+                                        <th className="text-left p-1.5 font-medium text-secondary">Name</th>
+                                        <th className="text-center p-1.5 font-medium text-secondary w-16">CPU</th>
+                                        <th className="text-center p-1.5 font-medium text-secondary w-16">RAM</th>
+                                        <th className="text-center p-1.5 font-medium text-secondary w-16">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredInventoryVMs.map((vm: InventoryVM) => {
+                                        const isSelected = selectedVMs.some(v => v.vm_moid === vm.moid);
+                                        return (
+                                            <tr 
+                                                key={vm.moid}
+                                                onClick={() => toggleVMSelection(vm)}
+                                                className={clsx(
+                                                    "cursor-pointer transition-colors border-b border-slate-100 dark:border-slate-800",
+                                                    isSelected 
+                                                        ? "bg-purple-500/10" 
+                                                        : "hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                )}
+                                            >
+                                                <td className="p-1.5 text-center">
+                                                    <div className={clsx(
+                                                        "w-4 h-4 rounded flex items-center justify-center border mx-auto",
+                                                        isSelected 
+                                                            ? "bg-purple-500 border-purple-500" 
+                                                            : "bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600"
+                                                    )}>
+                                                        {isSelected && <Check className="w-2.5 h-2.5 text-white stroke-[3]" />}
+                                                    </div>
+                                                </td>
+                                                <td className="p-1.5">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="font-medium text-slate-900 dark:text-white truncate max-w-[180px]">
+                                                            {vm.name}
+                                                        </span>
+                                                        {vm.is_template && (
+                                                            <span className="px-1 py-0.5 text-[8px] font-bold bg-purple-500/20 text-purple-500 rounded">TPL</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="p-1.5 text-center text-slate-500 dark:text-slate-400">{vm.num_cpu}</td>
+                                                <td className="p-1.5 text-center text-slate-500 dark:text-slate-400">{Math.round(vm.memory_mb/1024)}GB</td>
+                                                <td className="p-1.5 text-center">
+                                                    <span className={clsx(
+                                                        "inline-block w-2 h-2 rounded-full",
+                                                        vm.power_state === 'poweredOn' ? "bg-green-500" : "bg-slate-400"
+                                                    )} title={vm.power_state === 'poweredOn' ? 'Online' : 'Offline'} />
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
                         ) : (
-                            <div className="py-8 text-center text-sm text-secondary">No VMs found</div>
+                            <div className="py-6 text-center text-xs text-secondary">No VMs found</div>
                         )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-slate-700">
-                        <span className="text-xs font-medium text-secondary">{selectedVMs.length} VM(s) selected</span>
+                    {/* Footer - Compact */}
+                    <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] font-medium text-secondary">{selectedVMs.length} selected</span>
                         <button 
                             onClick={() => setVmSelectorOpen(false)}
-                            className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium text-sm hover:bg-purple-500 transition-colors"
+                            className="px-3 py-1.5 bg-purple-600 text-white rounded font-medium text-xs hover:bg-purple-500 transition-colors"
                         >
-                            Confirm Selection
+                            Confirm
                         </button>
                     </div>
                 </div>
@@ -740,53 +776,5 @@ const TemplateCard: React.FC<{ tpl: TemplateModel; onEdit: () => void; onDelete:
 };
 
 
-const InventoryVMRow: React.FC<{ vm: InventoryVM; isSelected: boolean; onToggle: () => void }> = ({ vm, isSelected, onToggle }) => (
-    <div 
-        onClick={onToggle}
-        className={clsx(
-            "flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all",
-            isSelected 
-                ? "bg-purple-500/10 border border-purple-500/30" 
-                : "bg-gray-50 dark:bg-slate-800/50 border border-transparent hover:border-purple-500/20 hover:bg-purple-500/5"
-        )}
-    >
-        {/* Checkbox */}
-        <div className={clsx(
-            "w-5 h-5 rounded flex items-center justify-center border transition-all shrink-0",
-            isSelected 
-                ? "bg-purple-500 border-purple-500" 
-                : "bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600"
-        )}>
-            {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
-        </div>
-
-        {/* Icon */}
-        <div className={clsx(
-            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
-            isSelected ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"
-        )}>
-            <Server className="w-4 h-4" />
-        </div>
-
-        {/* VM Info */}
-        <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{vm.name}</p>
-            <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-slate-400">
-                <span>{vm.num_cpu}vCPU</span>
-                <span>•</span>
-                <span>{Math.round(vm.memory_mb/1024)}GB</span>
-                <span>•</span>
-                <span className={vm.power_state === 'poweredOn' ? "text-green-500" : "text-gray-400"}>
-                    {vm.power_state === 'poweredOn' ? 'Online' : 'Offline'}
-                </span>
-            </div>
-        </div>
-
-        {/* Template badge */}
-        {vm.is_template && (
-            <span className="px-1.5 py-0.5 text-[9px] font-bold bg-purple-500/10 text-purple-500 rounded uppercase">TPL</span>
-        )}
-    </div>
-);
 
 export default Templates;

@@ -205,71 +205,17 @@ def get_console_page(
         }}
         body {{
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
         }}
-        .header {{
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #334155;
-            z-index: 100;
-        }}
-        .header h1 {{
-            color: #e2e8f0;
-            font-size: 16px;
-            font-weight: 600;
-        }}
-        .header .controls {{
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }}
-        .header .status {{
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #94a3b8;
-            font-size: 13px;
-        }}
-        .status-dot {{
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #fbbf24;
-            animation: pulse 2s infinite;
-        }}
-        .status-dot.connected {{ background: #22c55e; animation: none; }}
-        .status-dot.error {{ background: #ef4444; animation: none; }}
-        @keyframes pulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.5; }} }}
-
-        .btn {{
-            padding: 6px 12px;
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }}
-        .btn:hover {{ background: #2563eb; transform: translateY(-1px); }}
-        .btn-secondary {{ background: #475569; }}
-        .btn-secondary:hover {{ background: #64748b; }}
 
         #console-container {{
-            flex: 1;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #000;
             position: relative;
             overflow: hidden;
-            min-height: 0;
         }}
 
         #console-container:fullscreen {{
@@ -285,6 +231,53 @@ def get_console_page(
             align-items: center;
             justify-content: center;
         }}
+
+        /* Minimal floating control bar - appears on hover */
+        .control-bar {{
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }}
+        
+        #console-container:hover .control-bar {{
+            opacity: 1;
+        }}
+
+        .control-bar button {{
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }}
+        .control-bar button:hover {{
+            background: rgba(255, 255, 255, 0.2);
+        }}
+
+        .status-dot {{
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fbbf24;
+        }}
+        .status-dot.connected {{ background: #22c55e; }}
+        .status-dot.error {{ background: #ef4444; }}
 
         .loader {{
             position: absolute;
@@ -317,20 +310,22 @@ def get_console_page(
         }}
         .error-box h2 {{ color: #f87171; margin-bottom: 12px; }}
         .error-box p {{ color: #94a3b8; line-height: 1.6; margin-bottom: 20px; }}
+        .btn {{
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            margin: 0 4px;
+        }}
+        .btn:hover {{ background: #2563eb; }}
+        .btn-secondary {{ background: #475569; }}
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🖥️ {env_vm.vm_name}</h1>
-        <div class="controls">
-            <button class="btn btn-secondary" id="cad-button">Ctrl+Alt+Del</button>
-            <button class="btn btn-secondary" id="fullscreen-button">Fullscreen</button>
-            <div class="status">
-                <span class="status-dot" id="status-dot"></span>
-                <span id="status-text">Connecting...</span>
-            </div>
-        </div>
-    </div>
     <div id="console-container">
         <div class="loader" id="loader">
             <div class="spinner"></div>
@@ -338,7 +333,15 @@ def get_console_page(
             <p>Establishing secure console session...</p>
         </div>
         <div id="vnc-canvas-container"></div>
+        
+        <!-- Minimal floating control bar -->
+        <div class="control-bar">
+            <span class="status-dot" id="status-dot"></span>
+            <button id="cad-button">Ctrl+Alt+Del</button>
+            <button id="fullscreen-button">Fullscreen</button>
+        </div>
     </div>
+
 
     <script type="module">
         import RFB from '/noVNC-master/core/rfb.js';

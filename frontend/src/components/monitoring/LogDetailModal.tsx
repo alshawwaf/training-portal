@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { X, Activity, Server, User, FileText, AlertCircle, CheckCircle, XCircle, Info, Hash, Tag, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -95,6 +96,14 @@ const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, onClose }) => {
         return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     };
 
+    // Convert SNAKE_CASE to Title Case
+    const formatAction = (action: string) => {
+        return action
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     // Try to parse details as JSON for pretty display
     let parsedDetails: Record<string, unknown> | null = null;
 
@@ -106,8 +115,8 @@ const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, onClose }) => {
         }
     }
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-200 dark:bg-slate-900">
             <div 
                 ref={modalRef}
                 className="glass border border-theme rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
@@ -119,7 +128,7 @@ const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, onClose }) => {
                             <LevelIcon className={clsx("w-6 h-6", levelStyle.color)} />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-primary">{log.action}</h2>
+                            <h2 className="text-lg font-bold text-primary">{formatAction(log.action)}</h2>
                             <p className="text-sm text-secondary">{log.entity_name}</p>
                         </div>
                     </div>
@@ -172,8 +181,8 @@ const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, onClose }) => {
                                 <Tag className="w-3.5 h-3.5" />
                                 Action Type
                             </div>
-                            <p className="text-sm font-semibold text-primary">{log.action}</p>
-                            <p className="text-xs text-secondary mt-1 capitalize">{log.action.replace(/_/g, ' ').toLowerCase()}</p>
+                            <p className="text-sm font-semibold text-primary">{formatAction(log.action)}</p>
+                            <p className="text-xs text-secondary mt-1">{log.action}</p>
                         </div>
                         <div className="glass border border-theme rounded-xl p-4">
                             <div className="flex items-center gap-2 text-xs text-secondary mb-2">
@@ -234,7 +243,8 @@ const LogDetailModal: React.FC<LogDetailModalProps> = ({ log, onClose }) => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

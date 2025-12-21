@@ -6,7 +6,6 @@ import {
   Monitor,
   BookOpen,
   Activity,
-  Plus,
   Calendar,
   Clock,
   ArrowRight,
@@ -126,15 +125,6 @@ const Dashboard: React.FC = () => {
             Here's what's happening with your training platform today.
           </p>
         </div>
-        {isAdmin && (
-          <Link
-            to="/classes"
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Plus className="w-4 h-4" />
-            New Class
-          </Link>
-        )}
       </div>
 
       {isLoading ? (

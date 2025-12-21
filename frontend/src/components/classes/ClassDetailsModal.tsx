@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    MoreVertical, Eye, Trash2, Search, Calendar, Users, Server, Play, Square, RotateCcw, Key, RefreshCw, Monitor, ChevronDown, ChevronRight, Pause 
+    Eye, Trash2, Search, Calendar, Users, Server, Play, Square, RotateCcw, Key, RefreshCw, Monitor, ChevronDown, ChevronRight, Pause 
 } from 'lucide-react';
+import clsx from 'clsx';
 import Modal from '../Modal';
 
 import type { ClassModel, ClassEnvironment } from '../../types/class';
@@ -20,10 +21,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
     const [loadingEnvs, setLoadingEnvs] = useState(false);
     const [envSearch, setEnvSearch] = useState('');
     const [expandedEnvId, setExpandedEnvId] = useState<number | null>(null);
-    
-    // Action menu states
-    const [openEnvMenuId, setOpenEnvMenuId] = useState<number | null>(null);
-    const [openVmMenuId, setOpenVmMenuId] = useState<number | null>(null);
 
     useEffect(() => {
         if (classData && isOpen) {
@@ -49,7 +46,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
             await api.post(`/classes/environments/${envId}/power`, { action });
             showToast(`Environment ${action} triggered`, 'success');
             if (classData) fetchEnvironments(classData.id);
-            setOpenEnvMenuId(null);
         } catch (error) {
             console.error(`Failed to ${action} environment:`, error);
             showToast(`Failed to ${action} environment`, 'error');
@@ -62,7 +58,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
             await api.post(`/classes/environments/${envId}/revert`);
             showToast('Environment revert triggered', 'success');
             if (classData) fetchEnvironments(classData.id);
-            setOpenEnvMenuId(null);
         } catch (error) {
             console.error('Failed to revert environment:', error);
             showToast('Failed to revert environment', 'error');
@@ -75,7 +70,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
             await api.delete(`/classes/environments/${envId}`);
             showToast('Environment deleted', 'success');
             if (classData) fetchEnvironments(classData.id);
-            setOpenEnvMenuId(null);
         } catch (error) {
              console.error('Failed to delete environment:', error);
              showToast('Failed to delete environment', 'error');
@@ -88,7 +82,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
             await api.post(`/classes/environments/${classData.id}/vms/${vmId}/power`, { action });
             showToast(`VM ${action} command sent`, 'success');
             if (classData) fetchEnvironments(classData.id);
-            setOpenVmMenuId(null);
         } catch (error) {
             console.error(`Failed to ${action} VM:`, error);
             showToast(`Failed to ${action} VM`, 'error');
@@ -102,7 +95,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
             await api.post(`/classes/environments/${classData.id}/vms/${vmId}/power`, { action: 'revert' });
             showToast('VM revert started', 'success');
             if (classData) fetchEnvironments(classData.id);
-            setOpenVmMenuId(null);
         } catch (error) {
             console.error('Revert failed:', error);
             showToast('Failed to revert VM', 'error');
@@ -116,7 +108,6 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
              await api.delete(`/classes/environments/${classData.id}/vms/${vmId}`);
              showToast('VM deletion started', 'success');
              if (classData) fetchEnvironments(classData.id);
-             setOpenVmMenuId(null);
          } catch (error) {
              console.error('Delete failed:', error);
              showToast('Failed to delete VM', 'error');
@@ -151,76 +142,75 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
             isOpen={isOpen}
             onClose={onClose}
             title={classData.name}
-            icon={<Eye className="w-6 h-6 text-blue-400" />}
+            icon={<Eye className="w-5 h-5 text-blue-400" />}
             maxWidth="6xl"
         >
-            <div className="space-y-6">
-                {/* Compact Header Stats */}
-                <div className="flex items-center gap-6 flex-wrap">
-                    <div className="flex items-center gap-2 text-sm">
-                        <Key className="w-4 h-4 text-blue-400" />
-                        <span className="text-secondary">Passcode:</span>
-                        <span className="font-mono font-bold text-primary">{classData.passcode}</span>
+            <div className="space-y-4">
+                {/* Header Stats - Tighter */}
+                <div className="flex items-center gap-4 flex-wrap pb-2 border-b border-theme/30">
+                    <div className="flex items-center gap-1.5 text-xs">
+                        <Key className="w-3.5 h-3.5 text-blue-400" />
+                        <span className="text-secondary font-bold uppercase tracking-tighter">Key:</span>
+                        <span className="font-mono font-black text-primary bg-blue-500/10 px-1.5 rounded">{classData.passcode}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="w-4 h-4 text-purple-400" />
-                        <span className="text-secondary">{formatDate(classData.start_date)} - {formatDate(classData.end_date)}</span>
+                    <div className="flex items-center gap-1.5 text-xs">
+                        <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                        <span className="text-primary font-medium">{formatDate(classData.start_date)} - {formatDate(classData.end_date)}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                        <Users className="w-4 h-4 text-emerald-400" />
-                        <span className="font-bold text-primary">{environments.length}</span>
-                        <span className="text-secondary">/ {classData.max_users} Students</span>
+                    <div className="flex items-center gap-1.5 text-xs">
+                        <Users className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="font-black text-primary">{environments.length}</span>
+                        <span className="text-secondary opacity-70">/ {classData.max_users} Enrolled</span>
                     </div>
                 </div>
 
-                {/* Search and Actions Bar */}
-                <div className="flex items-center justify-between gap-4 bg-secondary/10 p-3 rounded-xl border border-theme">
-                    <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-2.5 w-4 h-4 text-secondary" />
+                {/* Search and Actions Bar - Compact */}
+                <div className="flex items-center justify-between gap-3 bg-secondary/5 p-2 rounded-lg border border-theme/50">
+                    <div className="relative flex-1 max-w-xs">
+                        <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-secondary" />
                         <input
                             type="text"
-                            placeholder="Search by student name or ID..."
+                            placeholder="Find student..."
                             value={envSearch}
                             onChange={(e) => setEnvSearch(e.target.value)}
-                            className="bg-elevated border border-theme rounded-lg pl-9 pr-4 py-2 text-sm text-primary focus:ring-2 focus:ring-blue-500/50 outline-none w-full"
+                            className="bg-transparent border border-theme/50 rounded-md pl-8 pr-3 py-1.5 text-xs text-primary focus:ring-1 focus:ring-blue-500/50 outline-none w-full"
                         />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs text-secondary">
-                            {filteredEnvironments.length} environment{filteredEnvironments.length !== 1 ? 's' : ''}
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
+                            {filteredEnvironments.length} Active Environments
                         </span>
                         <button 
                             onClick={() => classData && fetchEnvironments(classData.id)}
-                            className="p-2 hover:bg-theme-hover rounded-lg text-secondary hover:text-primary transition-colors"
-                            title="Refresh"
+                            className="p-1.5 hover:bg-theme-hover rounded text-secondary hover:text-primary transition-colors"
                         >
-                            <RefreshCw className={`w-4 h-4 ${loadingEnvs ? 'animate-spin' : ''}`} />
+                            <RefreshCw className={`w-3.5 h-3.5 ${loadingEnvs ? 'animate-spin' : ''}`} />
                         </button>
                     </div>
                 </div>
 
-                {/* Compact Table View */}
-                <div className="border border-theme rounded-xl overflow-hidden">
+                {/* Ultra-Compact Table View */}
+                <div className="border border-theme rounded-lg overflow-hidden bg-elevated/30">
                     {/* Table Header */}
-                    <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-secondary/10 border-b border-theme text-xs font-bold text-secondary uppercase tracking-wider">
+                    <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-secondary/10 border-b border-theme text-[10px] font-black text-secondary uppercase tracking-[0.15em]">
                         <div className="col-span-1"></div>
-                        <div className="col-span-3">Student</div>
-                        <div className="col-span-2">VMs</div>
-                        <div className="col-span-2">Status</div>
-                        <div className="col-span-4 text-right">Quick Actions</div>
+                        <div className="col-span-3">Identity</div>
+                        <div className="col-span-2">Fleet</div>
+                        <div className="col-span-2">Telemetry</div>
+                        <div className="col-span-4 text-right">Operations</div>
                     </div>
 
                     {/* Table Body */}
-                    <div className="divide-y divide-theme max-h-[50vh] overflow-y-auto">
+                    <div className="divide-y divide-theme/30 max-h-[45vh] overflow-y-auto custom-scrollbar">
                         {loadingEnvs ? (
-                            <div className="text-center py-12 text-secondary">
-                                <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
-                                Loading environments...
+                            <div className="text-center py-8 text-secondary text-xs italic">
+                                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 opacity-50" />
+                                Synchronizing environment state...
                             </div>
                         ) : filteredEnvironments.length === 0 ? (
                             <div className="text-center py-12">
-                                <Server className="w-10 h-10 text-secondary mx-auto mb-2" />
-                                <p className="text-secondary">No environments found</p>
+                                <Server className="w-8 h-8 text-secondary mx-auto mb-2 opacity-20" />
+                                <p className="text-xs font-bold text-secondary uppercase">No matching records</p>
                             </div>
                         ) : (
                             filteredEnvironments.map((env) => {
@@ -228,175 +218,132 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                 const isExpanded = expandedEnvId === env.id;
                                 
                                 return (
-                                    <div key={env.id} className="bg-elevated">
+                                    <div key={env.id} className="transition-colors hover:bg-white/[0.02]">
                                         {/* Compact Row */}
                                         <div 
-                                            className="grid grid-cols-12 gap-2 px-4 py-3 items-center cursor-pointer hover:bg-secondary/5 transition-colors"
+                                            className="grid grid-cols-12 gap-2 px-3 py-2 items-center cursor-pointer"
                                             onClick={() => setExpandedEnvId(isExpanded ? null : env.id)}
                                         >
                                             <div className="col-span-1">
                                                 {isExpanded ? (
-                                                    <ChevronDown className="w-4 h-4 text-secondary" />
+                                                    <ChevronDown className="w-3 h-3 text-secondary" />
                                                 ) : (
-                                                    <ChevronRight className="w-4 h-4 text-secondary" />
+                                                    <ChevronRight className="w-3 h-3 text-secondary" />
                                                 )}
                                             </div>
                                             <div className="col-span-3">
-                                                <div className="font-medium text-primary">{env.name}</div>
-                                                <div className="text-xs text-secondary">ID: {env.user_id || 'Unassigned'}</div>
+                                                <div className="text-xs font-bold text-primary truncate" title={env.name}>{env.name}</div>
+                                                <div className="text-[9px] font-mono text-secondary opacity-60 uppercase">{env.user_id || 'PROVISIONING'}</div>
                                             </div>
                                             <div className="col-span-2">
-                                                <span className="text-sm text-primary">{status.total} VM{status.total !== 1 ? 's' : ''}</span>
+                                                <span className="text-[11px] font-medium text-secondary">{status.total} Node{status.total !== 1 ? 's' : ''}</span>
                                             </div>
-                                            <div className="col-span-2 flex items-center gap-2">
+                                            <div className="col-span-2 flex items-center gap-1.5">
                                                 {status.on > 0 && (
-                                                    <span className="flex items-center gap-1 text-xs text-emerald-500">
-                                                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                                        {status.on}
-                                                    </span>
-                                                )}
-                                                {status.off > 0 && (
-                                                    <span className="flex items-center gap-1 text-xs text-red-500">
-                                                        <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                                                        {status.off}
-                                                    </span>
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" title="Active"></div>
                                                 )}
                                                 {status.suspended > 0 && (
-                                                    <span className="flex items-center gap-1 text-xs text-amber-500">
-                                                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                                                        {status.suspended}
-                                                    </span>
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" title="Suspended"></div>
+                                                )}
+                                                {status.off > 0 && (
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-slate-500" title="Offline"></div>
                                                 )}
                                             </div>
                                             <div className="col-span-4 flex items-center justify-end gap-1" onClick={e => e.stopPropagation()}>
-                                                <button 
-                                                    onClick={() => handleEnvPower(env.id, 'start')}
-                                                    className="p-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded transition-colors"
-                                                    title="Start All"
-                                                >
-                                                    <Play className="w-3.5 h-3.5" />
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleEnvPower(env.id, 'stop')}
-                                                    className="p-1.5 text-red-500 hover:bg-red-500/10 rounded transition-colors"
-                                                    title="Stop All"
-                                                >
-                                                    <Square className="w-3.5 h-3.5" />
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleEnvPower(env.id, 'suspend')}
-                                                    className="p-1.5 text-amber-500 hover:bg-amber-500/10 rounded transition-colors"
-                                                    title="Suspend All"
-                                                >
-                                                    <Pause className="w-3.5 h-3.5" />
-                                                </button>
+                                                <div className="flex bg-secondary/5 rounded-md p-0.5 border border-theme/30">
+                                                    <button 
+                                                        onClick={() => handleEnvPower(env.id, 'start')}
+                                                        className="p-1 px-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded transition-colors"
+                                                        title="Power On Fleet"
+                                                    >
+                                                        <Play className="w-3 h-3 fill-current" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleEnvPower(env.id, 'stop')}
+                                                        className="p-1 px-1.5 text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                                                        title="Shutdown Fleet"
+                                                    >
+                                                        <Square className="w-3 h-3 fill-current" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleEnvPower(env.id, 'suspend')}
+                                                        className="p-1 px-1.5 text-amber-500 hover:bg-amber-500/10 rounded transition-colors"
+                                                        title="Suspend Fleet"
+                                                    >
+                                                        <Pause className="w-3 h-3 fill-current" />
+                                                    </button>
+                                                </div>
                                                 <button 
                                                     onClick={() => handleEnvRevert(env.id)}
-                                                    className="p-1.5 text-purple-500 hover:bg-purple-500/10 rounded transition-colors"
-                                                    title="Revert All"
+                                                    className="p-1.5 text-purple-400 hover:bg-purple-500/10 rounded transition-colors"
+                                                    title="Revert Architectural State"
                                                 >
-                                                    <RotateCcw className="w-3.5 h-3.5" />
+                                                    <RotateCcw className="w-3 h-3" />
                                                 </button>
-                                                <div className="w-px h-4 bg-theme mx-1"></div>
                                                 <button 
                                                     onClick={() => handleEnvDelete(env.id)}
                                                     className="p-1.5 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded transition-colors"
-                                                    title="Delete Environment"
+                                                    title="Decommission Environment"
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    <Trash2 className="w-3 h-3" />
                                                 </button>
                                             </div>
                                         </div>
-
-                                        {/* Expanded VM Details */}
+ 
+                                        {/* Expanded VM Details - Ultra Compact */}
                                         {isExpanded && (
-                                            <div className="bg-secondary/5 border-t border-theme">
-                                                <div className="px-4 py-2 space-y-1">
-                                                    {env.vms.map((vm) => (
-                                                        <div key={vm.id} className="flex items-center justify-between py-2 px-3 bg-elevated rounded-lg border border-theme/50">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`w-2 h-2 rounded-full ${
-                                                                    vm.power_state === 'poweredOn' ? 'bg-green-500 shadow-lg shadow-green-500/50' :
-                                                                    vm.power_state === 'suspended' ? 'bg-amber-500 shadow-lg shadow-amber-500/50' :
-                                                                    'bg-red-500 shadow-lg shadow-red-500/50'
-                                                                }`}></div>
-                                                                <div>
-                                                                    <div className="font-mono text-sm text-primary">{vm.name}</div>
-                                                                    <div className="text-xs text-secondary">
-                                                                        {vm.ip_address || 'No IP'} • {vm.power_state}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            <div className="flex items-center gap-2">
-                                                                {/* Console Button */}
-                                                                <a 
-                                                                    href={`/api/classes/environments/${classData.id}/vms/${vm.id}/console`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded text-xs font-medium border border-blue-500/30" 
-                                                                    title="Open Console"
-                                                                >
-                                                                    <Monitor className="w-3.5 h-3.5" />
-                                                                    Console
-                                                                </a>
-                                                                
-                                                                {/* Power Toggle */}
-                                                                {vm.power_state === 'poweredOn' ? (
-                                                                    <button 
-                                                                        onClick={() => handlePowerControl(env.id, vm.id, 'stop')}
-                                                                        className="p-1.5 text-red-500 hover:bg-red-500/10 rounded transition-colors" 
-                                                                        title="Stop VM"
-                                                                    >
-                                                                        <Square className="w-3.5 h-3.5" />
-                                                                    </button>
-                                                                ) : (
-                                                                    <button 
-                                                                        onClick={() => handlePowerControl(env.id, vm.id, 'start')}
-                                                                        className="p-1.5 text-green-500 hover:bg-green-500/10 rounded transition-colors"
-                                                                        title="Start VM"
-                                                                    >
-                                                                        <Play className="w-3.5 h-3.5" />
-                                                                    </button>
-                                                                )}
-
-                                                                {/* VM Menu */}
-                                                                <div className="relative">
-                                                                    <button 
-                                                                        onClick={() => setOpenVmMenuId(openVmMenuId === vm.id ? null : vm.id)}
-                                                                        className="p-1.5 text-secondary hover:text-primary hover:bg-theme-hover rounded transition-colors"
-                                                                    >
-                                                                        <MoreVertical className="w-3.5 h-3.5" />
-                                                                    </button>
-                                                                    
-                                                                    {openVmMenuId === vm.id && (
-                                                                        <div className="absolute right-0 mt-1 w-40 bg-elevated border border-theme rounded-lg shadow-xl z-50 py-1">
-                                                                            <button 
-                                                                                onClick={() => handlePowerControl(env.id, vm.id, 'restart')}
-                                                                                className="w-full text-left px-3 py-1.5 text-xs text-amber-500 hover:bg-theme-hover flex items-center gap-2"
-                                                                            >
-                                                                                <RotateCcw className="w-3.5 h-3.5" /> Restart
-                                                                            </button>
-                                                                            <button 
-                                                                                onClick={() => handleVmRevert(vm.id)}
-                                                                                className="w-full text-left px-3 py-1.5 text-xs text-purple-500 hover:bg-theme-hover flex items-center gap-2"
-                                                                            >
-                                                                                <RefreshCw className="w-3.5 h-3.5" /> Revert
-                                                                            </button>
-                                                                            <div className="border-t border-theme my-1"></div>
-                                                                            <button 
-                                                                                onClick={() => handleVmDelete(vm.id)}
-                                                                                className="w-full text-left px-3 py-1.5 text-xs text-red-500 hover:bg-theme-hover flex items-center gap-2"
-                                                                            >
-                                                                                <Trash2 className="w-3.5 h-3.5" /> Delete
-                                                                            </button>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
+                                            <div className="bg-white/[0.01] border-t border-theme/20 px-3 py-1.5 space-y-1">
+                                                {env.vms.map((vm) => (
+                                                    <div key={vm.id} className="flex items-center justify-between py-1 px-2 hover:bg-secondary/5 rounded transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${
+                                                                vm.power_state === 'poweredOn' ? 'bg-emerald-500' :
+                                                                vm.power_state === 'suspended' ? 'bg-amber-500' :
+                                                                'bg-slate-500'
+                                                            }`}></div>
+                                                            <div>
+                                                                <span className="text-[11px] font-mono font-bold text-primary">{vm.name}</span>
+                                                                <span className="text-[9px] text-secondary ml-2 opacity-50">{vm.ip_address || 'UNSET'}</span>
                                                             </div>
                                                         </div>
-                                                    ))}
-                                                </div>
+                                                        
+                                                        <div className="flex items-center gap-3">
+                                                            <a 
+                                                                href={`/api/classes/environments/${classData.id}/vms/${vm.id}/console`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-tighter flex items-center gap-1"
+                                                            >
+                                                                <Monitor className="w-3 h-3" />
+                                                                Attach
+                                                            </a>
+                                                            
+                                                            <div className="flex items-center gap-0.5 opacity-60 hover:opacity-100 transition-opacity">
+                                                                <button 
+                                                                    onClick={() => handlePowerControl(env.id, vm.id, vm.power_state === 'poweredOn' ? 'stop' : 'start')}
+                                                                    className={clsx(
+                                                                        "p-1 rounded",
+                                                                        vm.power_state === 'poweredOn' ? "text-red-400 hover:bg-red-500/10" : "text-emerald-400 hover:bg-emerald-500/10"
+                                                                    )}
+                                                                >
+                                                                    {vm.power_state === 'poweredOn' ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleVmRevert(vm.id)}
+                                                                    className="p-1 text-purple-400 hover:bg-purple-500/10 rounded" 
+                                                                >
+                                                                    <RotateCcw className="w-2.5 h-2.5" />
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleVmDelete(vm.id)}
+                                                                    className="p-1 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded" 
+                                                                >
+                                                                    <Trash2 className="w-2.5 h-2.5" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         )}
                                     </div>
@@ -406,20 +353,20 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                     </div>
                 </div>
 
-                {/* Footer Legend */}
-                <div className="flex items-center justify-between text-xs text-secondary pt-2 border-t border-theme">
+                {/* Footer Legend - Ultra Compact */}
+                <div className="flex items-center justify-between text-[9px] font-bold text-secondary uppercase tracking-[0.1em] px-1">
                     <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Running
+                        <span className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Active
                         </span>
-                        <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-red-500"></span> Stopped
+                        <span className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-amber-500"></span> Suspend
                         </span>
-                        <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-amber-500"></span> Suspended
+                        <span className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-slate-500"></span> Offline
                         </span>
                     </div>
-                    <span>Click a row to expand VM details</span>
+                    <span className="italic opacity-50">Operational telemetry active • Click row for Node control</span>
                 </div>
             </div>
         </Modal>

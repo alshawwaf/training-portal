@@ -16,11 +16,17 @@ import {
     RefreshCw, 
     Eye, 
     EyeOff, 
-    LayoutGrid, 
-    Rows3, 
-    Lock,
     Settings as SettingsIcon,
-    Plus
+    Plus,
+    Users,
+    ExternalLink,
+    ShieldCheck,
+    Lock,
+    UserPlus,
+    Zap,
+    Hash,
+    User,
+    Key
 } from 'lucide-react';
 import Modal from '../components/Modal';
 import { AwsIcon, AzureIcon, GcpIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
@@ -41,7 +47,7 @@ const Settings: React.FC = () => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [browserNotifications, setBrowserNotifications] = useState(false);
     
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+    const [viewMode] = useState<'list' | 'grid'>('grid');
     
     // System Settings State
     const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
@@ -288,9 +294,9 @@ const Settings: React.FC = () => {
 
     const tabs = [
         { id: 'notifications', label: 'Alerts', icon: Bell, color: 'amber' },
-        { id: 'cloud', label: 'Ecosystem', icon: Cloud, color: 'sky' },
-        { id: 'onprem', label: 'Infrastructure', icon: Server, color: 'emerald' },
-        { id: 'system', label: 'Security', icon: Shield, color: 'purple' },
+        { id: 'cloud', label: 'Cloud Vendors', icon: Cloud, color: 'sky' },
+        { id: 'onprem', label: 'Private Cloud', icon: Server, color: 'emerald' },
+        { id: 'system', label: 'Email Service', icon: Shield, color: 'purple' },
     ] as const;
 
     if (isLoading) return <LoadingSpinner />;
@@ -309,27 +315,6 @@ const Settings: React.FC = () => {
                   <p className="text-secondary font-medium pl-10">
                     Fine-tune your personal experience and <span className="text-slate-500 font-bold">global platform settings</span>.
                   </p>
-                </div>
-
-                <div className="flex bg-secondary/30 p-1 rounded-2xl border border-theme backdrop-blur-md">
-                    <button 
-                        onClick={() => setViewMode('list')}
-                        className={clsx(
-                            "p-2.5 rounded-xl transition-all",
-                            viewMode === 'list' ? "bg-white dark:bg-slate-800 shadow-xl text-blue-500" : "text-secondary hover:text-primary"
-                        )}
-                    >
-                        <Rows3 className="w-5 h-5" />
-                    </button>
-                    <button 
-                        onClick={() => setViewMode('grid')}
-                        className={clsx(
-                            "p-2.5 rounded-xl transition-all",
-                            viewMode === 'grid' ? "bg-white dark:bg-slate-800 shadow-xl text-blue-500" : "text-secondary hover:text-primary"
-                        )}
-                    >
-                        <LayoutGrid className="w-5 h-5" />
-                    </button>
                 </div>
             </div>
 
@@ -394,7 +379,7 @@ const Settings: React.FC = () => {
 
                     {activeTab === 'cloud' && (
                         <div className="space-y-6">
-                            <SectionHeader title="Cloud Integration" subtitle="Manage external provider credentials" />
+                            <SectionHeader title="Cloud Vendors" subtitle="Configure external hyperscaler credentials" />
                             <div className={clsx(viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4")}>
                                 {cloudProviders.map(p => (
                                     <ProviderCard key={p.id} provider={p} onConfigure={() => handleOpenProviderModal(p)} viewMode={viewMode} />
@@ -406,7 +391,7 @@ const Settings: React.FC = () => {
                     {activeTab === 'onprem' && (
                         <div className="space-y-8 text-secondary">
                              <div className="flex items-center justify-between">
-                                <SectionHeader title="Infrastructure Matrix" subtitle="Connected clusters and hypervisors" />
+                                <SectionHeader title="Private Cloud" subtitle="Manage connected hypervisors and local clusters" />
                                 <button 
                                     onClick={() => { resetConnectionForm(); setEditingConnection(null); setAddConnectionOpen(true); }}
                                     className="btn-primary py-2 px-6 rounded-2xl flex items-center gap-2 shadow-lg shadow-blue-500/20"
@@ -461,32 +446,129 @@ const Settings: React.FC = () => {
 
                     {activeTab === 'system' && (
                         <div className="space-y-6">
-                            <SectionHeader title="System Core" subtitle="Global configuration and SMTP security" />
-                            <div className="glass rounded-[2.5rem] border border-theme p-10 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none text-purple-500">
-                                    <Lock className="w-32 h-32" />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-                                    {systemSettings.filter(s => s.category === 'smtp').map(s => (
-                                        <div key={s.key} className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1">{s.description || s.key}</label>
-                                            <input 
-                                                type={s.is_secret ? "password" : "text"}
-                                                value={s.value}
-                                                onChange={e => handleUpdateSetting(s.key, e.target.value)}
-                                                className="input bg-secondary/20 p-4 border-theme/50 focus:border-purple-500/50 rounded-2xl"
-                                            />
+                            <SectionHeader title="Email Service" subtitle="SMTP configuration for notifications and invitations" />
+                            
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                                {/* Configuration Info & Actions */}
+                                <div className="space-y-6">
+                                    <div className="glass rounded-2xl border border-theme p-6 bg-purple-500/5 relative overflow-hidden group hover:border-purple-500/30 transition-all">
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                            <ShieldCheck className="w-12 h-12 text-purple-500" />
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="mt-10 pt-8 border-t border-theme flex justify-end relative z-10">
+                                        <div className="flex items-center gap-3 mb-4 text-purple-500">
+                                            <div className="p-2 rounded-lg bg-purple-500/10">
+                                                <Lock className="w-4 h-4" />
+                                            </div>
+                                            <h4 className="font-bold uppercase tracking-widest text-[10px]">Security Directives</h4>
+                                        </div>
+                                        <p className="text-xs text-secondary leading-relaxed mb-6">
+                                            The platform utilizes <span className="text-primary font-bold">FastAPI Mail</span> for all secure transactional communications.
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="p-3 rounded-xl bg-secondary/10 border border-theme/50 flex flex-col gap-1">
+                                                <span className="text-[8px] font-bold text-secondary uppercase opacity-60">Handshake</span>
+                                                <span className="text-[10px] font-black text-emerald-500 uppercase">STARTTLS</span>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-secondary/10 border border-theme/50 flex flex-col gap-1">
+                                                <span className="text-[8px] font-bold text-secondary uppercase opacity-60">Authentication</span>
+                                                <span className="text-[10px] font-black text-blue-500 uppercase">Login/Plain</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="glass rounded-2xl border border-theme p-6 bg-blue-500/5 hover:border-blue-500/30 transition-all">
+                                        <div className="flex items-center gap-3 mb-4 text-blue-500">
+                                            <div className="p-2 rounded-lg bg-blue-500/10">
+                                                <UserPlus className="w-4 h-4" />
+                                            </div>
+                                            <h4 className="font-bold uppercase tracking-widest text-[10px]">Identity Services</h4>
+                                        </div>
+                                        <p className="text-[10px] text-secondary leading-relaxed mb-4 italic opacity-80">
+                                            System invitations and student registration workflows are tied to this relay.
+                                        </p>
+                                        <a 
+                                            href="/users" 
+                                            className="w-full flex items-center justify-between px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500 hover:text-white text-blue-500 border border-blue-500/20 rounded-xl font-bold uppercase tracking-widest text-[9px] transition-all group"
+                                        >
+                                            Manage Invitations
+                                            <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                                        </a>
+                                    </div>
+
                                     <button 
                                         onClick={() => setSmtpModalOpen(true)}
-                                        className="flex items-center gap-2 px-6 py-3 bg-purple-600/10 text-purple-500 border border-purple-500/20 rounded-2xl font-black uppercase tracking-widest text-xs transition-all hover:bg-purple-600 hover:text-white"
+                                        className="w-full flex items-center justify-between px-6 py-5 bg-gradient-to-r from-purple-600/10 to-blue-600/10 text-primary border border-theme/50 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:border-purple-500/50 hover:shadow-lg group shadow-purple-500/5"
                                     >
-                                        <Send className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        Audit SMTP Transport
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-purple-500 text-white shadow-lg shadow-purple-500/20">
+                                                <Zap className="w-4 h-4 group-hover:animate-pulse" />
+                                            </div>
+                                            Audit Transport
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                     </button>
+                                </div>
+
+                                {/* SMTP Form */}
+                                <div className="xl:col-span-2 glass rounded-2xl border border-theme p-8 relative overflow-hidden bg-secondary/5">
+                                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none text-primary">
+                                        <Mail className="w-64 h-64" />
+                                    </div>
+                                    
+                                    <div className="relative z-10 space-y-8">
+                                        {/* Infrastructure Group */}
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-2 pb-3 border-b border-theme/30">
+                                                <div className="w-1 h-4 bg-purple-500 rounded-full" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Relay Infrastructure</span>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {systemSettings.filter(s => s.category === 'smtp' && ['smtp_server', 'smtp_port', 'smtp_from'].includes(s.key)).map(s => (
+                                                    <div key={s.key} className={clsx("space-y-2", s.key === 'smtp_from' && "md:col-span-2")}>
+                                                        <label className="text-[9px] font-bold uppercase tracking-widest text-secondary/60 flex items-center gap-2">
+                                                            {s.key === 'smtp_server' && <Globe className="w-3 h-3" />}
+                                                            {s.key === 'smtp_port' && <Hash className="w-3 h-3" />}
+                                                            {s.key === 'smtp_from' && <Mail className="w-3 h-3" />}
+                                                            {s.description || s.key.replace('smtp_', '').replace('_', ' ')}
+                                                        </label>
+                                                        <input 
+                                                            type="text"
+                                                            value={s.value}
+                                                            onChange={e => handleUpdateSetting(s.key, e.target.value)}
+                                                            className="w-full bg-slate-50 dark:bg-black/40 px-4 py-3 border border-theme focus:border-purple-500/50 rounded-xl text-sm text-primary placeholder:text-secondary/30 outline-none transition-all hover:border-theme/80"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Credentials Group */}
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-2 pb-3 border-b border-theme/30">
+                                                <div className="w-1 h-4 bg-blue-500 rounded-full" />
+                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Access Credentials</span>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {systemSettings.filter(s => s.category === 'smtp' && ['smtp_username', 'smtp_password'].includes(s.key)).map(s => (
+                                                    <div key={s.key} className="space-y-2">
+                                                        <label className="text-[9px] font-bold uppercase tracking-widest text-secondary/60 flex items-center gap-2">
+                                                            {s.key === 'smtp_username' && <User className="w-3 h-3" />}
+                                                            {s.key === 'smtp_password' && <Key className="w-3 h-3" />}
+                                                            {s.description || s.key.replace('smtp_', '').replace('_', ' ')}
+                                                        </label>
+                                                        <input 
+                                                            type={s.is_secret ? "password" : "text"}
+                                                            value={s.value}
+                                                            onChange={e => handleUpdateSetting(s.key, e.target.value)}
+                                                            className="w-full bg-slate-50 dark:bg-black/40 px-4 py-3 border border-theme focus:border-blue-500/50 rounded-xl text-sm text-primary placeholder:text-secondary/30 outline-none transition-all hover:border-theme/80"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -573,11 +655,12 @@ const NotificationCard: React.FC<{ title: string, desc: string, icon: any, enabl
     </div>
 );
 
-const ProviderCard: React.FC<{ provider: any, onConfigure: () => void, viewMode: string }> = ({ provider, onConfigure, viewMode }) => (
+const ProviderCard: React.FC<{ provider: any; onConfigure: () => void; viewMode: 'grid' | 'list' }> = ({ provider, onConfigure, viewMode }) => (
     <div 
         onClick={onConfigure}
         className={clsx(
-            "glass rounded-[2rem] border border-theme cursor-pointer group transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] overflow-hidden relative",
+            "group relative glass rounded-2xl border border-theme overflow-hidden transition-all duration-500 cursor-pointer",
+            "hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1",
             viewMode === 'list' ? "flex items-center p-4 gap-6" : "p-8 text-center"
         )}
     >
@@ -593,21 +676,21 @@ const ProviderCard: React.FC<{ provider: any, onConfigure: () => void, viewMode:
             viewMode === 'list' ? "flex-row items-center !text-left w-full" : "items-center"
         )}>
             <div className={clsx(
-                "p-5 rounded-[1.5rem] bg-gradient-to-br from-secondary/50 to-secondary/30 border border-theme/50 shadow-inner mb-6 transition-all duration-500 group-hover:rotate-6",
-                viewMode === 'list' && "mb-0 mr-6"
+                "p-4 rounded-xl bg-gradient-to-br from-secondary/40 to-secondary/20 border border-theme/50 shadow-inner mb-5 transition-all duration-500 group-hover:rotate-6",
+                viewMode === 'list' && "mb-0 mr-5"
             )}>
-                <provider.icon className="w-8 h-8 opacity-80" />
+                <provider.icon className="w-7 h-7" />
             </div>
             <div className="flex-1">
-                <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{provider.id} network</span>
-                <h4 className="text-xl font-black text-primary tracking-tighter uppercase italic leading-none my-1">{provider.name}</h4>
-                <p className="text-[11px] text-secondary font-medium leading-relaxed opacity-60 px-2">{provider.description}</p>
+                <span className="text-[9px] font-black text-secondary uppercase tracking-[0.2em]">{provider.id} registry</span>
+                <h4 className="text-lg font-black text-primary tracking-tighter uppercase italic leading-none my-1">{provider.name}</h4>
+                <p className="text-[10px] text-secondary font-medium leading-relaxed opacity-60 px-2 line-clamp-2">{provider.description}</p>
             </div>
             <div className={clsx(
-                "mt-6 flex items-center gap-2 px-6 py-2 bg-secondary/30 rounded-full text-[10px] font-black uppercase tracking-widest text-secondary transition-all group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20",
+                "mt-6 flex items-center gap-2 px-5 py-2 bg-secondary/30 rounded-full text-[9px] font-black uppercase tracking-widest text-secondary transition-all group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20",
                 viewMode === 'list' && "mt-0"
             )}>
-                Config <ChevronRight className="w-3.5 h-3.5" />
+                Connect <ChevronRight className="w-3.5 h-3.5" />
             </div>
         </div>
     </div>
@@ -623,28 +706,28 @@ const InfrastructureCard: React.FC<{
     const [isExpanded, setIsExpanded] = useState(false);
     
     return (
-        <div className="glass rounded-2xl border border-theme overflow-hidden shadow-xl transition-all duration-300 hover:border-blue-500/30">
+        <div className="glass rounded-2xl border border-theme overflow-hidden shadow-sm transition-all duration-300 hover:border-blue-500/30">
             {/* Collapsible Header */}
             <div 
-                className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-secondary/10 cursor-pointer group"
+                className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-secondary/5 cursor-pointer group"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-primary border border-theme shadow-lg">
-                        <Icon className="w-8 h-8" />
+                    <div className="p-2.5 rounded-xl bg-secondary/10 border border-theme/50 shadow-sm text-primary">
+                        <Icon className="w-7 h-7" />
                     </div>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <h3 className="text-xl font-bold text-primary">{name}</h3>
+                        <div className="flex items-center gap-3 mb-0.5">
+                            <h3 className="text-lg font-bold text-primary tracking-tight">{name}</h3>
                             <div className={clsx(
-                                "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest",
                                 connected ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"
                             )}>
-                                <div className={clsx("w-1.5 h-1.5 rounded-full", connected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
-                                {connected ? 'Connected' : 'Disconnected'}
+                                <div className={clsx("w-1 h-1 rounded-full", connected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+                                {connected ? 'Online' : 'Offline'}
                             </div>
                         </div>
-                        <p className="text-sm text-secondary">{desc}</p>
+                        <p className="text-[11px] text-secondary font-medium italic opacity-70">{desc}</p>
                     </div>
                 </div>
                 <div className="mt-4 md:mt-0 flex items-center gap-3">
@@ -654,18 +737,23 @@ const InfrastructureCard: React.FC<{
                             <button 
                                 onClick={onTest} 
                                 disabled={loading}
-                                className="btn-secondary py-2 px-4 rounded-xl flex items-center gap-2 text-sm"
+                                className="flex items-center gap-2 px-4 py-2 bg-secondary/10 text-secondary hover:text-primary rounded-xl border border-theme/50 text-[10px] font-black uppercase tracking-widest transition-all"
                             >
-                                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
-                                Test
+                                {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Globe className="w-3.5 h-3.5" />}
+                                Test Link
                             </button>
                             {isNewStyle && (
-                                <button className="btn-secondary py-2 px-4 text-xs font-bold" onClick={onSave}>Edit</button>
+                                <button 
+                                    className="px-4 py-2 bg-blue-600/10 text-blue-500 border border-blue-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all" 
+                                    onClick={onSave}
+                                >
+                                    Modify
+                                </button>
                             )}
                         </div>
                     )}
-                    <button className="p-2 rounded-xl bg-secondary/20 text-secondary group-hover:text-primary group-hover:bg-secondary/40 transition-all">
-                        {isExpanded && !isNewStyle ? <ChevronDown className="w-5 h-5" /> : !isExpanded && !isNewStyle ? <ChevronRight className="w-5 h-5" /> : isNewStyle && isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+                    <button className="p-1.5 rounded-lg bg-secondary/10 text-secondary group-hover:text-primary group-hover:bg-secondary/20 transition-all">
+                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                     </button>
                 </div>
             </div>
@@ -718,6 +806,37 @@ const InfrastructureCard: React.FC<{
                                 className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Save Settings'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Expanded Content for New Style (connection list cards) */}
+            {isExpanded && isNewStyle && (
+                <div className="border-t border-theme animate-in slide-in-from-top-2 duration-200">
+                    <div className="p-6 bg-secondary/5 space-y-4">
+                        <div className="flex items-center gap-2 text-secondary text-sm">
+                            <Server className="w-4 h-4" />
+                            <span className="font-medium">Connection Actions</span>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            {secondaryActions}
+                        </div>
+                        <div className="flex gap-3 pt-3 border-t border-theme">
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); onTest(); }} 
+                                disabled={loading}
+                                className="btn-secondary py-2.5 px-5 rounded-xl flex items-center gap-2"
+                            >
+                                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+                                <span className="text-sm font-semibold">Test Connection</span>
+                            </button>
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); onSave(); }} 
+                                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                Edit Connection
                             </button>
                         </div>
                     </div>

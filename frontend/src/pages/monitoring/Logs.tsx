@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
 import api from '../../api';
 import { useToast } from '../../context/ToastContext';
 import LogDetailModal from '../../components/monitoring/LogDetailModal';
@@ -144,6 +145,14 @@ const Logs: React.FC = () => {
         }
     };
 
+    const formatAction = (action: string) => {
+        // Convert SNAKE_CASE to Title Case
+        return action
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     const formatDate = (dateStr: string) => new Date(dateStr).toLocaleString();
 
     const clearFilters = () => {
@@ -260,24 +269,24 @@ const Logs: React.FC = () => {
 
             {/* Search & Filter Bar */}
             {activeTab === 'operational' && (
-                <div className="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl border border-slate-700">
+                <div className="flex items-center gap-3 p-3 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-300 dark:border-slate-700">
                     <div className="relative flex-1 group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                        <input type="text" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} placeholder="Search logs..." className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 dark:text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                        <input type="text" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} placeholder="Search logs..." className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all" />
                     </div>
-                    <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                        <option value="" className="bg-slate-900">All Levels</option>
-                        <option value="SUCCESS" className="bg-slate-900">✓ Success</option>
-                        <option value="INFO" className="bg-slate-900">ℹ Info</option>
-                        <option value="WARNING" className="bg-slate-900">⚠ Warning</option>
-                        <option value="ERROR" className="bg-slate-900">✕ Error</option>
+                    <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        <option value="">All Levels</option>
+                        <option value="SUCCESS">✓ Success</option>
+                        <option value="INFO">ℹ Info</option>
+                        <option value="WARNING">⚠ Warning</option>
+                        <option value="ERROR">✕ Error</option>
                     </select>
-                    <select value={filterSource} onChange={(e) => setFilterSource(e.target.value)} className="px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                        <option value="" className="bg-slate-900">All Sources</option>
-                        <option value="APP" className="bg-slate-900">App</option>
-                        <option value="VSPHERE" className="bg-slate-900">vSphere</option>
-                        <option value="PROXMOX" className="bg-slate-900">Proxmox</option>
-                        <option value="SYSTEM" className="bg-slate-900">System</option>
+                    <select value={filterSource} onChange={(e) => setFilterSource(e.target.value)} className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                        <option value="">All Sources</option>
+                        <option value="APP">App</option>
+                        <option value="VSPHERE">vSphere</option>
+                        <option value="PROXMOX">Proxmox</option>
+                        <option value="SYSTEM">System</option>
                     </select>
                     {hasActiveFilters && <button onClick={clearFilters} className="p-2.5 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"><X className="w-4 h-4" /></button>}
                 </div>
@@ -306,7 +315,7 @@ const Logs: React.FC = () => {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-semibold text-primary truncate">{log.action}</span>
+                                            <span className="text-sm font-semibold text-primary truncate">{formatAction(log.action)}</span>
                                             <span className="text-xs text-secondary truncate hidden sm:inline">— {log.entity_name}</span>
                                         </div>
                                     </div>
@@ -350,21 +359,22 @@ const Logs: React.FC = () => {
             {/* Detail Modal */}
             <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
             
-            {/* Clear All Confirmation */}
-            {showClearConfirm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-5 max-w-sm w-full">
+            {/* Clear All Confirmation - Using Portal */}
+            {showClearConfirm && ReactDOM.createPortal(
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-200 dark:bg-slate-900">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-2xl shadow-xl p-5 max-w-sm w-full">
                         <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2 bg-red-500/20 rounded-lg"><Trash2 className="w-5 h-5 text-red-400" /></div>
-                            <h2 className="text-lg font-bold text-white">Clear All Logs?</h2>
+                            <div className="p-2 bg-red-500/20 rounded-lg"><Trash2 className="w-5 h-5 text-red-500" /></div>
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Clear All Logs?</h2>
                         </div>
-                        <p className="text-slate-400 text-sm mb-4">This will permanently delete all {stats?.total || 0} logs.</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm mb-4">This will permanently delete all {stats?.total || 0} logs.</p>
                         <div className="flex justify-end gap-2">
-                            <button onClick={() => setShowClearConfirm(false)} className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm">Cancel</button>
+                            <button onClick={() => setShowClearConfirm(false)} className="px-3 py-2 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-800 dark:text-white rounded-lg text-sm">Cancel</button>
                             <button onClick={handleClearAllLogs} className="px-3 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm">Clear All</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
