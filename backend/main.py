@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from db.database import engine, Base, SessionLocal
-from db.models import User, UserRole, SystemSetting, Template
-from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, infrastructure_connections, logs, guacamole, console_ws, users, student, instructor
+from db.models import User, UserRole, SystemSetting, Template, NotificationEvent
+from routers import auth, classes, settings, preferences, email, templates, dashboard, infrastructure, infrastructure_connections, logs, guacamole, console_ws, users, student, instructor, notification_events
 from services.proxmox_service import proxmox_service
 from services.email_service import email_service
 from services.vsphere_service import vsphere_service
@@ -138,14 +138,16 @@ async def startup_event():
             "proxmox_host": "",
             "proxmox_node": "",
             "backup_retention_days": "7",
-            # SMTP Defaults - Use Superadmin email as default
-            "smtp_server": "smtp.example.com",
-            "smtp_port": "587",
-            "smtp_username": os.getenv("SUPERADMIN_EMAIL", "admin@cpdemo.com"),
-            "smtp_password": "password",
-            "smtp_from": os.getenv("SUPERADMIN_EMAIL", "admin@cpdemo.com"),
-            "smtp_tls": "true",
+            # SMTP Defaults - Production ready configuration
+            "smtp_server": "10.1.2.250",
+            "smtp_port": "25",
+            "smtp_from": "info@americas-ses.com",
+            "smtp_to": "admin@americas-ses.com",
             "smtp_ssl": "false",
+            "smtp_starttls": "false",
+            "smtp_use_auth": "false",
+            "smtp_username": "",
+            "smtp_password": "",
             # AWS Defaults
             "aws_access_key_id": os.getenv("AWS_ACCESS_KEY_ID", ""),
             "aws_secret_access_key": os.getenv("AWS_SECRET_ACCESS_KEY", ""),
@@ -197,6 +199,27 @@ async def startup_event():
         
         db.commit()
 
+        # Seed Notification Events
+        notification_events_defaults = [
+            {"event_type": "class_created", "name": "Class Created", "description": "When a new training class is created", "email_enabled": True},
+            {"event_type": "class_started", "name": "Class Started", "description": "When a class session begins", "email_enabled": True},
+            {"event_type": "class_completed", "name": "Class Completed", "description": "When a class ends or is marked complete", "email_enabled": True},
+            {"event_type": "student_joined", "name": "Student Joined", "description": "When a student joins a class", "email_enabled": True},
+            {"event_type": "environment_provisioned", "name": "Environment Provisioned", "description": "When a student environment is ready", "email_enabled": True},
+            {"event_type": "environment_error", "name": "Environment Error", "description": "When environment provisioning fails", "email_enabled": True},
+            {"event_type": "user_invited", "name": "User Invited", "description": "When a new user is invited to the platform", "email_enabled": True},
+            {"event_type": "user_registered", "name": "User Registered", "description": "When a new user completes registration", "email_enabled": True},
+            {"event_type": "system_alert", "name": "System Alert", "description": "Critical system notifications", "email_enabled": True},
+        ]
+        
+        for event_data in notification_events_defaults:
+            event = db.query(NotificationEvent).filter(NotificationEvent.event_type == event_data["event_type"]).first()
+            if not event:
+                new_event = NotificationEvent(**event_data)
+                db.add(new_event)
+        
+        db.commit()
+
         # Initialize email service only (fast)
         await email_service.load_config(db)
         
@@ -226,6 +249,7 @@ app.include_router(console_ws.router)
 app.include_router(student.router)
 app.include_router(instructor.router)
 app.include_router(infrastructure_connections.router)
+app.include_router(notification_events.router)
 
 @app.get("/")
 def read_root():

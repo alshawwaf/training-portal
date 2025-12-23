@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import Class, ClassStatus, ClassEnvironment, EnvironmentVM, Template, TemplateVM
+from services.proxmox_service import proxmox_service
 from services.vsphere_service import vsphere_service
 from services.guacamole_service import guacamole_service
 from services.logging_service import logging_service
+from services.notification_service import notification_service
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
@@ -109,7 +111,12 @@ def save_all_backups(db: Session):
 
 # CREATE
 @router.post("/", response_model=ClassRead)
-def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: User = Depends(get_instructor_user)):
+async def create_class(
+    cls: ClassCreate, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_instructor_user)
+):
     # Validate status
     status = cls.status if cls.status in VALID_STATUSES else "draft"
     
@@ -145,6 +152,13 @@ def create_class(cls: ClassCreate, db: Session = Depends(get_db), current_user: 
     # Save JSON backup
     save_backup(db_class)
     save_all_backups(db)
+    
+    # Send notification to instructor
+    await notification_service.notify_class_created(
+        db=db,
+        class_=db_class,
+        background_tasks=background_tasks
+    )
     
     return db_class
 

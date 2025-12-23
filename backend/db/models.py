@@ -319,3 +319,25 @@ class ClassStudent(Base):
     
     class_ = relationship("Class")
     environment = relationship("ClassEnvironment")
+
+
+class NotificationEvent(Base):
+    """Configurable notification events that can trigger emails"""
+    __tablename__ = "notification_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String, unique=True, index=True)  # e.g., "class_created", "student_joined"
+    name = Column(String)  # Human-readable name
+    description = Column(String, nullable=True)
+    email_enabled = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "event_type": self.event_type,
+            "name": self.name,
+            "description": self.description,
+            "email_enabled": self.email_enabled,
+        }

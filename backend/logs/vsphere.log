@@ -17107,3 +17107,9 @@ TimeoutError: [Errno 110] Connection timed out
 2025-12-21 03:49:13,672 - INFO - Generated WebMKS ticket for vc-Student_1-pfSense. Ticket length: 16. URL available: True
 2025-12-21 03:49:13,675 - INFO - Using ticket.url for WebMKS connection (ticket length: 16)
 2025-12-21 03:49:13,676 - INFO - Replaced hostname localhost.localdomain with 192.168.10.11 for Docker accessibility
+2025-12-22 02:26:46,294 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-22 02:26:50,114 - INFO - VSphereService: Configuration loaded from database
+2025-12-23 00:07:51,974 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-23 00:07:55,184 - INFO - VSphereService: Configuration loaded from database
+2025-12-23 00:29:49,099 - INFO - vSphere Service initialized (DB Connections only).
+2025-12-23 00:29:51,730 - INFO - VSphereService: Configuration loaded from database

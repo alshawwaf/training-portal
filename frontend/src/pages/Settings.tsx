@@ -10,7 +10,6 @@ import {
     Check, 
     Server, 
     Mail, 
-    Send, 
     Cloud, 
     Globe, 
     RefreshCw, 
@@ -18,17 +17,11 @@ import {
     EyeOff, 
     Settings as SettingsIcon,
     Plus,
-    Users,
-    ExternalLink,
     ShieldCheck,
-    Lock,
-    UserPlus,
-    Zap,
-    Hash,
-    User,
-    Key
+    Hash
 } from 'lucide-react';
 import Modal from '../components/Modal';
+import EmailSettingsModal from '../components/EmailSettingsModal';
 import { AwsIcon, AzureIcon, GcpIcon, ProxmoxIcon, VMwareIcon } from '../components/ProviderIcons';
 import clsx from 'clsx';
 
@@ -51,10 +44,8 @@ const Settings: React.FC = () => {
     
     // System Settings State
     const [systemSettings, setSystemSettings] = useState<SystemSetting[]>([]);
-    const [testEmailLoading, setTestEmailLoading] = useState(false);
-    const [testRecipient, setTestRecipient] = useState('');
     
-    const [smtpModalOpen, setSmtpModalOpen] = useState(false);
+    const [emailModalOpen, setEmailModalOpen] = useState(false);
     
 
     // Infrastructure Connections State
@@ -98,7 +89,6 @@ const Settings: React.FC = () => {
     useEffect(() => {
         if (user?.role === 'admin') {
             fetchSettings();
-            if (user?.email) setTestRecipient(user.email);
         }
         fetchPreferences();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,32 +166,6 @@ const Settings: React.FC = () => {
             showToast('Preferences updated', 'success');
         } catch {
             showToast('Failed to sync preferences', 'error');
-        }
-    };
-
-    const handleUpdateSetting = async (key: string, value: string) => {
-        try {
-            await api.put(`/settings/${key}`, { value });
-            setSystemSettings(prev => prev.map(s => s.key === key ? { ...s, value } : s));
-        } catch {
-            showToast(`Failed to update ${key}`, 'error');
-        }
-    };
-
-    const handleTestEmail = async () => {
-        setTestEmailLoading(true);
-        try {
-            const res = await api.post('/email/test', { recipient: testRecipient });
-            if (res.data.success) {
-                showToast(`Transmission Successful: ${res.data.message}`, 'success');
-                setSmtpModalOpen(false);
-            } else {
-                showToast(res.data.message || 'Transmission failed', 'error');
-            }
-        } catch (e: any) {
-            showToast(e.response?.data?.detail || 'Audit sequence failed', 'error');
-        } finally {
-            setTestEmailLoading(false);
         }
     };
 
@@ -448,127 +412,71 @@ const Settings: React.FC = () => {
                         <div className="space-y-6">
                             <SectionHeader title="Email Service" subtitle="SMTP configuration for notifications and invitations" />
                             
-                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                                {/* Configuration Info & Actions */}
-                                <div className="space-y-6">
-                                    <div className="glass rounded-2xl border border-theme p-6 bg-purple-500/5 relative overflow-hidden group hover:border-purple-500/30 transition-all">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                            <ShieldCheck className="w-12 h-12 text-purple-500" />
-                                        </div>
-                                        <div className="flex items-center gap-3 mb-4 text-purple-500">
-                                            <div className="p-2 rounded-lg bg-purple-500/10">
-                                                <Lock className="w-4 h-4" />
-                                            </div>
-                                            <h4 className="font-bold uppercase tracking-widest text-[10px]">Security Directives</h4>
-                                        </div>
-                                        <p className="text-xs text-secondary leading-relaxed mb-6">
-                                            The platform utilizes <span className="text-primary font-bold">FastAPI Mail</span> for all secure transactional communications.
-                                        </p>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="p-3 rounded-xl bg-secondary/10 border border-theme/50 flex flex-col gap-1">
-                                                <span className="text-[8px] font-bold text-secondary uppercase opacity-60">Handshake</span>
-                                                <span className="text-[10px] font-black text-emerald-500 uppercase">STARTTLS</span>
-                                            </div>
-                                            <div className="p-3 rounded-xl bg-secondary/10 border border-theme/50 flex flex-col gap-1">
-                                                <span className="text-[8px] font-bold text-secondary uppercase opacity-60">Authentication</span>
-                                                <span className="text-[10px] font-black text-blue-500 uppercase">Login/Plain</span>
+                            {/* Single Card with Configure Button */}
+                            <div className="glass rounded-2xl border border-theme p-8 relative overflow-hidden bg-gradient-to-br from-purple-500/5 to-blue-500/5 hover:border-purple-500/30 transition-all group">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.05] pointer-events-none text-primary">
+                                    <Mail className="w-48 h-48" />
+                                </div>
+                                
+                                <div className="relative z-10">
+                                    <div className="flex items-start justify-between mb-6">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/20">
+                                                    <Mail className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-black text-primary">Email Notifications</h3>
+                                                    <p className="text-xs text-secondary font-medium">SMTP Relay Configuration</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <p className="text-sm text-secondary mb-6 max-w-2xl">
+                                        Configure your SMTP server to enable email notifications for class updates, student registrations, 
+                                        and system alerts. Customize which events trigger email notifications.
+                                    </p>
 
-                                    <div className="glass rounded-2xl border border-theme p-6 bg-blue-500/5 hover:border-blue-500/30 transition-all">
-                                        <div className="flex items-center gap-3 mb-4 text-blue-500">
-                                            <div className="p-2 rounded-lg bg-blue-500/10">
-                                                <UserPlus className="w-4 h-4" />
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                        <div className="p-4 rounded-xl bg-secondary/10 border border-theme/50">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Server className="w-4 h-4 text-purple-500" />
+                                                <span className="text-xs font-bold text-secondary uppercase">Server</span>
                                             </div>
-                                            <h4 className="font-bold uppercase tracking-widest text-[10px]">Identity Services</h4>
+                                            <p className="text-sm font-bold text-primary truncate">
+                                                {systemSettings.find(s => s.key === 'smtp_server')?.value || 'Not configured'}
+                                            </p>
                                         </div>
-                                        <p className="text-[10px] text-secondary leading-relaxed mb-4 italic opacity-80">
-                                            System invitations and student registration workflows are tied to this relay.
-                                        </p>
-                                        <a 
-                                            href="/users" 
-                                            className="w-full flex items-center justify-between px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500 hover:text-white text-blue-500 border border-blue-500/20 rounded-xl font-bold uppercase tracking-widest text-[9px] transition-all group"
-                                        >
-                                            Manage Invitations
-                                            <ExternalLink className="w-3 h-3 opacity-50 group-hover:opacity-100" />
-                                        </a>
+                                        <div className="p-4 rounded-xl bg-secondary/10 border border-theme/50">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Hash className="w-4 h-4 text-blue-500" />
+                                                <span className="text-xs font-bold text-secondary uppercase">Port</span>
+                                            </div>
+                                            <p className="text-sm font-bold text-primary">
+                                                {systemSettings.find(s => s.key === 'smtp_port')?.value || '25'}
+                                            </p>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-secondary/10 border border-theme/50">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                                                <span className="text-xs font-bold text-secondary uppercase">Security</span>
+                                            </div>
+                                            <p className="text-sm font-bold text-primary">
+                                                {systemSettings.find(s => s.key === 'smtp_ssl')?.value === 'true' ? 'SSL/TLS' : 
+                                                 systemSettings.find(s => s.key === 'smtp_starttls')?.value === 'true' ? 'STARTTLS' : 'None'}
+                                            </p>
+                                        </div>
                                     </div>
 
                                     <button 
-                                        onClick={() => setSmtpModalOpen(true)}
-                                        className="w-full flex items-center justify-between px-6 py-5 bg-gradient-to-r from-purple-600/10 to-blue-600/10 text-primary border border-theme/50 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:border-purple-500/50 hover:shadow-lg group shadow-purple-500/5"
+                                        onClick={() => setEmailModalOpen(true)}
+                                        className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-purple-500/20 group-hover:shadow-xl group-hover:shadow-purple-500/30"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-purple-500 text-white shadow-lg shadow-purple-500/20">
-                                                <Zap className="w-4 h-4 group-hover:animate-pulse" />
-                                            </div>
-                                            Audit Transport
-                                        </div>
-                                        <ChevronRight className="w-4 h-4 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                        <SettingsIcon className="w-5 h-5" />
+                                        Configure Email Settings
+                                        <ChevronRight className="w-4 h-4 opacity-60 group-hover:translate-x-1 transition-transform" />
                                     </button>
-                                </div>
-
-                                {/* SMTP Form */}
-                                <div className="xl:col-span-2 glass rounded-2xl border border-theme p-8 relative overflow-hidden bg-secondary/5">
-                                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none text-primary">
-                                        <Mail className="w-64 h-64" />
-                                    </div>
-                                    
-                                    <div className="relative z-10 space-y-8">
-                                        {/* Infrastructure Group */}
-                                        <div className="space-y-6">
-                                            <div className="flex items-center gap-2 pb-3 border-b border-theme/30">
-                                                <div className="w-1 h-4 bg-purple-500 rounded-full" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Relay Infrastructure</span>
-                                            </div>
-                                            
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {systemSettings.filter(s => s.category === 'smtp' && ['smtp_server', 'smtp_port', 'smtp_from'].includes(s.key)).map(s => (
-                                                    <div key={s.key} className={clsx("space-y-2", s.key === 'smtp_from' && "md:col-span-2")}>
-                                                        <label className="text-[9px] font-bold uppercase tracking-widest text-secondary/60 flex items-center gap-2">
-                                                            {s.key === 'smtp_server' && <Globe className="w-3 h-3" />}
-                                                            {s.key === 'smtp_port' && <Hash className="w-3 h-3" />}
-                                                            {s.key === 'smtp_from' && <Mail className="w-3 h-3" />}
-                                                            {s.description || s.key.replace('smtp_', '').replace('_', ' ')}
-                                                        </label>
-                                                        <input 
-                                                            type="text"
-                                                            value={s.value}
-                                                            onChange={e => handleUpdateSetting(s.key, e.target.value)}
-                                                            className="w-full bg-slate-50 dark:bg-black/40 px-4 py-3 border border-theme focus:border-purple-500/50 rounded-xl text-sm text-primary placeholder:text-secondary/30 outline-none transition-all hover:border-theme/80"
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Credentials Group */}
-                                        <div className="space-y-6">
-                                            <div className="flex items-center gap-2 pb-3 border-b border-theme/30">
-                                                <div className="w-1 h-4 bg-blue-500 rounded-full" />
-                                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Access Credentials</span>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {systemSettings.filter(s => s.category === 'smtp' && ['smtp_username', 'smtp_password'].includes(s.key)).map(s => (
-                                                    <div key={s.key} className="space-y-2">
-                                                        <label className="text-[9px] font-bold uppercase tracking-widest text-secondary/60 flex items-center gap-2">
-                                                            {s.key === 'smtp_username' && <User className="w-3 h-3" />}
-                                                            {s.key === 'smtp_password' && <Key className="w-3 h-3" />}
-                                                            {s.description || s.key.replace('smtp_', '').replace('_', ' ')}
-                                                        </label>
-                                                        <input 
-                                                            type={s.is_secret ? "password" : "text"}
-                                                            value={s.value}
-                                                            onChange={e => handleUpdateSetting(s.key, e.target.value)}
-                                                            className="w-full bg-slate-50 dark:bg-black/40 px-4 py-3 border border-theme focus:border-blue-500/50 rounded-xl text-sm text-primary placeholder:text-secondary/30 outline-none transition-all hover:border-theme/80"
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -601,7 +509,7 @@ const Settings: React.FC = () => {
             </Modal>
 
             {/* Modals */}
-            <SMTPTestModal isOpen={smtpModalOpen} onClose={() => setSmtpModalOpen(false)} recipient={testRecipient} setRecipient={setTestRecipient} onTest={handleTestEmail} loading={testEmailLoading} />
+            <EmailSettingsModal isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} />
             <AddConnectionModal 
                 isOpen={addConnectionOpen} 
                 onClose={() => setAddConnectionOpen(false)} 
@@ -851,35 +759,6 @@ const LoadingSpinner = () => (
         <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl" />
         <p className="text-secondary font-black uppercase tracking-[0.3em] text-[10px] animate-pulse">Syncing Control Center...</p>
     </div>
-);
-
-
-const SMTPTestModal: React.FC<{ isOpen: boolean, onClose: () => void, recipient: string, setRecipient: (v: string) => void, onTest: () => void, loading: boolean }> = ({ isOpen, onClose, recipient, setRecipient, onTest, loading }) => (
-    <Modal isOpen={isOpen} onClose={onClose} title="Transport Audit" maxWidth="md">
-        <div className="space-y-6">
-            <p className="text-secondary font-medium text-sm text-center px-4">Initialize a test sequence to verify SMTP relay connectivity and security handshake.</p>
-            <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-secondary pl-1">Target Recipient</label>
-                <div className="flex gap-2">
-                    <input 
-                        type="email" 
-                        value={recipient} 
-                        onChange={e => setRecipient(e.target.value)} 
-                        placeholder="admin@enterprise.com" 
-                        className="input flex-1 bg-secondary/10 p-4 border-theme focus:border-purple-500/50 rounded-2xl font-bold"
-                    />
-                    <button 
-                        onClick={onTest} 
-                        disabled={loading || !recipient}
-                        className="p-4 bg-purple-600 text-white rounded-2xl shadow-lg shadow-purple-500/20 active:scale-90 transition-all"
-                    >
-                        {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                    </button>
-                </div>
-            </div>
-            {loading && <div className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-500 text-center animate-pulse mt-4">Transmitting Handshake...</div>}
-        </div>
-    </Modal>
 );
 
 const AddConnectionModal: React.FC<{ 

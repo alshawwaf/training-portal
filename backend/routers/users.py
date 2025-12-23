@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from db.database import get_db
 from db.models import User, Group, UserGroup, Permission, GroupPermission
@@ -9,6 +9,7 @@ import datetime
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 from services.email_service import email_service
+from services.notification_service import notification_service
 from .auth import get_admin_user, get_password_hash
 
 logger = logging.getLogger("se_portal.users")
@@ -74,7 +75,12 @@ def list_users(db: Session = Depends(get_db), admin: User = Depends(get_admin_us
     return db.query(User).all()
 
 @router.post("/invite")
-async def invite_user(invite: UserInvite, db: Session = Depends(get_db), admin: User = Depends(get_admin_user)):
+async def invite_user(
+    invite: UserInvite, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db), 
+    admin: User = Depends(get_admin_user)
+):
     """Invite a new user and send them an email (Admin only)"""
     existing = db.query(User).filter(User.email == invite.email).first()
     if existing:
@@ -102,15 +108,26 @@ async def invite_user(invite: UserInvite, db: Session = Depends(get_db), admin: 
     
     db.commit()
     
-    # Send invitation email
+    # Send invitation email using notification service
     try:
+        await notification_service.notify_user_invited(
+            db=db,
+            user_email=invite.email,
+            role="Instructor",
+            invited_by=admin.name or admin.email,
+            invite_url="/login",
+            background_tasks=background_tasks
+        )
+        
+        # Also send temp password email
         await email_service.load_config(db)
         await email_service.send_email(
-            subject="Invitation to SE Training Portal",
+            subject="Your SE Training Portal Account Credentials",
             recipients=[invite.email],
             body={
-                "message": f"Hello {invite.name},\n\nYou have been invited to the SE Training Portal.\n"
-                           f"Your temporary password is: {temp_password}\n"
+                "message": f"Hello {invite.name},<br><br>"
+                           f"Your account has been created.<br><br>"
+                           f"<strong>Temporary Password:</strong> {temp_password}<br><br>"
                            f"{'You will be required to change your password on first login.' if invite.require_password_change else ''}"
             }
         )

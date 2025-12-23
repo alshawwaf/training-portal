@@ -2,7 +2,7 @@
 Student API routes for class access without real accounts.
 Students join using email + passcode and get assigned an environment.
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
@@ -17,6 +17,7 @@ logger = logging.getLogger("se_portal")
 
 from .auth import get_admin_user, get_current_user
 from db.models import User
+from services.notification_service import notification_service
 
 def get_db():
     db = SessionLocal()
@@ -69,7 +70,12 @@ class StudentSessionResponse(BaseModel):
 # ============ Routes ============
 
 @router.post("/join/{join_token}", response_model=JoinClassResponse)
-def join_class(join_token: str, request: JoinClassRequest, db: Session = Depends(get_db)):
+async def join_class(
+    join_token: str, 
+    request: JoinClassRequest, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
     """
     Join a class using the join token and passcode.
     Creates or retrieves student session and assigns an environment.
@@ -163,6 +169,16 @@ def join_class(join_token: str, request: JoinClassRequest, db: Session = Depends
     db.commit()
     
     logger.info(f"Student {request.email} joined class '{cls.name}' with environment #{available_env.student_number}")
+    
+    # Notify instructor that student joined
+    await notification_service.notify_student_joined(
+        db=db,
+        class_=cls,
+        student_name=request.name or request.email,
+        student_email=request.email,
+        environment_name=f"Environment #{available_env.student_number}",
+        background_tasks=background_tasks
+    )
     
     return JoinClassResponse(
         success=True,

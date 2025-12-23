@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api';
-import { Mail, Globe, Send, Check, ChevronRight, Eye, EyeOff, Settings } from 'lucide-react';
+import { Mail, Globe, Check, ChevronRight, Settings } from 'lucide-react';
 import Modal from '../components/Modal';
+import EmailSettingsModal from '../components/EmailSettingsModal';
 
 interface NotificationChannel {
     id: string;
@@ -22,32 +23,14 @@ const Notifications: React.FC = () => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [browserNotifications, setBrowserNotifications] = useState(false);
     
-    // SMTP Modal State
-    const [smtpModalOpen, setSmtpModalOpen] = useState(false);
-    const [smtpForm, setSmtpForm] = useState({
-        smtp_server: '',
-        smtp_port: '587',
-        smtp_user: '',
-        smtp_password: '',
-        smtp_from: '',
-        smtp_tls: 'true'
-    });
-    const [smtpSaving, setSmtpSaving] = useState(false);
-    const [showSmtpPassword, setShowSmtpPassword] = useState(false);
-    const [testEmailLoading, setTestEmailLoading] = useState(false);
-    const [testRecipient, setTestRecipient] = useState('');
-
-    // Browser Notifications Modal
+    // Modal States
+    const [emailSettingsModalOpen, setEmailSettingsModalOpen] = useState(false);
     const [browserModalOpen, setBrowserModalOpen] = useState(false);
-
-    // Email Preferences Modal
-    const [emailModalOpen, setEmailModalOpen] = useState(false);
+    const [emailPrefsModalOpen, setEmailPrefsModalOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
-            setTestRecipient(user.email || '');
             fetchPreferences();
-            fetchSmtpSettings();
         }
     }, [user]);
 
@@ -56,25 +39,6 @@ const Notifications: React.FC = () => {
             const res = await api.get('/preferences/');
             setEmailNotifications(res.data.email_notifications);
             setBrowserNotifications(res.data.browser_notifications);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const fetchSmtpSettings = async () => {
-        try {
-            const res = await api.get('/settings/');
-            const settings = Array.isArray(res.data) ? res.data : [];
-            const smtp: Record<string, string> = {};
-            settings.forEach((s: any) => {
-                if (s.key.startsWith('smtp_')) {
-                    smtp[s.key] = s.value;
-                }
-            });
-            setSmtpForm(prev => ({
-                ...prev,
-                ...smtp
-            }));
         } catch (e) {
             console.error(e);
         }
@@ -90,38 +54,6 @@ const Notifications: React.FC = () => {
             showToast('Preferences updated', 'success');
         } catch {
             showToast('Failed to update preferences', 'error');
-        }
-    };
-
-    const handleSaveSmtp = async () => {
-        setSmtpSaving(true);
-        try {
-            const promises = Object.entries(smtpForm).map(([key, value]) => {
-                return api.put(`/settings/${key}`, { value });
-            });
-            await Promise.all(promises);
-            showToast('SMTP settings saved', 'success');
-            setSmtpModalOpen(false);
-        } catch (e) {
-            showToast('Failed to save SMTP settings', 'error');
-        } finally {
-            setSmtpSaving(false);
-        }
-    };
-
-    const handleTestEmail = async () => {
-        setTestEmailLoading(true);
-        try {
-            await api.post('/email/test', {
-                to: [testRecipient || user?.email],
-                subject: "SMTP Configuration Test",
-                message: "If you are reading this, your SMTP configuration is working correctly!"
-            });
-            showToast('Test email sent successfully!', 'success');
-        } catch (e: any) {
-            showToast(e.response?.data?.detail || 'Failed to send test email', 'error');
-        } finally {
-            setTestEmailLoading(false);
         }
     };
 
@@ -157,8 +89,8 @@ const Notifications: React.FC = () => {
         },
         {
             id: 'smtp',
-            title: 'SMTP Configuration',
-            description: 'Configure email server settings',
+            title: 'Email Server Settings',
+            description: 'Configure SMTP and notification events',
             icon: Settings,
             color: 'emerald'
         }
@@ -167,13 +99,13 @@ const Notifications: React.FC = () => {
     const handleCardClick = (channel: NotificationChannel) => {
         switch (channel.id) {
             case 'email':
-                setEmailModalOpen(true);
+                setEmailPrefsModalOpen(true);
                 break;
             case 'browser':
                 setBrowserModalOpen(true);
                 break;
             case 'smtp':
-                setSmtpModalOpen(true);
+                setEmailSettingsModalOpen(true);
                 break;
         }
     };
@@ -231,10 +163,10 @@ const Notifications: React.FC = () => {
                 ))}
             </div>
 
-            {/* Email Notifications Modal */}
+            {/* Email Preferences Modal */}
             <Modal
-                isOpen={emailModalOpen}
-                onClose={() => setEmailModalOpen(false)}
+                isOpen={emailPrefsModalOpen}
+                onClose={() => setEmailPrefsModalOpen(false)}
                 title="Email Notifications"
                 maxWidth="sm"
             >
@@ -256,7 +188,7 @@ const Notifications: React.FC = () => {
                         </button>
                     </div>
                     <div className="flex justify-end">
-                        <button onClick={() => setEmailModalOpen(false)} className="btn-primary">
+                        <button onClick={() => setEmailPrefsModalOpen(false)} className="btn-primary">
                             Done
                         </button>
                     </div>
@@ -304,129 +236,11 @@ const Notifications: React.FC = () => {
                 </div>
             </Modal>
 
-            {/* SMTP Configuration Modal */}
-            <Modal
-                isOpen={smtpModalOpen}
-                onClose={() => setSmtpModalOpen(false)}
-                title="SMTP Configuration"
-                maxWidth="lg"
-            >
-                <div className="space-y-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">SMTP Server</label>
-                            <input 
-                                type="text" 
-                                className="input" 
-                                placeholder="smtp.example.com"
-                                value={smtpForm.smtp_server}
-                                onChange={(e) => setSmtpForm(prev => ({...prev, smtp_server: e.target.value}))}
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">SMTP Port</label>
-                            <input 
-                                type="text" 
-                                className="input" 
-                                placeholder="587"
-                                value={smtpForm.smtp_port}
-                                onChange={(e) => setSmtpForm(prev => ({...prev, smtp_port: e.target.value}))}
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Username</label>
-                            <input 
-                                type="text" 
-                                className="input" 
-                                placeholder="user@example.com"
-                                value={smtpForm.smtp_user}
-                                onChange={(e) => setSmtpForm(prev => ({...prev, smtp_user: e.target.value}))}
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">Password</label>
-                            <div className="relative">
-                                <input 
-                                    type={showSmtpPassword ? "text" : "password"}
-                                    className="input pr-10" 
-                                    placeholder="••••••••"
-                                    value={smtpForm.smtp_password}
-                                    onChange={(e) => setSmtpForm(prev => ({...prev, smtp_password: e.target.value}))}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSmtpPassword(!showSmtpPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-primary transition-colors"
-                                >
-                                    {showSmtpPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                </button>
-                            </div>
-                        </div>
-                        <div className="space-y-1.5 md:col-span-2">
-                            <label className="text-xs font-medium text-secondary uppercase tracking-wider">From Address</label>
-                            <input 
-                                type="email" 
-                                className="input" 
-                                placeholder="noreply@example.com"
-                                value={smtpForm.smtp_from}
-                                onChange={(e) => setSmtpForm(prev => ({...prev, smtp_from: e.target.value}))}
-                            />
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button 
-                                onClick={() => setSmtpForm(prev => ({...prev, smtp_tls: prev.smtp_tls === 'true' ? 'false' : 'true'}))}
-                                className={`relative w-11 h-6 rounded-full transition-colors ${smtpForm.smtp_tls === 'true' ? 'bg-blue-600' : 'bg-gray-600'}`}
-                            >
-                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${smtpForm.smtp_tls === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
-                            </button>
-                            <span className="text-sm text-secondary">Use TLS</span>
-                        </div>
-                    </div>
-
-                    {/* Test Email Section */}
-                    <div className="border-t border-theme pt-5">
-                        <p className="text-sm font-medium text-primary mb-3">Test Configuration</p>
-                        <div className="flex gap-3">
-                            <input 
-                                type="email" 
-                                className="input flex-1" 
-                                placeholder="Enter test recipient email"
-                                value={testRecipient}
-                                onChange={(e) => setTestRecipient(e.target.value)}
-                            />
-                            <button 
-                                onClick={handleTestEmail}
-                                disabled={testEmailLoading}
-                                className="btn-secondary shrink-0"
-                            >
-                                {testEmailLoading ? (
-                                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                ) : (
-                                    <Send className="w-4 h-4" />
-                                )}
-                                Send Test
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4 border-t border-theme">
-                        <button onClick={() => setSmtpModalOpen(false)} className="btn-secondary">
-                            Cancel
-                        </button>
-                        <button 
-                            onClick={handleSaveSmtp}
-                            disabled={smtpSaving}
-                            className="btn-primary"
-                        >
-                            {smtpSaving ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                'Save Settings'
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </Modal>
+            {/* Email Settings Modal (SMTP + Notification Events) */}
+            <EmailSettingsModal 
+                isOpen={emailSettingsModalOpen} 
+                onClose={() => setEmailSettingsModalOpen(false)} 
+            />
         </div>
     );
 };
