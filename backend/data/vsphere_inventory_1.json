@@ -1,5 +1,5 @@
 {
-  "last_sync": "2025-12-21T00:40:51.157430",
+  "last_sync": "2025-12-23T05:03:36.288755",
   "datacenters": [
     {
       "name": "vCenter-Datacenter",
@@ -111,6 +111,15 @@
   ],
   "vms": [
     {
+      "name": "sbt-Student_1-pfSense",
+      "moid": "vm-5423",
+      "power_state": "poweredOn",
+      "guest_os": "FreeBSD 12 or later versions (64-bit)",
+      "cpu": 2,
+      "memory_mb": 4096,
+      "is_template": false
+    },
+    {
       "name": "Proxmox",
       "moid": "vm-5230",
       "power_state": "suspended",
@@ -135,6 +144,15 @@
       "guest_os": "Microsoft Windows 10 (64-bit)",
       "cpu": 4,
       "memory_mb": 16384,
+      "is_template": false
+    },
+    {
+      "name": "sbt-Student_1-Kali_Linux-SBT-R82",
+      "moid": "vm-5425",
+      "power_state": "poweredOff",
+      "guest_os": "Unknown",
+      "cpu": 0,
+      "memory_mb": 0,
       "is_template": false
     },
     {

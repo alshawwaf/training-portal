@@ -123,6 +123,16 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
         });
     };
 
+    // Clean up VM/environment names for display
+    const formatDisplayName = (name: string) => {
+        return name
+            .replace(/[-_]/g, ' ')  // Replace dashes and underscores with spaces
+            .replace(/\s+/g, ' ')   // Collapse multiple spaces
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     const getVmStatusCounts = (env: ClassEnvironment) => {
         const on = env.vms.filter(v => v.power_state === 'poweredOn').length;
         const off = env.vms.filter(v => v.power_state === 'poweredOff').length;
@@ -149,16 +159,16 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                 {/* Header Stats - Tighter */}
                 <div className="flex items-center gap-4 flex-wrap pb-2 border-b border-theme/30">
                     <div className="flex items-center gap-1.5 text-xs">
-                        <Key className="w-3.5 h-3.5 text-blue-400" />
+                        <Key className="w-3.5 h-3.5 text-violet-400" />
                         <span className="text-secondary font-bold uppercase tracking-tighter">Key:</span>
-                        <span className="font-mono font-black text-primary bg-blue-500/10 px-1.5 rounded">{classData.passcode}</span>
+                        <span className="font-mono font-black text-primary bg-violet-500/10 px-1.5 rounded">{classData.passcode}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs">
-                        <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                        <Calendar className="w-3.5 h-3.5 text-fuchsia-400" />
                         <span className="text-primary font-medium">{formatDate(classData.start_date)} - {formatDate(classData.end_date)}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs">
-                        <Users className="w-3.5 h-3.5 text-emerald-400" />
+                        <Users className="w-3.5 h-3.5 text-cyan-400" />
                         <span className="font-black text-primary">{environments.length}</span>
                         <span className="text-secondary opacity-70">/ {classData.max_users} Enrolled</span>
                     </div>
@@ -232,7 +242,7 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                                 )}
                                             </div>
                                             <div className="col-span-3">
-                                                <div className="text-xs font-bold text-primary truncate" title={env.name}>{env.name}</div>
+                                                <div className="text-xs font-bold text-primary truncate" title={env.name}>{formatDisplayName(env.name)}</div>
                                                 <div className="text-[9px] font-mono text-secondary opacity-60 uppercase">{env.user_id || 'PROVISIONING'}</div>
                                             </div>
                                             <div className="col-span-2">
@@ -243,7 +253,7 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" title="Active"></div>
                                                 )}
                                                 {status.suspended > 0 && (
-                                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" title="Suspended"></div>
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-fuchsia-500 shadow-[0_0_8px_rgba(217,70,239,0.4)]" title="Suspended"></div>
                                                 )}
                                                 {status.off > 0 && (
                                                     <div className="w-2.5 h-2.5 rounded-full bg-slate-500" title="Offline"></div>
@@ -260,14 +270,14 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                                     </button>
                                                     <button 
                                                         onClick={() => handleEnvPower(env.id, 'stop')}
-                                                        className="p-1 px-1.5 text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                                                        className="p-1 px-1.5 text-rose-500 hover:bg-rose-500/10 rounded transition-colors"
                                                         title="Shutdown Fleet"
                                                     >
                                                         <Square className="w-3 h-3 fill-current" />
                                                     </button>
                                                     <button 
                                                         onClick={() => handleEnvPower(env.id, 'suspend')}
-                                                        className="p-1 px-1.5 text-amber-500 hover:bg-amber-500/10 rounded transition-colors"
+                                                        className="p-1 px-1.5 text-fuchsia-500 hover:bg-fuchsia-500/10 rounded transition-colors"
                                                         title="Suspend Fleet"
                                                     >
                                                         <Pause className="w-3 h-3 fill-current" />
@@ -282,7 +292,7 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                                 </button>
                                                 <button 
                                                     onClick={() => handleEnvDelete(env.id)}
-                                                    className="p-1.5 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                                                    className="p-1.5 text-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded transition-colors"
                                                     title="Decommission Environment"
                                                 >
                                                     <Trash2 className="w-3 h-3" />
@@ -298,12 +308,12 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                                         <div className="flex items-center gap-3">
                                                             <div className={`w-1.5 h-1.5 rounded-full ${
                                                                 vm.power_state === 'poweredOn' ? 'bg-emerald-500' :
-                                                                vm.power_state === 'suspended' ? 'bg-amber-500' :
+                                                                vm.power_state === 'suspended' ? 'bg-fuchsia-500' :
                                                                 'bg-slate-500'
                                                             }`}></div>
                                                             <div>
-                                                                <span className="text-[11px] font-mono font-bold text-primary">{vm.name}</span>
-                                                                <span className="text-[9px] text-secondary ml-2 opacity-50">{vm.ip_address || 'UNSET'}</span>
+                                                                <span className="text-[11px] font-medium text-primary">{formatDisplayName(vm.name)}</span>
+                                                                <span className="text-[9px] text-secondary ml-2 opacity-50">{vm.ip_address || 'Pending'}</span>
                                                             </div>
                                                         </div>
                                                         
@@ -323,20 +333,20 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                                                                     onClick={() => handlePowerControl(env.id, vm.id, vm.power_state === 'poweredOn' ? 'stop' : 'start')}
                                                                     className={clsx(
                                                                         "p-1 rounded",
-                                                                        vm.power_state === 'poweredOn' ? "text-red-400 hover:bg-red-500/10" : "text-emerald-400 hover:bg-emerald-500/10"
+                                                                        vm.power_state === 'poweredOn' ? "text-rose-400 hover:bg-rose-500/10" : "text-emerald-400 hover:bg-emerald-500/10"
                                                                     )}
                                                                 >
                                                                     {vm.power_state === 'poweredOn' ? <Square className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleVmRevert(vm.id)}
-                                                                    className="p-1 text-purple-400 hover:bg-purple-500/10 rounded" 
+                                                                    className="p-1 text-violet-400 hover:bg-violet-500/10 rounded" 
                                                                 >
                                                                     <RotateCcw className="w-2.5 h-2.5" />
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleVmDelete(vm.id)}
-                                                                    className="p-1 text-secondary hover:text-red-500 hover:bg-red-500/10 rounded" 
+                                                                    className="p-1 text-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded" 
                                                                 >
                                                                     <Trash2 className="w-2.5 h-2.5" />
                                                                 </button>
@@ -360,7 +370,7 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({ isOpen, onClose, 
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Active
                         </span>
                         <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-amber-500"></span> Suspend
+                            <span className="w-2 h-2 rounded-full bg-fuchsia-500"></span> Suspended
                         </span>
                         <span className="flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-slate-500"></span> Offline

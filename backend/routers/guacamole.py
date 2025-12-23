@@ -354,7 +354,7 @@ def get_console_page(
 
         function updateStatus(status, text) {{
             statusDot.className = 'status-dot ' + status;
-            statusText.textContent = text;
+            if (statusText) statusText.textContent = text;
         }}
 
         function showError(message) {{
@@ -395,9 +395,10 @@ def get_console_page(
 
                 window.rfb.addEventListener("connect", () => {{
                     console.log("noVNC Connected");
-                    updateStatus('connected', 'Connected');
+                    // Hide loader immediately
                     loader.style.opacity = '0';
-                    setTimeout(() => loader.style.display = 'none', 500);
+                    loader.style.display = 'none';
+                    updateStatus('connected', 'Connected');
                     
                     // CRITICAL: Force a resize event after a short delay to ensure 
                     // noVNC correctly calculates the container dimensions.

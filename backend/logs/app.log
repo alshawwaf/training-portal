@@ -25498,3 +25498,1383 @@ MAIL_FROM
 2025-12-23 00:33:22,002 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
 2025-12-23 00:33:23,084 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['cpadmin@americas-ses.com']
 2025-12-23 00:33:49,001 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 00:50:01,906 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 00:50:01,911 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 00:50:01,915 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 00:50:01,920 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 00:50:01,926 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 00:50:01,937 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 00:50:01,942 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 00:50:01,946 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 00:50:01,951 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 00:50:01,954 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 00:50:01,960 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 00:50:01,964 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 00:50:01,971 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 00:50:01,982 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 00:50:01,987 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 00:50:01,992 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 00:50:01,997 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 00:50:02,003 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 00:50:02,009 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 00:50:02,013 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 00:50:02,017 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 00:50:02,021 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 00:50:02,027 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 00:50:02,031 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 00:50:02,039 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 00:50:02,044 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 00:50:02,048 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 00:50:02,053 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 00:50:02,059 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 00:50:02,063 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 00:50:02,069 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 00:50:02,076 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 00:50:02,080 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 00:50:02,086 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 00:50:02,091 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 00:50:02,095 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 00:50:02,101 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 00:50:02,105 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 00:50:02,108 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 00:50:02,113 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 00:50:02,120 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 00:50:02,123 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 00:50:02,126 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 00:50:02,129 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 00:50:02,131 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 00:50:02,134 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 00:50:02,137 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 00:50:02,140 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 00:50:02,143 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 00:50:02,146 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 00:50:02,150 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 00:50:02,154 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 00:50:02,161 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 00:50:02,166 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 00:50:02,170 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 00:50:02,172 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 00:50:02,174 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 00:50:02,177 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 00:50:02,180 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 00:50:02,182 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 00:50:02,185 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 00:50:02,188 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 00:50:02,191 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 00:50:02,193 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 00:50:02,195 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 00:50:02,198 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 00:50:02,201 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 00:50:02,203 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 00:50:02,206 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 00:50:02,209 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 00:50:02,213 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 00:50:02,217 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 00:50:02,219 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 00:50:02,224 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 00:50:02,227 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 00:50:02,231 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 00:50:02,235 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 00:50:02,239 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 00:50:02,242 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 00:50:02,244 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 00:50:02,247 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 00:50:02,249 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 00:50:02,252 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 00:50:02,255 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 00:50:02,257 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 00:50:02,260 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 00:50:02,263 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 00:50:02,265 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 00:50:02,268 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 00:50:02,270 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 00:50:02,273 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 00:50:02,275 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 00:50:02,278 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 00:50:02,281 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 00:50:02,288 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 00:50:02,292 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 00:50:02,296 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 00:50:02,301 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 00:50:02,307 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 00:50:02,313 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 00:50:02,320 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 00:50:02,326 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 00:50:02,333 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 00:50:02,340 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 00:50:02,343 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 00:50:02,348 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 00:50:02,355 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 00:50:02,359 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 00:50:02,365 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 00:50:02,370 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 00:50:02,376 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 00:50:02,382 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 00:50:02,386 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 00:50:02,394 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 00:50:02,400 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 00:50:02,404 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 00:50:02,408 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 00:50:02,412 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 00:50:02,444 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 00:50:02,758 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 00:50:02,764 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 04:00:40,019 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 04:00:40,023 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 04:00:40,026 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 04:00:40,030 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 04:00:40,032 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 04:00:40,035 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 04:00:40,038 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 04:00:40,040 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 04:00:40,043 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 04:00:40,046 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 04:00:40,049 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 04:00:40,052 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 04:00:40,055 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 04:00:40,058 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 04:00:40,061 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 04:00:40,067 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 04:00:40,072 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 04:00:40,078 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 04:00:40,083 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 04:00:40,088 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 04:00:40,092 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 04:00:40,098 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 04:00:40,104 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 04:00:40,109 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 04:00:40,117 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 04:00:40,121 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 04:00:40,126 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 04:00:40,129 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 04:00:40,132 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 04:00:40,140 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 04:00:40,145 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 04:00:40,151 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 04:00:40,157 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 04:00:40,162 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 04:00:40,169 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 04:00:40,175 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 04:00:40,179 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 04:00:40,185 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 04:00:40,190 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 04:00:40,195 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 04:00:40,200 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 04:00:40,205 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 04:00:40,211 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 04:00:40,219 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 04:00:40,225 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 04:00:40,231 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 04:00:40,237 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 04:00:40,242 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 04:00:40,246 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 04:00:40,252 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 04:00:40,257 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 04:00:40,262 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 04:00:40,266 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 04:00:40,272 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 04:00:40,276 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 04:00:40,280 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 04:00:40,283 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 04:00:40,287 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 04:00:40,290 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 04:00:40,293 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 04:00:40,296 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 04:00:40,298 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 04:00:40,301 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 04:00:40,305 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 04:00:40,308 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 04:00:40,310 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 04:00:40,313 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 04:00:40,318 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 04:00:40,326 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 04:00:40,334 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 04:00:40,341 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 04:00:40,344 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 04:00:40,349 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 04:00:40,353 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 04:00:40,356 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 04:00:40,359 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 04:00:40,363 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 04:00:40,366 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 04:00:40,369 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 04:00:40,372 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 04:00:40,374 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 04:00:40,377 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 04:00:40,380 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 04:00:40,383 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 04:00:40,386 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 04:00:40,389 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 04:00:40,392 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 04:00:40,394 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 04:00:40,398 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 04:00:40,401 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 04:00:40,405 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 04:00:40,408 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 04:00:40,410 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 04:00:40,413 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 04:00:40,417 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 04:00:40,420 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 04:00:40,423 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 04:00:40,426 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 04:00:40,429 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 04:00:40,432 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 04:00:40,435 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 04:00:40,437 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 04:00:40,440 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 04:00:40,443 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 04:00:40,445 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 04:00:40,448 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 04:00:40,450 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 04:00:40,453 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 04:00:40,456 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 04:00:40,459 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 04:00:40,462 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 04:00:40,465 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 04:00:40,467 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 04:00:40,470 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 04:00:40,473 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 04:00:40,475 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 04:00:40,478 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 04:00:40,480 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 04:00:40,525 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 04:00:40,820 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 04:00:40,830 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 04:01:40,496 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 04:02:39,573 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 04:02:55,586 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 04:02:56,678 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 04:04:19,264 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:25
+2025-12-23 04:04:28,819 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:04:28,867 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:04:32,163 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:04:32,215 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:04:34,768 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:04:35,980 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 04:07:53,026 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'user_invited' to 1 recipients
+2025-12-23 04:07:53,049 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:07:54,276 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['alshawwaf@gmail.com']
+2025-12-23 04:07:55,432 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['alshawwaf@gmail.com']
+2025-12-23 04:07:55,436 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'You're Invited to SE Training Portal' to 1 recipients
+2025-12-23 04:09:03,579 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'user_invited' to 1 recipients
+2025-12-23 04:09:03,589 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:09:04,776 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['administrator@americas-ses.com']
+2025-12-23 04:09:05,953 - se_portal.email_service - INFO - email_service.py:93 - Email sent to ['administrator@americas-ses.com']
+2025-12-23 04:09:05,959 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'You're Invited to SE Training Portal' to 1 recipients
+2025-12-23 04:13:47,366 - se_portal.email_service - INFO - email_service.py:54 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:23:26,270 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 04:23:26,273 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 04:23:26,276 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 04:23:26,278 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 04:23:26,281 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 04:23:26,284 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 04:23:26,286 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 04:23:26,289 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 04:23:26,292 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 04:23:26,294 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 04:23:26,297 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 04:23:26,300 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 04:23:26,303 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 04:23:26,306 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 04:23:26,308 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 04:23:26,311 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 04:23:26,313 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 04:23:26,316 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 04:23:26,318 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 04:23:26,321 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 04:23:26,323 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 04:23:26,326 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 04:23:26,328 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 04:23:26,331 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 04:23:26,334 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 04:23:26,336 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 04:23:26,339 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 04:23:26,342 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 04:23:26,344 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 04:23:26,348 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 04:23:26,350 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 04:23:26,353 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 04:23:26,356 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 04:23:26,358 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 04:23:26,361 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 04:23:26,364 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 04:23:26,366 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 04:23:26,369 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 04:23:26,372 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 04:23:26,375 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 04:23:26,377 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 04:23:26,380 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 04:23:26,382 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 04:23:26,385 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 04:23:26,388 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 04:23:26,391 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 04:23:26,394 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 04:23:26,396 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 04:23:26,398 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 04:23:26,401 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 04:23:26,404 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 04:23:26,406 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 04:23:26,409 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 04:23:26,412 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 04:23:26,414 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 04:23:26,417 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 04:23:26,419 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 04:23:26,422 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 04:23:26,425 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 04:23:26,428 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 04:23:26,431 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 04:23:26,433 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 04:23:26,436 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 04:23:26,439 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 04:23:26,441 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 04:23:26,444 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 04:23:26,446 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 04:23:26,449 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 04:23:26,451 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 04:23:26,454 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 04:23:26,457 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 04:23:26,459 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 04:23:26,462 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 04:23:26,464 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 04:23:26,467 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 04:23:26,470 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 04:23:26,472 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 04:23:26,475 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 04:23:26,477 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 04:23:26,481 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 04:23:26,485 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 04:23:26,491 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 04:23:26,495 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 04:23:26,499 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 04:23:26,505 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 04:23:26,509 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 04:23:26,513 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 04:23:26,517 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 04:23:26,523 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 04:23:26,527 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 04:23:26,530 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 04:23:26,535 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 04:23:26,539 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 04:23:26,542 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 04:23:26,546 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 04:23:26,551 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 04:23:26,556 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 04:23:26,560 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 04:23:26,566 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 04:23:26,571 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 04:23:26,575 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 04:23:26,582 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 04:23:26,592 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 04:23:26,596 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 04:23:26,601 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 04:23:26,607 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 04:23:26,611 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 04:23:26,616 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 04:23:26,620 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 04:23:26,625 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 04:23:26,630 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 04:23:26,635 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 04:23:26,641 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 04:23:26,648 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 04:23:26,655 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 04:23:26,661 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 04:23:26,666 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 04:23:26,670 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 04:23:26,694 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 04:23:26,975 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:23:26,984 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 04:24:00,337 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:24:18,362 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:24:30,186 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:24:31,359 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 04:26:04,594 - se_portal - INFO - templates.py:97 - Created template: pfsense with 2 VMs
+2025-12-23 04:26:30,951 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'class_created' to 1 recipients
+2025-12-23 04:26:32,223 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['admin@cpdemo.com']
+2025-12-23 04:26:32,228 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'New Training Class: sbt' to 1 recipients
+2025-12-23 04:31:43,312 - se_portal - INFO - student.py:171 - Student administrator@americas-ses.com joined class 'sbt' with environment #None
+2025-12-23 04:31:43,327 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'student_joined' to 1 recipients
+2025-12-23 04:31:44,608 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['admin@cpdemo.com']
+2025-12-23 04:31:44,614 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'Student Joined: administrator@americas-ses.com - sbt' to 1 recipients
+2025-12-23 04:31:58,885 - se_portal - INFO - student.py:361 - Student administrator@americas-ses.com performed start on VM sbt-Student_1-pfSense
+2025-12-23 04:31:59,476 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/1/1/1
+2025-12-23 04:32:01,778 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 04:32:01,784 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 04:32:01,790 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MTciLCAiY2xhc3NfaWQiOiAxLC...
+2025-12-23 04:32:01,796 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5417
+2025-12-23 04:32:01,800 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5417', 'class_id': 1, 'env_id': 1, 'vm_id': 1}
+2025-12-23 04:32:01,804 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5417
+2025-12-23 04:32:01,808 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5417...
+2025-12-23 04:32:01,828 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 04:32:01,987 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 04:32:01,993 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/bf6126e3a1c45194...
+2025-12-23 04:32:02,020 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 04:32:02,126 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 04:32:02,132 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 04:32:02,137 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 04:32:02,146 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 04:32:20,646 - se_portal.console_ws - INFO - console_ws.py:176 - Relay vsphere->client finished. vSphere closed the connection. Count: 152, Reason: 
+2025-12-23 04:32:20,650 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 04:32:21,729 - se_portal - INFO - student.py:361 - Student administrator@americas-ses.com performed stop on VM sbt-Student_1-pfSense
+2025-12-23 04:39:12,544 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 04:39:12,548 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 04:39:12,550 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 04:39:12,554 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 04:39:12,556 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 04:39:12,559 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 04:39:12,563 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 04:39:12,565 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 04:39:12,567 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 04:39:12,570 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 04:39:12,573 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 04:39:12,575 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 04:39:12,578 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 04:39:12,582 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 04:39:12,584 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 04:39:12,587 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 04:39:12,589 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 04:39:12,600 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 04:39:12,603 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 04:39:12,606 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 04:39:12,609 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 04:39:12,612 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 04:39:12,615 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 04:39:12,618 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 04:39:12,621 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 04:39:12,624 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 04:39:12,626 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 04:39:12,629 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 04:39:12,632 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 04:39:12,635 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 04:39:12,637 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 04:39:12,641 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 04:39:12,643 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 04:39:12,646 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 04:39:12,648 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 04:39:12,651 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 04:39:12,654 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 04:39:12,657 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 04:39:12,659 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 04:39:12,662 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 04:39:12,665 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 04:39:12,668 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 04:39:12,671 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 04:39:12,673 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 04:39:12,676 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 04:39:12,679 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 04:39:12,682 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 04:39:12,685 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 04:39:12,688 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 04:39:12,690 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 04:39:12,693 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 04:39:12,695 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 04:39:12,698 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 04:39:12,701 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 04:39:12,703 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 04:39:12,706 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 04:39:12,708 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 04:39:12,711 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 04:39:12,713 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 04:39:12,716 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 04:39:12,719 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 04:39:12,721 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 04:39:12,724 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 04:39:12,727 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 04:39:12,729 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 04:39:12,732 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 04:39:12,736 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 04:39:12,738 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 04:39:12,740 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 04:39:12,743 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 04:39:12,746 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 04:39:12,748 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 04:39:12,751 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 04:39:12,754 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 04:39:12,756 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 04:39:12,759 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 04:39:12,763 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 04:39:12,768 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 04:39:12,775 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 04:39:12,778 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 04:39:12,780 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 04:39:12,783 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 04:39:12,786 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 04:39:12,788 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 04:39:12,791 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 04:39:12,793 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 04:39:12,796 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 04:39:12,799 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 04:39:12,802 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 04:39:12,804 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 04:39:12,807 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 04:39:12,810 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 04:39:12,813 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 04:39:12,815 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 04:39:12,818 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 04:39:12,820 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 04:39:12,823 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 04:39:12,825 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 04:39:12,829 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 04:39:12,833 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 04:39:12,837 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 04:39:12,840 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 04:39:12,843 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 04:39:12,845 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 04:39:12,848 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 04:39:12,851 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 04:39:12,854 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 04:39:12,857 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 04:39:12,860 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 04:39:12,863 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 04:39:12,866 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 04:39:12,869 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 04:39:12,872 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 04:39:12,874 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 04:39:12,877 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 04:39:12,879 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 04:39:12,882 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 04:39:12,884 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 04:39:12,915 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 04:39:13,182 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:39:13,187 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 04:48:05,194 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 04:48:05,200 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 04:48:05,205 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 04:48:05,208 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 04:48:05,210 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 04:48:05,213 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 04:48:05,215 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 04:48:05,218 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 04:48:05,221 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 04:48:05,223 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 04:48:05,226 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 04:48:05,230 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 04:48:05,236 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 04:48:05,241 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 04:48:05,246 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 04:48:05,249 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 04:48:05,253 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 04:48:05,256 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 04:48:05,259 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 04:48:05,263 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 04:48:05,265 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 04:48:05,267 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 04:48:05,270 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 04:48:05,272 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 04:48:05,275 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 04:48:05,277 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 04:48:05,279 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 04:48:05,282 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 04:48:05,284 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 04:48:05,287 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 04:48:05,289 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 04:48:05,293 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 04:48:05,297 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 04:48:05,301 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 04:48:05,304 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 04:48:05,307 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 04:48:05,309 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 04:48:05,312 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 04:48:05,314 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 04:48:05,316 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 04:48:05,319 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 04:48:05,321 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 04:48:05,324 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 04:48:05,327 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 04:48:05,329 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 04:48:05,332 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 04:48:05,334 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 04:48:05,337 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 04:48:05,340 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 04:48:05,342 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 04:48:05,345 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 04:48:05,348 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 04:48:05,350 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 04:48:05,354 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 04:48:05,359 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 04:48:05,364 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 04:48:05,369 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 04:48:05,373 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 04:48:05,377 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 04:48:05,379 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 04:48:05,382 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 04:48:05,385 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 04:48:05,389 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 04:48:05,391 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 04:48:05,394 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 04:48:05,397 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 04:48:05,399 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 04:48:05,403 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 04:48:05,405 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 04:48:05,408 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 04:48:05,411 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 04:48:05,414 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 04:48:05,417 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 04:48:05,419 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 04:48:05,422 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 04:48:05,425 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 04:48:05,427 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 04:48:05,430 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 04:48:05,433 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 04:48:05,436 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 04:48:05,438 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 04:48:05,441 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 04:48:05,443 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 04:48:05,446 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 04:48:05,450 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 04:48:05,455 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 04:48:05,460 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 04:48:05,463 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 04:48:05,466 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 04:48:05,469 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 04:48:05,472 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 04:48:05,474 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 04:48:05,477 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 04:48:05,482 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 04:48:05,486 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 04:48:05,491 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 04:48:05,495 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 04:48:05,498 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 04:48:05,500 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 04:48:05,503 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 04:48:05,506 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 04:48:05,511 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 04:48:05,521 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 04:48:05,528 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 04:48:05,532 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 04:48:05,537 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 04:48:05,540 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 04:48:05,557 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 04:48:05,561 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 04:48:05,565 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 04:48:05,570 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 04:48:05,574 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 04:48:05,577 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 04:48:05,582 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 04:48:05,591 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 04:48:05,598 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 04:48:05,602 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 04:48:05,605 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 04:48:05,644 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 04:48:06,044 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:48:06,057 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 04:49:08,371 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:49:12,485 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:49:13,622 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 04:50:40,632 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'user_invited' to 1 recipients
+2025-12-23 04:50:40,647 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:50:41,819 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 04:50:43,018 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 04:50:43,022 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'You're Invited to SE Training Portal' to 1 recipients
+2025-12-23 04:59:34,216 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 04:59:34,219 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 04:59:34,222 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 04:59:34,224 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 04:59:34,227 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 04:59:34,229 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 04:59:34,232 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 04:59:34,234 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 04:59:34,237 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 04:59:34,242 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 04:59:34,247 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 04:59:34,251 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 04:59:34,254 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 04:59:34,257 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 04:59:34,261 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 04:59:34,265 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 04:59:34,269 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 04:59:34,276 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 04:59:34,281 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 04:59:34,286 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 04:59:34,293 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 04:59:34,297 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 04:59:34,301 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 04:59:34,303 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 04:59:34,306 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 04:59:34,309 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 04:59:34,316 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 04:59:34,319 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 04:59:34,324 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 04:59:34,328 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 04:59:34,331 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 04:59:34,334 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 04:59:34,336 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 04:59:34,339 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 04:59:34,343 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 04:59:34,347 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 04:59:34,352 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 04:59:34,356 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 04:59:34,359 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 04:59:34,362 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 04:59:34,364 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 04:59:34,367 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 04:59:34,373 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 04:59:34,378 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 04:59:34,382 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 04:59:34,385 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 04:59:34,388 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 04:59:34,390 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 04:59:34,393 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 04:59:34,397 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 04:59:34,400 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 04:59:34,408 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 04:59:34,418 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 04:59:34,422 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 04:59:34,425 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 04:59:34,428 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 04:59:34,431 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 04:59:34,435 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 04:59:34,441 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 04:59:34,445 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 04:59:34,448 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 04:59:34,453 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 04:59:34,464 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 04:59:34,467 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 04:59:34,470 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 04:59:34,472 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 04:59:34,475 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 04:59:34,478 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 04:59:34,480 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 04:59:34,483 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 04:59:34,486 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 04:59:34,488 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 04:59:34,491 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 04:59:34,496 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 04:59:34,507 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 04:59:34,509 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 04:59:34,512 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 04:59:34,515 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 04:59:34,519 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 04:59:34,523 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 04:59:34,528 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 04:59:34,531 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 04:59:34,533 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 04:59:34,536 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 04:59:34,538 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 04:59:34,541 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 04:59:34,545 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 04:59:34,549 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 04:59:34,552 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 04:59:34,556 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 04:59:34,558 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 04:59:34,561 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 04:59:34,564 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 04:59:34,567 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 04:59:34,570 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 04:59:34,575 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 04:59:34,581 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 04:59:34,589 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 04:59:34,598 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 04:59:34,601 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 04:59:34,603 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 04:59:34,606 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 04:59:34,608 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 04:59:34,611 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 04:59:34,613 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 04:59:34,616 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 04:59:34,619 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 04:59:34,622 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 04:59:34,624 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 04:59:34,627 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 04:59:34,630 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 04:59:34,632 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 04:59:34,635 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 04:59:34,638 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 04:59:34,640 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 04:59:34,642 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 04:59:34,645 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 04:59:34,648 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 04:59:34,675 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 04:59:34,947 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 04:59:34,958 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 05:00:10,347 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 05:00:14,817 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 05:00:15,968 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['cpadmin@americas-ses.com']
+2025-12-23 05:01:34,956 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'class_created' to 1 recipients
+2025-12-23 05:01:36,226 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['admin@cpdemo.com']
+2025-12-23 05:01:36,229 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'New Training Class: sbt' to 1 recipients
+2025-12-23 05:14:27,803 - se_portal - INFO - student.py:171 - Student administrator@americas-ses.com joined class 'sbt' with environment #None
+2025-12-23 05:14:27,820 - se_portal.notification_service - INFO - notification_service.py:210 - Queued notification 'student_joined' to 1 recipients
+2025-12-23 05:14:28,626 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:14:29,072 - se_portal.email_service - INFO - email_service.py:97 - Email sent to ['admin@cpdemo.com']
+2025-12-23 05:14:29,078 - se_portal.notification_service - INFO - notification_service.py:234 - Sent notification 'Student Joined: administrator@americas-ses.com - sbt' to 1 recipients
+2025-12-23 05:14:30,260 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:14:30,263 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:14:30,265 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:14:30,268 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:14:30,270 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:14:30,272 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:14:30,275 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:14:30,289 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:14:30,427 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:14:30,430 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/2c61f8e2b0bcac6f...
+2025-12-23 05:14:30,451 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:14:30,519 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:14:30,526 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:14:30,530 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:30,540 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:32,723 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:14:32,803 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:14:32,806 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 17 messages
+2025-12-23 05:14:32,818 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:14:34,259 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:14:34,263 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:14:34,266 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:14:34,273 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:14:34,278 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:14:34,282 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:14:34,292 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:14:34,301 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:14:34,326 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:14:34,466 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:14:34,470 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/a18a3415b5d4aef8...
+2025-12-23 05:14:34,493 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:14:34,525 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:14:34,529 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:14:34,532 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:34,540 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:34,584 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:14:34,590 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 3 messages
+2025-12-23 05:14:34,599 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:14:35,887 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:14:35,891 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:14:35,894 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:14:35,896 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:14:35,900 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:14:35,902 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:14:35,905 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:14:35,920 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:14:36,083 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:14:36,088 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/d6c47221d715f37d...
+2025-12-23 05:14:36,115 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:14:36,157 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:14:36,160 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:14:36,162 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:36,168 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:38,956 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:14:39,028 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:14:39,032 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 11 messages
+2025-12-23 05:14:39,046 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:14:40,418 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:14:40,421 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:14:40,423 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:14:40,426 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:14:40,429 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:14:40,432 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:14:40,435 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:14:40,443 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:14:40,575 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:14:40,577 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/b92b52138b102da4...
+2025-12-23 05:14:40,597 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:14:40,637 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:14:40,641 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:14:40,643 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:40,650 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:43,268 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:14:43,335 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:14:43,339 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 13 messages
+2025-12-23 05:14:43,349 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:14:44,735 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:14:44,737 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:14:44,741 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:14:44,744 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:14:44,746 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:14:44,749 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:14:44,752 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:14:44,759 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:14:44,916 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:14:44,921 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/6d5b52ca1c933287...
+2025-12-23 05:14:44,947 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:14:44,990 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:14:44,998 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:14:45,002 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:14:45,011 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:15:09,360 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:15:09,479 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:15:09,484 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 20 messages
+2025-12-23 05:15:09,497 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:15:11,287 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:15:11,291 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:15:11,294 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:15:11,299 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:15:11,302 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:15:11,305 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:15:11,308 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:15:11,315 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:15:11,522 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:15:11,526 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/79aefee843504eca...
+2025-12-23 05:15:11,550 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:15:11,601 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:15:11,606 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:15:11,613 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:15:11,639 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:15:13,261 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:15:13,335 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:15:13,338 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 13 messages
+2025-12-23 05:15:13,348 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:15:14,698 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:15:14,701 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:15:14,704 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:15:14,707 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:15:14,710 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:15:14,712 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:15:14,715 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:15:14,722 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:15:14,853 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:15:14,856 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/61cc43805d6581a7...
+2025-12-23 05:15:14,877 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:15:14,935 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:15:14,940 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:15:14,943 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:15:14,950 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:18:57,327 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:18:57,333 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 51 messages
+2025-12-23 05:18:57,351 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:24:43,276 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 05:24:43,279 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 05:24:43,282 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 05:24:43,285 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 05:24:43,287 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 05:24:43,290 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 05:24:43,292 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 05:24:43,295 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 05:24:43,298 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 05:24:43,301 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 05:24:43,303 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 05:24:43,306 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 05:24:43,309 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 05:24:43,312 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 05:24:43,314 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 05:24:43,317 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 05:24:43,320 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 05:24:43,322 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 05:24:43,324 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 05:24:43,327 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 05:24:43,329 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 05:24:43,333 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 05:24:43,335 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 05:24:43,338 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 05:24:43,340 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 05:24:43,343 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 05:24:43,346 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 05:24:43,349 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 05:24:43,351 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 05:24:43,354 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 05:24:43,356 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 05:24:43,359 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 05:24:43,362 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 05:24:43,364 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 05:24:43,367 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 05:24:43,370 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 05:24:43,372 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 05:24:43,375 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 05:24:43,377 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 05:24:43,380 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 05:24:43,383 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 05:24:43,385 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 05:24:43,388 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 05:24:43,391 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 05:24:43,394 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 05:24:43,397 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 05:24:43,399 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 05:24:43,402 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 05:24:43,405 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 05:24:43,408 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 05:24:43,410 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 05:24:43,413 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 05:24:43,416 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 05:24:43,420 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 05:24:43,423 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 05:24:43,426 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 05:24:43,429 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 05:24:43,433 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 05:24:43,435 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 05:24:43,439 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 05:24:43,442 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 05:24:43,445 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 05:24:43,448 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 05:24:43,451 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 05:24:43,454 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 05:24:43,456 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 05:24:43,459 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 05:24:43,462 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 05:24:43,464 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 05:24:43,467 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 05:24:43,469 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 05:24:43,472 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 05:24:43,475 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 05:24:43,478 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 05:24:43,480 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 05:24:43,483 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 05:24:43,485 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 05:24:43,488 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 05:24:43,490 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 05:24:43,493 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 05:24:43,496 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 05:24:43,498 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 05:24:43,501 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 05:24:43,504 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 05:24:43,508 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 05:24:43,513 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 05:24:43,515 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 05:24:43,518 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 05:24:43,521 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 05:24:43,524 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 05:24:43,527 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 05:24:43,529 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 05:24:43,531 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 05:24:43,534 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 05:24:43,536 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 05:24:43,539 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 05:24:43,542 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 05:24:43,544 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 05:24:43,547 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 05:24:43,550 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 05:24:43,552 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 05:24:43,557 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 05:24:43,562 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 05:24:43,565 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 05:24:43,567 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 05:24:43,570 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 05:24:43,573 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 05:24:43,575 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 05:24:43,578 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 05:24:43,581 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 05:24:43,583 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 05:24:43,587 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 05:24:43,589 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 05:24:43,592 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 05:24:43,595 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 05:24:43,597 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 05:24:43,599 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 05:24:43,601 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 05:24:43,628 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 05:24:43,906 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 05:24:43,913 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.
+2025-12-23 05:27:17,097 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:27:17,102 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:27:17,105 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:27:17,108 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:27:17,110 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:27:17,113 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:27:17,115 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:27:17,126 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:27:17,277 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:27:17,280 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/543d0a8233711ed0...
+2025-12-23 05:27:17,314 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:27:17,397 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:27:17,401 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:27:17,404 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:17,412 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:29,085 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:27:29,088 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 55 messages
+2025-12-23 05:27:29,097 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:27:30,428 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:27:30,431 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:27:30,434 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:27:30,438 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:27:30,440 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:27:30,443 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:27:30,446 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:27:30,453 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:27:30,593 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:27:30,595 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/292c55384deaac18...
+2025-12-23 05:27:30,616 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:27:30,655 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:27:30,659 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:27:30,666 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:30,672 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:32,493 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:27:32,496 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 12 messages
+2025-12-23 05:27:32,508 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:27:52,930 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:27:54,373 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:27:54,376 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:27:54,381 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:27:54,384 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:27:54,386 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:27:54,389 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:27:54,391 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:27:54,397 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:27:54,501 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:27:54,506 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/82c29f3888764fdb...
+2025-12-23 05:27:54,527 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:27:54,572 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:27:54,577 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:27:54,582 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:54,589 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:55,948 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:27:56,017 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:27:56,020 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-23 05:27:56,029 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:27:57,439 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:27:57,443 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:27:57,446 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:27:57,448 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:27:57,451 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:27:57,454 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:27:57,456 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:27:57,462 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:27:57,596 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:27:57,600 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/143bef5176e67601...
+2025-12-23 05:27:57,620 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:27:57,651 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:27:57,658 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:27:57,675 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:27:57,682 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:28:06,504 - se_portal.console_ws - INFO - console_ws.py:176 - Relay vsphere->client finished. vSphere closed the connection. Count: 13, Reason: 
+2025-12-23 05:28:06,514 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:28:08,601 - se_portal - INFO - student.py:361 - Student administrator@americas-ses.com performed revert on VM sbt-Student_1-Kali_Linux-SBT-R82
+2025-12-23 05:28:20,262 - se_portal - INFO - student.py:361 - Student administrator@americas-ses.com performed start on VM sbt-Student_1-Kali_Linux-SBT-R82
+2025-12-23 05:28:20,546 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:28:21,944 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:28:21,946 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:28:21,949 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:28:21,951 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:28:21,954 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:28:21,956 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:28:21,958 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:28:21,964 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:28:22,075 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:28:22,078 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/8021521bb450d4ab...
+2025-12-23 05:28:22,103 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:28:22,139 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:28:22,142 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:28:22,145 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:28:22,151 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:28:47,863 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:28:47,866 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 167 messages
+2025-12-23 05:28:47,882 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:28:48,515 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:28:49,943 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:28:49,946 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:28:49,948 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:28:49,951 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:28:49,954 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:28:49,956 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:28:49,958 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:28:49,965 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:28:50,062 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:28:50,074 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/9a7a014d9169a00d...
+2025-12-23 05:28:50,099 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:28:50,141 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:28:50,145 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:28:50,147 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:28:50,153 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:28:52,678 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:28:52,746 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:28:52,750 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-23 05:28:52,760 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:28:54,076 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:28:54,080 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:28:54,085 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:28:54,090 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:28:54,096 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:28:54,101 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:28:54,105 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:28:54,112 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:28:54,243 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:28:54,246 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/971877f8e21f9bd5...
+2025-12-23 05:28:54,272 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:28:54,315 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:28:54,318 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:28:54,320 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:28:54,326 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:29:08,303 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:29:08,399 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:29:08,404 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 51 messages
+2025-12-23 05:29:08,412 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:29:09,773 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:29:09,777 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:29:09,781 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:29:09,784 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:29:09,788 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:29:09,791 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:29:09,794 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:29:09,804 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:29:09,909 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:29:09,912 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/ffb4a313840ca8a7...
+2025-12-23 05:29:09,935 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:29:09,968 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:29:09,972 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:29:09,975 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:29:09,982 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:29:14,912 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:29:14,915 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:29:14,918 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:29:14,921 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:29:14,923 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:29:14,926 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:29:14,929 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:29:14,935 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:29:15,022 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:29:15,024 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/286bdefe45e12b54...
+2025-12-23 05:29:15,044 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:29:15,070 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:29:15,072 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:29:15,075 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:29:15,081 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:29:16,500 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:29:16,503 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-23 05:29:16,512 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:33:30,168 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:33:30,174 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 60 messages
+2025-12-23 05:33:30,188 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:33:30,889 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-pfSense, URL=/api/console/2/2/2
+2025-12-23 05:33:32,324 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:33:32,327 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:33:32,330 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjMiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:33:32,332 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5423
+2025-12-23 05:33:32,335 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5423', 'class_id': 2, 'env_id': 2, 'vm_id': 2}
+2025-12-23 05:33:32,337 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5423
+2025-12-23 05:33:32,340 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5423...
+2025-12-23 05:33:32,347 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:33:32,482 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:33:32,485 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/3d80c4821da5ec29...
+2025-12-23 05:33:32,526 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:33:32,561 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:33:32,565 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:33:32,570 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:33:32,579 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:33:34,134 - se_portal - INFO - student.py:407 - Console access granted for student administrator@americas-ses.com: VM=sbt-Student_1-Kali_Linux-SBT-R82, URL=/api/console/2/2/3
+2025-12-23 05:33:34,210 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:33:34,214 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 10 messages
+2025-12-23 05:33:34,224 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:33:35,558 - se_portal.console_ws - INFO - console_ws.py:29 - Client WebSocket accepted with subprotocol: binary
+2025-12-23 05:33:35,562 - se_portal.console_ws - INFO - console_ws.py:35 - === CONSOLE SESSION START ===
+2025-12-23 05:33:35,565 - se_portal.console_ws - INFO - console_ws.py:36 - Received token (length: 84): eyJ2bV9tb2lkIjogInZtLTU0MjUiLCAiY2xhc3NfaWQiOiAyLC...
+2025-12-23 05:33:35,569 - se_portal.console_ws - INFO - console_ws.py:43 - Token decoded successfully. VM MOID: vm-5425
+2025-12-23 05:33:35,574 - se_portal.console_ws - DEBUG - console_ws.py:44 - Full token config: {'vm_moid': 'vm-5425', 'class_id': 2, 'env_id': 2, 'vm_id': 3}
+2025-12-23 05:33:35,585 - se_portal.console_ws - INFO - console_ws.py:51 - Connecting to console for VM: vm-5425
+2025-12-23 05:33:35,588 - se_portal.console_ws - INFO - console_ws.py:61 - Generating vSphere HTML5 console ticket for vm-5425...
+2025-12-23 05:33:35,595 - se_portal.console_ws - INFO - console_ws.py:81 - Using vSphere connection ID: 1
+2025-12-23 05:33:35,727 - se_portal.console_ws - INFO - console_ws.py:88 - Ticket generation result: success=True, host=192.168.10.11, port=443
+2025-12-23 05:33:35,730 - se_portal.console_ws - INFO - console_ws.py:106 - Proxying to vSphere WebSocket: wss://192.168.10.11:443/ticket/6b46ae771cf37fdd...
+2025-12-23 05:33:35,750 - se_portal.console_ws - INFO - console_ws.py:113 - Attempting WebSocket connection to 192.168.10.11:443...
+2025-12-23 05:33:35,800 - se_portal.console_ws - INFO - console_ws.py:123 - vSphere WebSocket connected. Protocol: binary
+2025-12-23 05:33:35,802 - se_portal.console_ws - INFO - console_ws.py:132 - Starting bidirectional relay between client and vSphere...
+2025-12-23 05:33:35,805 - se_portal.console_ws - INFO - console_ws.py:165 - First message FROM vSphere: b'RFB 003.008\n' (len=12)
+2025-12-23 05:33:35,820 - se_portal.console_ws - INFO - console_ws.py:149 - First message FROM client: b'RFB 003.008\n' (len=12)
+2025-12-23 05:33:49,728 - se_portal.console_ws - INFO - console_ws.py:145 - Relay client->vsphere: Received non-data frame: websocket.disconnect
+2025-12-23 05:33:49,732 - se_portal.console_ws - INFO - console_ws.py:153 - Relay client->vsphere finished normally after 13 messages
+2025-12-23 05:33:49,743 - se_portal.console_ws - INFO - console_ws.py:209 - === CONSOLE SESSION END ===
+2025-12-23 05:42:24,170 - se_portal - INFO - main.py:91 - Starting up application...
+2025-12-23 05:42:24,173 - se_portal - INFO - main.py:96 - Route: /openapi.json [openapi]
+2025-12-23 05:42:24,176 - se_portal - INFO - main.py:96 - Route: /docs [swagger_ui_html]
+2025-12-23 05:42:24,180 - se_portal - INFO - main.py:96 - Route: /docs/oauth2-redirect [swagger_ui_redirect]
+2025-12-23 05:42:24,183 - se_portal - INFO - main.py:96 - Route: /redoc [redoc_html]
+2025-12-23 05:42:24,186 - se_portal - INFO - main.py:96 - Route: /static [static]
+2025-12-23 05:42:24,189 - se_portal - INFO - main.py:96 - Route: /api/static [api_static]
+2025-12-23 05:42:24,192 - se_portal - INFO - main.py:96 - Route: /auth/local-login [local_login]
+2025-12-23 05:42:24,195 - se_portal - INFO - main.py:96 - Route: /auth/register [register]
+2025-12-23 05:42:24,197 - se_portal - INFO - main.py:96 - Route: /auth/verify-email [verify_email]
+2025-12-23 05:42:24,201 - se_portal - INFO - main.py:96 - Route: /auth/change-password [change_password]
+2025-12-23 05:42:24,203 - se_portal - INFO - main.py:96 - Route: /auth/profile [update_profile]
+2025-12-23 05:42:24,206 - se_portal - INFO - main.py:96 - Route: /auth/login [login]
+2025-12-23 05:42:24,209 - se_portal - INFO - main.py:96 - Route: /auth/callback [authorized]
+2025-12-23 05:42:24,211 - se_portal - INFO - main.py:96 - Route: /users/ [list_users]
+2025-12-23 05:42:24,214 - se_portal - INFO - main.py:96 - Route: /users/invite [invite_user]
+2025-12-23 05:42:24,218 - se_portal - INFO - main.py:96 - Route: /users/permissions [list_permissions]
+2025-12-23 05:42:24,220 - se_portal - INFO - main.py:96 - Route: /users/groups [list_groups]
+2025-12-23 05:42:24,224 - se_portal - INFO - main.py:96 - Route: /users/groups [create_group]
+2025-12-23 05:42:24,226 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [update_user]
+2025-12-23 05:42:24,229 - se_portal - INFO - main.py:96 - Route: /users/{user_id} [delete_user]
+2025-12-23 05:42:24,232 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [delete_group]
+2025-12-23 05:42:24,235 - se_portal - INFO - main.py:96 - Route: /users/groups/{group_id} [update_group]
+2025-12-23 05:42:24,238 - se_portal - INFO - main.py:96 - Route: /classes/ [create_class]
+2025-12-23 05:42:24,241 - se_portal - INFO - main.py:96 - Route: /classes/ [list_classes]
+2025-12-23 05:42:24,244 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [get_class]
+2025-12-23 05:42:24,247 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [update_class]
+2025-12-23 05:42:24,250 - se_portal - INFO - main.py:96 - Route: /classes/{class_id} [delete_class]
+2025-12-23 05:42:24,253 - se_portal - INFO - main.py:96 - Route: /classes/meta/statuses [get_statuses]
+2025-12-23 05:42:24,256 - se_portal - INFO - main.py:96 - Route: /classes/backup/export [export_backup]
+2025-12-23 05:42:24,258 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/provision [provision_class]
+2025-12-23 05:42:24,262 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [get_class_environments]
+2025-12-23 05:42:24,265 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/power [control_vm_power]
+2025-12-23 05:42:24,267 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id} [delete_vm]
+2025-12-23 05:42:24,271 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/revert [revert_vm]
+2025-12-23 05:42:24,274 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/vmrc [get_vmrc_console]
+2025-12-23 05:42:24,276 - se_portal - INFO - main.py:96 - Route: /classes/environments/{class_id}/vms/{vm_id}/console [get_html5_console]
+2025-12-23 05:42:24,279 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/power [control_environment_power]
+2025-12-23 05:42:24,282 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id}/revert [revert_environment]
+2025-12-23 05:42:24,285 - se_portal - INFO - main.py:96 - Route: /classes/environments/{env_id} [delete_environment_by_id]
+2025-12-23 05:42:24,289 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/suspend-all [suspend_all_vms]
+2025-12-23 05:42:24,292 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/revert-all [revert_all_vms]
+2025-12-23 05:42:24,295 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments [delete_all_environments]
+2025-12-23 05:42:24,299 - se_portal - INFO - main.py:96 - Route: /classes/{class_id}/environments/{env_id}/vms/{vm_id}/console [get_vm_console]
+2025-12-23 05:42:24,302 - se_portal - INFO - main.py:96 - Route: /settings/ [get_settings]
+2025-12-23 05:42:24,305 - se_portal - INFO - main.py:96 - Route: /settings/{key} [update_setting]
+2025-12-23 05:42:24,309 - se_portal - INFO - main.py:96 - Route: /settings/ [create_setting]
+2025-12-23 05:42:24,312 - se_portal - INFO - main.py:96 - Route: /preferences/ [get_preferences]
+2025-12-23 05:42:24,315 - se_portal - INFO - main.py:96 - Route: /preferences/ [update_preferences]
+2025-12-23 05:42:24,318 - se_portal - INFO - main.py:96 - Route: /email/test [send_test_email]
+2025-12-23 05:42:24,320 - se_portal - INFO - main.py:96 - Route: /email/settings [get_email_settings]
+2025-12-23 05:42:24,323 - se_portal - INFO - main.py:96 - Route: /email/settings [save_email_settings]
+2025-12-23 05:42:24,326 - se_portal - INFO - main.py:96 - Route: /email/status [get_email_status]
+2025-12-23 05:42:24,329 - se_portal - INFO - main.py:96 - Route: /templates/ [list_templates]
+2025-12-23 05:42:24,332 - se_portal - INFO - main.py:96 - Route: /templates/ [create_template]
+2025-12-23 05:42:24,336 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [get_template]
+2025-12-23 05:42:24,339 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [update_template]
+2025-12-23 05:42:24,342 - se_portal - INFO - main.py:96 - Route: /templates/{template_id} [delete_template]
+2025-12-23 05:42:24,345 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [add_vm_to_template]
+2025-12-23 05:42:24,347 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [update_template_vm]
+2025-12-23 05:42:24,350 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms/{vm_id} [remove_vm_from_template]
+2025-12-23 05:42:24,353 - se_portal - INFO - main.py:96 - Route: /templates/{template_id}/vms [list_template_vms]
+2025-12-23 05:42:24,355 - se_portal - INFO - main.py:96 - Route: /dashboard/stats [get_dashboard_stats]
+2025-12-23 05:42:24,358 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/test [test_proxmox_connection]
+2025-12-23 05:42:24,361 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/save [save_proxmox_settings]
+2025-12-23 05:42:24,364 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/status [get_proxmox_status]
+2025-12-23 05:42:24,366 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/sync [sync_proxmox_inventory]
+2025-12-23 05:42:24,369 - se_portal - INFO - main.py:96 - Route: /infrastructure/proxmox/inventory [get_proxmox_inventory]
+2025-12-23 05:42:24,371 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/test [test_vsphere_connection]
+2025-12-23 05:42:24,374 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/save [save_vsphere_settings]
+2025-12-23 05:42:24,377 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/status [get_vsphere_status]
+2025-12-23 05:42:24,380 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/vms [get_vsphere_vms]
+2025-12-23 05:42:24,383 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/hosts [get_vsphere_hosts]
+2025-12-23 05:42:24,386 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/networks [get_vsphere_networks]
+2025-12-23 05:42:24,388 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/sync [sync_vsphere_inventory]
+2025-12-23 05:42:24,392 - se_portal - INFO - main.py:96 - Route: /infrastructure/vsphere/inventory [get_vsphere_inventory]
+2025-12-23 05:42:24,395 - se_portal - INFO - main.py:96 - Route: /logs/ [get_logs]
+2025-12-23 05:42:24,398 - se_portal - INFO - main.py:96 - Route: /logs/export [export_logs]
+2025-12-23 05:42:24,400 - se_portal - INFO - main.py:96 - Route: /logs/stats [get_log_stats]
+2025-12-23 05:42:24,403 - se_portal - INFO - main.py:96 - Route: /logs/app-log [get_application_logs]
+2025-12-23 05:42:24,406 - se_portal - INFO - main.py:96 - Route: /logs/{log_id} [delete_single_log]
+2025-12-23 05:42:24,409 - se_portal - INFO - main.py:96 - Route: /logs/bulk/delete [delete_bulk_logs]
+2025-12-23 05:42:24,412 - se_portal - INFO - main.py:96 - Route: /logs/range/delete [delete_logs_by_date_range]
+2025-12-23 05:42:24,416 - se_portal - INFO - main.py:96 - Route: /logs/clear/all [clear_all_logs]
+2025-12-23 05:42:24,419 - se_portal - INFO - main.py:96 - Route: /console/ticket/{class_id}/{env_id}/{vm_id} [get_fresh_ticket]
+2025-12-23 05:42:24,422 - se_portal - INFO - main.py:96 - Route: /console/{class_id}/{env_id}/{vm_id} [get_console_page]
+2025-12-23 05:42:24,425 - se_portal - INFO - main.py:96 - Route: /console/auth [proxy_guacamole_auth]
+2025-12-23 05:42:24,428 - se_portal - INFO - main.py:96 - Route: /ws/test [test_ws_router]
+2025-12-23 05:42:24,430 - se_portal - INFO - main.py:96 - Route: /ws/console/{token} [console_websocket_endpoint]
+2025-12-23 05:42:24,433 - se_portal - INFO - main.py:96 - Route: /student/join/{join_token} [join_class]
+2025-12-23 05:42:24,435 - se_portal - INFO - main.py:96 - Route: /student/environment [get_student_environment]
+2025-12-23 05:42:24,438 - se_portal - INFO - main.py:96 - Route: /student/session [get_session_info]
+2025-12-23 05:42:24,441 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/power [control_student_vm]
+2025-12-23 05:42:24,444 - se_portal - INFO - main.py:96 - Route: /student/vm/{vm_id}/console [get_vm_console]
+2025-12-23 05:42:24,447 - se_portal - INFO - main.py:96 - Route: /student/logout [logout_student]
+2025-12-23 05:42:24,450 - se_portal - INFO - main.py:96 - Route: /student/class/{join_token}/info [get_class_info]
+2025-12-23 05:42:24,453 - se_portal - INFO - main.py:96 - Route: /student/admin/sessions [get_all_student_sessions]
+2025-12-23 05:42:24,456 - se_portal - INFO - main.py:96 - Route: /instructor/classes [get_instructor_classes]
+2025-12-23 05:42:24,459 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/students [get_class_students]
+2025-12-23 05:42:24,462 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/action [perform_student_action]
+2025-12-23 05:42:24,465 - se_portal - INFO - main.py:96 - Route: /instructor/class/{class_id}/student/{student_id}/environment [get_student_environment_details]
+2025-12-23 05:42:24,468 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [get_connections]
+2025-12-23 05:42:24,471 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [get_connection]
+2025-12-23 05:42:24,474 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/ [create_connection]
+2025-12-23 05:42:24,477 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [update_connection]
+2025-12-23 05:42:24,480 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id} [delete_connection]
+2025-12-23 05:42:24,483 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/test [test_connection]
+2025-12-23 05:42:24,486 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/sync [sync_inventory]
+2025-12-23 05:42:24,488 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/inventory [get_inventory]
+2025-12-23 05:42:24,491 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/datastores [get_datastores]
+2025-12-23 05:42:24,494 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/power [vm_power_action]
+2025-12-23 05:42:24,497 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid}/clone [vm_clone]
+2025-12-23 05:42:24,500 - se_portal - INFO - main.py:96 - Route: /infrastructure-connections/{connection_id}/vms/{vm_moid} [vm_delete]
+2025-12-23 05:42:24,503 - se_portal - INFO - main.py:96 - Route: /notification-events/ [get_notification_events]
+2025-12-23 05:42:24,506 - se_portal - INFO - main.py:96 - Route: /notification-events/{event_type} [update_notification_event]
+2025-12-23 05:42:24,510 - se_portal - INFO - main.py:96 - Route: /notification-events/bulk-update [bulk_update_notification_events]
+2025-12-23 05:42:24,513 - se_portal - INFO - main.py:96 - Route: / [read_root]
+2025-12-23 05:42:24,516 - se_portal - INFO - main.py:96 - Route: /health [health_check]
+2025-12-23 05:42:24,554 - se_portal - INFO - main.py:113 - Database migration: columns verified/added.
+2025-12-23 05:42:24,847 - se_portal.email_service - INFO - email_service.py:58 - Email configuration loaded successfully. Server: 10.1.2.250:587
+2025-12-23 05:42:24,864 - se_portal - INFO - main.py:230 - Startup complete. Infrastructure connections are now managed on-demand via the UI.

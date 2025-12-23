@@ -60,10 +60,12 @@ const DeletionStatusModal: React.FC<DeletionStatusModalProps> = ({
 
         try {
             const baseUrl = '/api';
+            const token = localStorage.getItem('token');
             const response = await fetch(`${baseUrl}/classes/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : '',
                 },
                 signal: controller.signal
             });

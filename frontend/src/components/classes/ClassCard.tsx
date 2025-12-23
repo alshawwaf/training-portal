@@ -174,16 +174,16 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
   // Status color mapping for the glow effect
   const statusGlow = {
-    active: 'from-emerald-500/20 to-teal-500/10',
+    active: 'from-violet-500/20 to-purple-500/10',
     draft: 'from-slate-500/20 to-gray-500/10',
-    upcoming: 'from-blue-500/20 to-indigo-500/10',
-    completed: 'from-purple-500/20 to-fuchsia-500/10',
+    upcoming: 'from-indigo-500/20 to-blue-500/10',
+    completed: 'from-fuchsia-500/20 to-pink-500/10',
     archived: 'from-gray-500/20 to-slate-500/10',
   };
 
   return (
     <>
-      <div className="group relative bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-blue-500/5 dark:hover:shadow-blue-500/10">
+      <div className="group relative bg-white dark:bg-slate-800/50 rounded-2xl border border-gray-200 dark:border-slate-700/50 hover:border-violet-300 dark:hover:border-violet-500/50 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl hover:shadow-violet-500/5 dark:hover:shadow-violet-500/10">
         {/* Gradient glow on hover */}
         <div className={clsx(
           "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-br",
@@ -195,8 +195,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
           <div className="flex items-start gap-3">
             {/* Provider Icon with gradient background */}
             <div className="relative flex-shrink-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity" />
-              <div className="relative p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative p-2.5 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shadow-lg">
                 <ProviderIcon className="w-5 h-5 text-white" />
               </div>
             </div>
@@ -301,7 +301,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
                 <button 
                   onClick={handleStopAll} 
                   disabled={isLoading !== null}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
                 >
                   {isLoading === 'stop' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5" />}
                   Stop
@@ -309,7 +309,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
                 <button 
                   onClick={handleSuspendAll} 
                   disabled={isLoading !== null}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-fuchsia-500 hover:bg-fuchsia-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
                 >
                   {isLoading === 'suspend' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Pause className="w-3.5 h-3.5" />}
                   Suspend
@@ -364,7 +364,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
               </button>
               <button 
                 onClick={handleOpenDeletion} 
-                className="flex items-center gap-1.5 px-3 py-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-xs font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg text-xs font-medium transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Delete

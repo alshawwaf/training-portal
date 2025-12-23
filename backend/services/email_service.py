@@ -1,5 +1,6 @@
 import logging
 import datetime
+import os
 from typing import List, Dict, Any, Optional
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
@@ -7,6 +8,9 @@ from db.models import SystemSetting, NotificationEvent
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger("se_portal.email_service")
+
+# Base URL for email links - reads from FRONTEND_URL or BASE_URL env variable
+BASE_URL = os.getenv("FRONTEND_URL") or os.getenv("BASE_URL", "http://localhost:9090")
 
 class EmailService:
     def __init__(self):
@@ -123,54 +127,119 @@ class EmailService:
             body={"message": message, "url": url}
         )
 
+    def _build_button_html(self, url: Optional[str]) -> str:
+        """Build button HTML with full URL."""
+        if not url:
+            return ""
+        
+        # Make relative URLs absolute
+        if url.startswith("/"):
+            full_url = f"{BASE_URL}{url}"
+        else:
+            full_url = url
+        
+        # Use table-based layout for maximum email client compatibility
+        return f'''
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
+                                            <tr>
+                                                <td align="center">
+                                                    <a href="{full_url}" 
+                                                       style="display: inline-block; padding: 14px 32px; 
+                                                              background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); 
+                                                              color: #ffffff; text-decoration: none; border-radius: 10px; 
+                                                              font-weight: 600; font-size: 14px; 
+                                                              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                                                              box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);"
+                                                    >Access Portal</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" style="padding-top: 12px;">
+                                                    <p style="margin: 0; font-size: 12px; color: #64748b;">
+                                                        Or copy this link: <a href="{full_url}" style="color: #60a5fa;">{full_url}</a>
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+        '''
+
     def _build_html_template(self, subject: str, body: Dict[str, Any]) -> str:
-        """Build professional HTML email template."""
+        """Build professional HTML email template matching app design."""
+        button_html = self._build_button_html(body.get('url'))
+        
         return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                body {{ font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a2e; margin: 0; padding: 0; background-color: #f0f2f5; }}
-                .wrapper {{ padding: 40px 20px; }}
-                .container {{ max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }}
-                .header {{ background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%); padding: 40px 30px; text-align: center; }}
-                .header h1 {{ margin: 0; font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; }}
-                .header p {{ margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.7); }}
-                .content {{ padding: 40px 30px; }}
-                .content h2 {{ color: #1e3a5f; margin: 0 0 20px; font-size: 20px; font-weight: 600; }}
-                .content p {{ margin: 0 0 16px; color: #4a5568; font-size: 15px; }}
-                .button {{ display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 20px; box-shadow: 0 4px 14px rgba(59,130,246,0.35); }}
-                .button:hover {{ background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }}
-                .footer {{ background: #f8fafc; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0; }}
-                .footer p {{ margin: 0 0 8px; font-size: 12px; color: #64748b; }}
-                .footer .brand {{ font-weight: 600; color: #1e3a5f; }}
-                .divider {{ height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 24px 0; }}
-            </style>
-        </head>
-        <body>
-            <div class="wrapper">
-                <div class="container">
-                    <div class="header">
-                        <h1>SE Training Portal</h1>
-                        <p>Training Environment Management</p>
-                    </div>
-                    <div class="content">
-                        <h2>{subject}</h2>
-                        <p>{body.get('message', '')}</p>
-                        {f'<div class="divider"></div><div style="text-align: center;"><a href="{body.get("url")}" class="button">Access Portal</a></div>' if body.get('url') else ''}
-                        <div class="divider"></div>
-                        <p style="color: #64748b; font-size: 13px;">Best regards,<br><span style="color: #1e3a5f; font-weight: 600;">SE Training Team</span></p>
-                    </div>
-                    <div class="footer">
-                        <p>This is an automated notification from the SE Training Portal.</p>
-                        <p>&copy; {datetime.datetime.now().year} <span class="brand">Check Point Software Technologies Ltd.</span></p>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="min-height: 100vh;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <!-- Main Container -->
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; margin: 0 auto;">
+                    <!-- Logo/Header -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 32px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 12px 16px; border-radius: 12px;">
+                                        <span style="color: #ffffff; font-size: 20px; font-weight: 700; letter-spacing: -0.5px;">SE Training Portal</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Card -->
+                    <tr>
+                        <td>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; border: 1px solid #334155; overflow: hidden;">
+                                <!-- Card Header -->
+                                <tr>
+                                    <td style="padding: 32px 32px 24px 32px; border-bottom: 1px solid #334155;">
+                                        <h1 style="margin: 0; font-size: 22px; font-weight: 600; color: #f1f5f9; letter-spacing: -0.3px;">{subject}</h1>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Card Body -->
+                                <tr>
+                                    <td style="padding: 24px 32px 32px 32px;">
+                                        <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.7; color: #94a3b8;">{body.get('message', '')}</p>
+                                        
+                                        {button_html}
+                                        
+                                        <!-- Signature -->
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #334155;">
+                                            <tr>
+                                                <td>
+                                                    <p style="margin: 0; font-size: 14px; color: #64748b;">Best regards,</p>
+                                                    <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: 600; color: #e2e8f0;">SE Training Team</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding: 24px 0;">
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #475569;">This is an automated notification from SE Training Portal</p>
+                            <p style="margin: 0; font-size: 12px; color: #475569;">&copy; {datetime.datetime.now().year} <span style="font-weight: 600; color: #64748b;">Check Point Software Technologies Ltd.</span></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
         """
 
 email_service = EmailService()

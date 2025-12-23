@@ -1,19 +1,19 @@
 {
   "class": {
     "id": 2,
-    "name": "Test Class",
+    "name": "sbt",
     "instructor_id": 1,
-    "blueprint_id": null,
-    "template_id": 2,
+    "blueprint_id": "1",
+    "template_id": 1,
     "max_users": 1,
     "passcode": "Cpwins!1",
-    "start_date": "2024-01-01T00:00:00",
-    "end_date": "2025-12-31T23:59:59",
+    "start_date": "2025-12-23T05:01:19.440000",
+    "end_date": "2025-12-30T05:01:19.440000",
     "status": "active",
-    "description": "Automated test class",
-    "created_at": "2025-12-19T19:04:27.816727",
-    "updated_at": "2025-12-19T19:04:27.816735"
+    "description": "",
+    "created_at": "2025-12-23T05:01:34.866250",
+    "updated_at": "2025-12-23T05:01:34.866255"
   },
-  "backup_timestamp": "2025-12-19T19:04:27.851503",
+  "backup_timestamp": "2025-12-23T05:01:34.895679",
   "version": 1
 }

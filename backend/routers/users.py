@@ -34,6 +34,7 @@ class UserRead(BaseModel):
 class UserInvite(BaseModel):
     name: str
     email: EmailStr
+    role: str = "instructor"  # student, instructor, admin
     group_ids: List[int] = []
     require_password_change: bool = True
 
@@ -96,7 +97,7 @@ async def invite_user(
         hashed_password=get_password_hash(temp_password),
         is_email_confirmed=True, # Pre-confirmed since admin invited them
         password_reset_required=invite.require_password_change,
-        role="instructor", # Default role, can be refined with groups
+        role=invite.role,  # Use role from invite
         invited_at=datetime.datetime.utcnow()
     )
     db.add(new_user)
@@ -108,12 +109,11 @@ async def invite_user(
     
     db.commit()
     
-    # Send invitation email using notification service
     try:
         await notification_service.notify_user_invited(
             db=db,
             user_email=invite.email,
-            role="Instructor",
+            role=invite.role.title(),
             invited_by=admin.name or admin.email,
             invite_url="/login",
             background_tasks=background_tasks

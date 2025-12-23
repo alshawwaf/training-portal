@@ -40,6 +40,18 @@ const StudentClassViewer: React.FC = () => {
     const [consoleUrl, setConsoleUrl] = useState<string | null>(null);
     const refreshInterval = useRef<any>(null);
 
+    const selectedVmIdRef = useRef<number | null>(null);
+
+    // Clean up VM names for display
+    const formatDisplayName = (name: string) => {
+        return name
+            .replace(/[-_]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     const fetchEnvironment = async () => {
         try {
             const token = localStorage.getItem('student_session');
@@ -52,14 +64,16 @@ const StudentClassViewer: React.FC = () => {
             setEnvironment(res.data);
             
             if (res.data.vms.length > 0) {
-                if (!selectedVm) {
+                // Use ref to check if we already have a selection
+                if (selectedVmIdRef.current === null) {
+                    // First load - select first VM
                     setSelectedVm(res.data.vms[0]);
+                    selectedVmIdRef.current = res.data.vms[0].id;
                 } else {
-                    const updated = res.data.vms.find((v: VM) => v.id === selectedVm.id);
+                    // Update the selected VM data without changing selection
+                    const updated = res.data.vms.find((v: VM) => v.id === selectedVmIdRef.current);
                     if (updated) {
-                        if (updated.status !== selectedVm.status || updated.ip_address !== selectedVm.ip_address) {
-                            setSelectedVm(updated);
-                        }
+                        setSelectedVm(updated);
                     }
                 }
             }
@@ -199,7 +213,7 @@ const StudentClassViewer: React.FC = () => {
                             {environment.vms.map(vm => (
                                 <button
                                     key={vm.id}
-                                    onClick={() => setSelectedVm(vm)}
+                                    onClick={() => { setSelectedVm(vm); selectedVmIdRef.current = vm.id; }}
                                     className={clsx(
                                         "w-full text-left group relative p-3 rounded-xl transition-all duration-200 border",
                                         selectedVm?.id === vm.id 
@@ -227,9 +241,9 @@ const StudentClassViewer: React.FC = () => {
                                                 "text-sm font-semibold truncate",
                                                 selectedVm?.id === vm.id ? "text-white" : "text-slate-300 group-hover:text-white"
                                             )}>
-                                                {vm.name}
+                                                {formatDisplayName(vm.name)}
                                             </p>
-                                            <p className="text-xs text-slate-500 font-mono">
+                                            <p className="text-xs text-slate-500">
                                                 {vm.ip_address || 'Connecting...'}
                                             </p>
                                         </div>
@@ -261,7 +275,7 @@ const StudentClassViewer: React.FC = () => {
                                             )} />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-white">{selectedVm.name}</p>
+                                            <p className="text-sm font-bold text-white">{formatDisplayName(selectedVm.name)}</p>
                                             <p className={clsx(
                                                 "text-xs font-medium",
                                                 selectedVm.status === 'poweredOn' ? "text-emerald-400" : "text-slate-500"
