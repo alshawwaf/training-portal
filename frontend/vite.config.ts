@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: frontendPort,
       host: "0.0.0.0", // Allow external connections (needed for Docker)
+      allowedHosts: true,
       proxy: {
         "/api": {
           target: backendUrl,
