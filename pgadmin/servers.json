@@ -1,0 +1,14 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "SE Training Portal DB",
+            "Group": "Servers",
+            "Host": "db",
+            "Port": 5432,
+            "MaintenanceDB": "training_portal",
+            "Username": "admin",
+            "SSLMode": "prefer",
+            "PassFile": "/pgpass"
+        }
+    }
+}

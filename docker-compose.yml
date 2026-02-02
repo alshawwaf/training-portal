@@ -1,0 +1,128 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: training_portal_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-training_portal}
+    ports:
+      - "5433:5432"
+    volumes:
+      - training_portal_db_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin - Visual Database Management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: training_portal_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@cpdemo.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-Cpwins!1}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+    ports:
+      - "5050:80"
+    volumes:
+      - training_portal_pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: training_portal_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-admin}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-training_portal}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID:-your-client-id-here}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET:-your-client-secret-here}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID:-your-tenant-id-here}
+      - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-admin@cpdemo.com}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-Cpwins!1}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8989}
+      - PROXMOX_HOST=${PROXMOX_HOST:-}
+      - PROXMOX_USER=${PROXMOX_USER:-root@pam}
+      - PROXMOX_PASSWORD=${PROXMOX_PASSWORD:-}
+      - PROXMOX_NODE=${PROXMOX_NODE:-}
+      - VSPHERE_HOST=${VSPHERE_HOST:-}
+      - VSPHERE_USER=${VSPHERE_USER:-administrator@vsphere.local}
+      - VSPHERE_PASSWORD=${VSPHERE_PASSWORD:-}
+      - VSPHERE_PORT=${VSPHERE_PORT:-443}
+      - VSPHERE_VERIFY_SSL=${VSPHERE_VERIFY_SSL:-false}
+      # Guacamole secret key - MUST match JSON_SECRET_KEY in guacamole service
+      - GUACAMOLE_SECRET_KEY=${GUACAMOLE_SECRET_KEY}
+      - GUACAMOLE_URL=${GUACAMOLE_URL:-http://guacamole:8080/guacamole}
+      - GUACAMOLE_EXTERNAL_URL=${GUACAMOLE_EXTERNAL_URL:-http://localhost:8085/guacamole}
+      # Logging and registration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ALLOWED_DOMAINS=${ALLOWED_DOMAINS:-example.com}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: training_portal_frontend
+    restart: always
+    ports:
+      - "9090:9090"
+    environment:
+      - FRONTEND_PORT=9090
+      - FRONTEND_URL=http://localhost:9090
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # Guacamole Daemon (guacd) - Protocol proxy for RDP/SSH/VNC
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: training_portal_guacd
+    restart: always
+    networks:
+      - default
+
+  # Guacamole Web Application - HTML5 console access
+  guacamole:
+    image: guacamole/guacamole:latest
+    container_name: training_portal_guacamole
+    restart: always
+    ports:
+      - "8085:8080"
+    environment:
+      GUACD_HOSTNAME: guacd
+      GUACD_PORT: 4822
+      GUACAMOLE_HOME: /etc/guacamole
+      # JSON Auth - key MUST be set in .env file (GUACAMOLE_SECRET_KEY)
+      JSON_SECRET_KEY: ${GUACAMOLE_SECRET_KEY}
+    volumes:
+      # Guacamole config with JSON auth secret
+      - ./guacamole/guacamole.properties:/etc/guacamole/guacamole.properties:ro
+      # Custom branding (CSS and JSON)
+      - ./guacamole/branding:/etc/guacamole/branding:ro
+    depends_on:
+      - guacd
+    networks:
+      - default
+
+volumes:
+  training_portal_db_data:
+  training_portal_pgadmin_data:
