@@ -160,7 +160,10 @@ cp .env.example .env
 # Edit .env with your settings
 
 # Launch
-docker-compose up --build -d
+docker compose up --build -d
+
+> [!IMPORTANT]
+> **Networking Note:** If deploying in a reverse-proxy environment like Dokploy, ensure both the frontend and backend are on the same Docker network (e.g., `dokploy-network`) to allow the frontend proxy to resolve the `backend` hostname.
 ```
 
 **Access:** Navigate to [http://localhost:9999](http://localhost:9999)  
