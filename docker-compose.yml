@@ -74,6 +74,9 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
+    networks:
+      - default
+      - dokploy-network
 
   # React Frontend
   frontend:
@@ -91,6 +94,9 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    networks:
+      - default
+      - dokploy-network
 
   # Guacamole Daemon (guacd) - Protocol proxy for RDP/SSH/VNC
   guacd:
@@ -126,3 +132,7 @@ services:
 volumes:
   training_portal_db_data:
   training_portal_pgadmin_data:
+
+networks:
+  dokploy-network:
+    external: true
