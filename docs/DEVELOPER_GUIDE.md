@@ -1,6 +1,6 @@
 # Developer Guide
 
-This document provides comprehensive information for developers working on the SE Training Portal.
+This document provides comprehensive information for developers working on the Training Portal.
 
 ---
 
@@ -12,9 +12,10 @@ This document provides comprehensive information for developers working on the S
 4. [Database](#database)
 5. [Authentication](#authentication)
 6. [Proxmox Integration](#proxmox-integration)
-7. [Docker Development](#docker-development)
-8. [Testing](#testing)
-9. [Deployment](#deployment)
+7. [vSphere Integration](#vsphere-integration)
+8. [Docker Development](#docker-development)
+9. [Testing](#testing)
+10. [Deployment](#deployment)
 
 ---
 
@@ -23,7 +24,7 @@ This document provides comprehensive information for developers working on the S
 ### Directory Structure
 
 ```
-SE Training Portal/
+training-portal/
 ├── backend/                   # FastAPI Backend
 │   ├── db/                    # Database layer
 │   │   ├── __init__.py
@@ -92,7 +93,7 @@ User Browser
      │
      ▼
 ┌─────────────────┐
-│    Frontend     │  Port 8989
+│    Frontend     │  Port 9090
 │   (Vite/React)  │
 └────────┬────────┘
          │ /api/* & /auth/* proxied
@@ -107,7 +108,7 @@ User Browser
 ┌───────┐  ┌──────────────┐
 │  DB   │  │   Providers  │
 │(Postgre│  │ (Proxmox /   │
-│ SQLite)│  │  vSphere)    │
+│  SQL)  │  │  vSphere)    │
 └───────┘  └──────────────┘
 ```
 
@@ -186,7 +187,7 @@ npm install
 npm run dev
 ```
 
-App available at: http://localhost:8989
+App available at: http://localhost:9090
 
 ### Design System
 
@@ -326,8 +327,17 @@ class Template(Base):
 
 ### Database URL
 
-- **Development (SQLite)**: `sqlite:///./sql_app.db`
-- **Production (PostgreSQL)**: `postgresql://user:pass@host:5432/dbname`
+The database is PostgreSQL in every environment. The URL is read from the
+`DATABASE_URL` environment variable (`db/database.py`); if unset, it falls back to
+`postgresql://admin:password@localhost:5432/training_portal`.
+
+- **Docker Compose**: `postgresql://admin:password@db:5432/training_portal`
+- **Local dev**: `postgresql://admin:password@localhost:5433/training_portal` (the
+  `db` container publishes Postgres on host port `5433`)
+
+> The engine still special-cases a `sqlite://` URL, so SQLite works for quick
+> throwaway experiments, but it is not a supported configuration and the schema is
+> only validated against PostgreSQL.
 
 ---
 
@@ -364,25 +374,16 @@ SUPERADMIN_PASSWORD=Cpwins!1
 
 ## Proxmox Integration
 
-### Mock Mode
+### Configuration
 
-For development without Proxmox:
+Proxmox connections are **stored in the database**, not in environment variables.
+`services/proxmox_service.py` reads credentials from `InfrastructureConnection` rows
+(created via **Settings → Private Cloud** in the UI, or the
+`/infrastructure-connections/` API). There is no mock mode — a connection must be
+configured for any Proxmox operation to succeed.
 
-```env
-PROXMOX_MOCK=true
-```
-
-The service will return mock data for all operations.
-
-### Real Connection
-
-```env
-PROXMOX_MOCK=false
-PROXMOX_HOST=192.168.1.100
-PROXMOX_USER=root@pam
-PROXMOX_PASSWORD=your-password
-PROXMOX_NODE=pve
-```
+Fields captured per connection: host, user (`root@pam`), password/token, and node.
+The `proxmoxer` library is used under the hood.
 
 ### Available Operations
 
@@ -428,14 +429,12 @@ docker-compose build
 ### Running All Services
 
 ```powershell
-docker-compose up
+docker compose up
 ```
 
-### Running with Database Tools
-
-```powershell
-docker-compose --profile tools up
-```
+This brings up every service, including **pgAdmin** for visual database management at
+[http://localhost:5050](http://localhost:5050) (default `admin@cpdemo.com` / `Cpwins!1`,
+configurable via `PGADMIN_EMAIL` / `PGADMIN_PASSWORD`).
 
 ### Rebuilding After Changes
 
@@ -460,18 +459,15 @@ docker-compose exec db psql -U admin -d training_portal
 
 ## Testing
 
-### Backend Tests
+> There is **no automated test suite** yet — the project ships no `pytest` tests and
+> the frontend has no `test` script. Static checks and manual verification are the
+> current workflow.
 
-```powershell
-cd backend
-pytest
-```
-
-### Frontend Tests
+### Linting
 
 ```powershell
 cd frontend
-npm test
+npm run lint
 ```
 
 ### Manual Testing
@@ -486,24 +482,30 @@ npm test
 
 ## Deployment
 
+The portal is deployed on a **bare-metal Ubuntu host running [Dokploy](https://dokploy.com/)**
+(Traefik ingress + Let's Encrypt TLS). Dokploy builds and runs the `docker-compose.yml`
+stack; TLS termination and the public `training.<domain>` hostname are handled by
+Traefik, so there is no separate production compose override. The `backend` and
+`frontend` services attach to the external `dokploy-network` so Traefik can route to
+them. (There is no Azure VM or Terraform in this stack.)
+
 ### Production Checklist
 
-- [ ] Set `ENV=production` in `.env`
-- [ ] Configure real Azure AD credentials
-- [ ] Set strong `SUPERADMIN_PASSWORD`
-- [ ] Configure real Proxmox connection
-- [ ] Set `PROXMOX_MOCK=false`
-- [ ] Use PostgreSQL instead of SQLite
-- [ ] Configure proper `FRONTEND_URL`
-- [ ] Set up SSL/TLS certificates
-- [ ] Configure proper CORS origins
+- [ ] Set strong `SUPERADMIN_PASSWORD` (and a non-default `SUPERADMIN_EMAIL`)
+- [ ] Generate a fresh `GUACAMOLE_SECRET_KEY` (`python -c "import secrets; print(secrets.token_hex(16))"`)
+- [ ] Configure real Azure AD credentials (optional — local auth works without them)
+- [ ] Configure vSphere/Proxmox connections via **Settings → Private Cloud** in the UI
+- [ ] Set `FRONTEND_URL` to the public HTTPS URL (used in emails and OAuth redirects)
+- [ ] Restrict `ALLOWED_DOMAINS` to the domains that may self-register
+- [ ] Ensure the external `dokploy-network` exists on the host
 
-### Docker Production
+### Deploy with Docker Compose / Dokploy
 
-```powershell
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```bash
+docker compose up -d --build
 ```
 
 ### Environment Variables
 
-All sensitive values should be set via environment variables or secrets management, never committed to the repository.
+All sensitive values should be set via the `.env` file (or Dokploy's environment UI)
+and never committed to the repository.

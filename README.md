@@ -152,8 +152,8 @@ Get the entire stack running in under 60 seconds:
 
 ```bash
 # Clone repository
-git clone https://github.com/alshawwaf/se-training-portal.git
-cd se-training-portal
+git clone https://github.com/alshawwaf/training-portal.git
+cd training-portal
 
 # Configure environment
 cp .env.example .env
@@ -161,13 +161,13 @@ cp .env.example .env
 
 # Launch
 docker compose up --build -d
-
-> [!IMPORTANT]
-> **Networking Note:** If deploying in a reverse-proxy environment like Dokploy, ensure both the frontend and backend are on the same Docker network (e.g., `dokploy-network`) to allow the frontend proxy to resolve the `backend` hostname.
 ```
 
-**Access:** Navigate to [http://localhost:9999](http://localhost:9999)  
-**Login:** `admin@example.com` / `Cpwins!1` (configurable in `.env`)
+> [!IMPORTANT]
+> **Networking Note:** This stack is designed to run behind [Dokploy](https://dokploy.com/) (Traefik ingress + Let's Encrypt) on a bare-metal Ubuntu host. The `backend` and `frontend` services join the external `dokploy-network` so the frontend proxy can resolve the `backend` hostname.
+
+**Access:** Navigate to [http://localhost:9090](http://localhost:9090)  
+**Login:** `admin@cpdemo.com` / `Cpwins!1` (configurable in `.env`)
 
 ---
 
@@ -192,7 +192,7 @@ npm install
 npm run dev
 ```
 
-**Frontend:** [http://localhost:9999](http://localhost:9999)  
+**Frontend:** [http://localhost:9090](http://localhost:9090)  
 **Backend API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
@@ -209,11 +209,11 @@ npm run dev
 DATABASE_URL=postgresql://admin:password@db:5432/training_portal
 
 # Superadmin Account
-SUPERADMIN_EMAIL=admin@example.com
+SUPERADMIN_EMAIL=admin@cpdemo.com
 SUPERADMIN_PASSWORD=Cpwins!1
 
 # Frontend URL
-FRONTEND_URL=http://localhost:9999
+FRONTEND_URL=http://localhost:9090
 
 # Guacamole Secret (generate with: python -c "import secrets; print(secrets.token_hex(16))")
 GUACAMOLE_SECRET_KEY=REDACTED_GUACAMOLE_SECRET_KEY
@@ -227,7 +227,7 @@ AZURE_CLIENT_SECRET=
 AZURE_TENANT_ID=
 
 # Allowed email domains for registration (comma-separated)
-ALLOWED_DOMAINS=example.com
+ALLOWED_DOMAINS=checkpoint.com,example.com
 
 # Guacamole URLs (defaults work for Docker Compose)
 GUACAMOLE_URL=http://guacamole:8080/guacamole
@@ -316,9 +316,10 @@ training-portal/
 │   │   │   ├── Dashboard.tsx    # Main Landing
 │   │   │   ├── Templates.tsx    # Template Management
 │   │   │   ├── NetworkDesigner.tsx  # Visual Topology Editor
-│   │   │   ├── Classes.tsx      # Class Creation & Management
+│   │   │   ├── CreateClass.tsx / TrainingClasses.tsx  # Class Creation & Management
 │   │   │   ├── Settings.tsx     # Provider & System Config
 │   │   │   ├── MyEnvironments.tsx  # Student Workspace
+│   │   │   ├── admin/ · auth/ · classes/  # Users, Register/Verify, Class views
 │   │   │   └── monitoring/      # Admin Views
 │   │   ├── context/             # React Context Providers
 │   │   │   ├── AuthContext.tsx  # User Session State
@@ -329,9 +330,9 @@ training-portal/
 │   ├── vite.config.ts           # Vite Build Configuration
 │   └── Dockerfile
 │
-├── guacamole/                   # Apache Guacamole Config
-│   ├── guacamole.properties
-│   └── user-mapping.xml
+├── guacamole/                   # Apache Guacamole Config (JSON auth)
+│   ├── guacamole.properties     # guacd host + JSON secret settings
+│   └── branding/                # Custom Guacamole CSS/JSON branding
 │
 ├── docs/
 │   └── DEVELOPER_GUIDE.md       # Detailed Development Docs
@@ -347,7 +348,9 @@ training-portal/
 
 ### Base URL
 - **Development:** `http://localhost:8000`
-- **Production:** Your configured `BACKEND_URL`
+- **Docker / Production:** The frontend proxies `/api/*` and `/auth/*` to the
+  `backend` service (`VITE_API_URL`, default `http://backend:8000`), so the API is
+  reached through the frontend origin rather than a separate public URL.
 
 ### Authentication
 
@@ -410,36 +413,36 @@ training-portal/
 
 ## Development Workflow
 
-### Running Tests
+### Linting
 
 ```bash
-# Backend tests
-cd backend
-pytest
-
-# Frontend tests
+# Frontend lint (ESLint)
 cd frontend
-npm test
+npm run lint
 ```
+
+> **Note:** There is no automated test suite yet — validation is manual (see
+> [DEVELOPER_GUIDE.md → Manual Testing](docs/DEVELOPER_GUIDE.md#manual-testing)).
 
 ### Building for Production
 
 ```bash
 # Build Docker images
-docker-compose build
+docker compose build
 
 # Run in production mode
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Database Migrations
 
-```bash
-# Access backend container
-docker-compose exec backend bash
+The schema is created automatically on first startup (`Base.metadata.create_all`).
+There is no Alembic pipeline; additive schema changes ship as standalone scripts in
+`backend/` (e.g. `migrate_infrastructure.py`, `migrate_logs.py`, `migrate_stage2.py`)
+and `backend/migrations/`. Run one inside the backend container when needed:
 
-# Run Alembic migrations (when implemented)
-alembic upgrade head
+```bash
+docker compose exec backend python migrate_stage2.py
 ```
 
 ### Viewing Logs
@@ -501,7 +504,7 @@ All rights reserved.
 
 - **Developer Guide:** [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)
 - **API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Report Issues:** [GitHub Issues](https://github.com/alshawwaf/se-training-portal/issues)
+- **Report Issues:** [GitHub Issues](https://github.com/alshawwaf/training-portal/issues)
 - **Contact:** For enterprise support inquiries
 
 ---
