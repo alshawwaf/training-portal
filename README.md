@@ -1,514 +1,147 @@
 # Training Portal
 
-<p align="center">
-  <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind"/>
-  <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
-  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="Postgres"/>
+A hands-on lab portal that provisions isolated, multi-VM student environments on VMware vSphere and Proxmox VE, with zero-install browser console access through Apache Guacamole.
+
+<p align="left">
+  <img src="https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi&logoColor=white" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/React_19-20232A?style=flat&logo=react&logoColor=61DAFB" alt="React 19"/>
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/Guacamole-529433?style=flat&logo=apache&logoColor=white" alt="Apache Guacamole"/>
+  <img src="https://img.shields.io/badge/Docker-2CA5E0?style=flat&logo=docker&logoColor=white" alt="Docker"/>
 </p>
 
-### **The Enterprise Blueprint for Virtualized Hands-on Learning.**
-
-A modern, high-performance training management platform designed to orchestrate complex lab environments across high-tier hypervisors. Empower instructors to deploy isolated, multi-VM environments on-demand with professional-grade monitoring and networking control.
-
-[**Documentation**](docs/DEVELOPER_GUIDE.md) | [**API Specs**](http://localhost:8000/docs) | [**Contributing**](#contributing)
+Part of the [Dev Hub](https://github.com/alshawwaf/dev-hub) ecosystem — deploy the whole suite with [ubuntu-dokploy-ai](https://github.com/alshawwaf/ubuntu-dokploy-ai).
 
 ---
 
-##  What Makes This Different?
+## Overview
 
-Traditional training platforms require complex manual setup, vendor lock-in, and limited networking capabilities. **Training Portal** provides:
+Training Portal lets an instructor define a lab as a reusable **template** (a set of VMs with a network topology) and then spin up a per-student copy of that lab for a scheduled **class**. Each student gets an isolated environment they can reach entirely from the browser — no VPN, RDP client, or VNC viewer to install.
 
-- **Multi-Hypervisor Freedom** – Deploy to vSphere, Proxmox, or hybrid environments without vendor lock-in
-- **Visual Network Designer** – Drag-and-drop topology builder with automatic port group/bridge creation
-- **True Isolation** – Per-student VLAN segmentation and resource pool separation
-- **Zero Client Installs** – Browser-based console access (WebMKS, VNC, RDP) with no downloads
-- **Real-Time Intelligence** – Live VM metrics, automatic lifecycle management, and comprehensive auditing
-- **One-Command Deploy** – Complete Docker Compose stack for instant production-ready deployment
+The backend talks to the hypervisor directly (pyVmomi for vSphere, proxmoxer for Proxmox), clones the source VMs, wires up isolated networks (VLAN-backed port groups on vSphere, Linux bridges on Proxmox), and hands out console sessions through Apache Guacamole. A scheduler advances classes through their lifecycle (Draft → Upcoming → Active → Completed) and provisions or tears down environments on time.
 
----
+Provider credentials, SMTP, and Azure AD are configured from the **Settings** UI and stored in the database, so the stack runs without editing environment files after the first boot.
 
-<details>
-<summary><b>System Architecture</b> (Click to expand)</summary>
+## Features
 
-```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#e3f2fd','secondaryColor':'#fff3e0','tertiaryColor':'#f3e5f5'}}}%%
-graph TD
-    User([User Browser]) <-->|React 19 / Vite| FE[Frontend]
-    FE <-->|REST API| BE[FastAPI Backend]
-    
-    subgraph CS[Core Services]
-        BE <-->|SQLAlchemy| DB[(PostgreSQL)]
-        BE ---|Scheduler| LS[Lifecycle Manager]
-        BE ---|SMTP| ES[Email Service]
-    end
-    
-    subgraph IL[Infrastructure Layer]
-        BE <-->|pyVmomi| VS[vSphere Cluster]
-        BE <-->|Proxmox API| PX[Proxmox VE]
-    end
-    
-    FE -.->|VNC/RDP| GUA[Guacamole / WebMKS]
-    GUA <--> VS
-    GUA <--> PX
-    
-    style CS fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style IL fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-```
+- **Multi-hypervisor provisioning** — VMware vSphere (linked or full clones) and Proxmox VE (full clones) from the same template model.
+- **Visual network designer** — drag-and-drop topology editor (React Flow) that creates isolated networks: VLAN-backed distributed port groups on vSphere, VLAN bridges on Proxmox.
+- **Per-NIC control** — adapter type (VMXNET3 / VirtIO / E1000), MAC, MTU, rate limit, queues, link state, and firewall flags per virtual NIC.
+- **Class lifecycle automation** — scheduled classes auto-advance through Draft → Upcoming → Active → Completed; parallel or sequential provisioning, spare environments, and per-class datastore selection.
+- **Browser console access** — HTML5 RDP / SSH / VNC through Apache Guacamole (JSON auth), plus a WebMKS/noVNC WebSocket relay for the native vSphere console.
+- **Authentication & RBAC** — Azure AD SSO (MSAL) or local accounts, self-registration with email verification and domain allow-listing, role/permission groups (Admin / Instructor / Student), and guest join via class passcode.
+- **Student workspace** — self-service power on/off, one-click console, and downloadable RDP/SSH connection files.
+- **Admin tooling** — user management, infrastructure explorer, action + application logs, notification events, and a Settings UI for every provider and SMTP.
 
-</details>
+## Screenshots
 
+_Screenshots to be added._
 
-## Feature Highlights
+## Quick start
 
-### For Instructors
-
-<table>
-<tr>
-<td width="50%">
-
-**Template Management**
-- Define multi-VM lab blueprints with visual networking
-- Support for vSphere linked clones and Proxmox full clones
-- Template library with smart filtering (VM types, providers)
-- Network topology designer with drag-and-drop interface
-
-</td>
-<td width="50%">
-
-**Class Orchestration**
-- Create scheduled classes with auto-provisioning
-- Automated lifecycle: Draft → Upcoming → Active → Completed
-- Per-class datastore selection for storage optimization
-- Bulk operations: start/stop/revert all student environments
-
-</td>
-</tr>
-<tr>
-<td>
-
-**Advanced Networking**
-- Visual network topology editor
-- Automatic VLAN/port group creation for vSphere
-- Linux bridge configuration for Proxmox
-- NIC adapter type detection (VMXNET3, VirtIO, E1000)
-- Per-NIC settings: MAC, MTU, firewall, link state
-
-</td>
-<td>
-
-**Monitoring & Control**
-- Real-time VM performance metrics (CPU, RAM, Disk)
-- System-wide class and environment dashboards
-- Granular action logs with user attribution
-- Task tracking for provisioning operations
-
-</td>
-</tr>
-</table>
-
-### For Students
-
-<table>
-<tr>
-<td width="50%">
-
-**My Workspace**
-- Self-service environment access
-- One-click VM power operations
-- Browser-based console (no client software)
-- Download RDP/SSH connection files
-
-</td>
-<td width="50%">
-
-**Seamless Access**
-- Azure AD SSO or local authentication
-- Email verification with SMTP codes
-- Role-based access control (RBAC)
-- Guest join with class passcodes
-
-</td>
-</tr>
-</table>
-
-### For Administrators
-
-- **User Management** – Invite, activate, deactivate, and role assignment
-- **Permissions & Groups** – Granular RBAC with custom permission clusters
-- **System Logs** – Dual-tab logging for actions and application exceptions
-- **Provider Settings** – Configure vSphere, Proxmox, SMTP, and Azure AD from UI
-- **Infrastructure Explorer** – Browse and sync resources from connected hypervisors
-
----
-
-## Quick Start
-
-### **Option 1: Docker Compose (Recommended)**
-
-Get the entire stack running in under 60 seconds:
+Requires Docker and Docker Compose.
 
 ```bash
-# Clone repository
 git clone https://github.com/alshawwaf/training-portal.git
 cd training-portal
 
-# Configure environment
 cp .env.example .env
-# Edit .env with your settings
+# Edit .env — at minimum set GUACAMOLE_SECRET_KEY, SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD
+# Generate a secret: python -c "import secrets; print(secrets.token_hex(16))"
 
-# Launch
 docker compose up --build -d
 ```
 
-> [!IMPORTANT]
-> **Networking Note:** This stack is designed to run behind [Dokploy](https://dokploy.com/) (Traefik ingress + Let's Encrypt) on a bare-metal Ubuntu host. The `backend` and `frontend` services join the external `dokploy-network` so the frontend proxy can resolve the `backend` hostname.
+| Service | URL | Notes |
+|:--------|:----|:------|
+| Portal UI | http://localhost:9090 | Log in with `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` (default `admin@cpdemo.com` / `Cpwins!1`) |
+| Backend API + Swagger | http://localhost:8000/docs | FastAPI OpenAPI docs |
+| Apache Guacamole | http://localhost:8085/guacamole | Console broker (JSON auth) |
+| pgAdmin | http://localhost:5050 | DB admin (`PGADMIN_EMAIL` / `PGADMIN_PASSWORD`) |
+| PostgreSQL | localhost:5433 | Published from the `db` container |
 
-**Access:** Navigate to [http://localhost:9090](http://localhost:9090)  
-**Login:** `admin@cpdemo.com` / `Cpwins!1` (configurable in `.env`)
+> The `backend` and `frontend` services attach to the external `dokploy-network`. If you are running the stack outside Dokploy, create it once with `docker network create dokploy-network`.
 
----
+### Development mode
 
-### **Option 2: Development Mode**
+Run the services directly for hot reload (point `DATABASE_URL` at a local Postgres, or start just the `db` container with `docker compose up -d db`):
 
-For local development with hot-reload:
-
-**Backend:**
 ```bash
+# Backend
 cd backend
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # Linux/Mac
+python -m venv .venv && source .venv/bin/activate   # .venv\Scripts\activate on Windows
 pip install -r requirements.txt
-uvicorn main:app --reload
-```
+uvicorn main:app --reload            # http://localhost:8000/docs
 
-**Frontend** (new terminal):
-```bash
+# Frontend (separate terminal)
 cd frontend
 npm install
-npm run dev
+npm run dev                          # http://localhost:9090 (proxies /api and /auth to the backend)
 ```
 
-**Frontend:** [http://localhost:9090](http://localhost:9090)  
-**Backend API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
+## Deployment
 
----
+Training Portal deploys automatically as part of the Dev Hub suite via [ubuntu-dokploy-ai](https://github.com/alshawwaf/ubuntu-dokploy-ai) and is served at **training.\<your-domain\>**. Dokploy builds and runs `docker-compose.yml`; Traefik handles ingress and Let's Encrypt TLS, and the `backend` / `frontend` services join the external `dokploy-network` so Traefik can route to them. There is no separate production compose override.
+
+Before going live: set a strong `SUPERADMIN_PASSWORD`, generate a fresh `GUACAMOLE_SECRET_KEY`, set `FRONTEND_URL` to the public HTTPS URL, and restrict `ALLOWED_DOMAINS`. See [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) for the full production checklist.
 
 ## Configuration
 
-### Environment Variables (`.env`)
+Values are read from `.env` (see [`.env.example`](.env.example)). Most infrastructure and SMTP settings can instead be managed from **Settings** in the UI and are persisted in the database.
 
-```env
-# ============================================================================
-# REQUIRED VARIABLES
-# ============================================================================
-# Database
-DATABASE_URL=postgresql://admin:password@db:5432/training_portal
+| Variable | Required | Default | Description |
+|:---------|:--------:|:--------|:------------|
+| `DATABASE_URL` | yes | `postgresql://admin:password@db:5432/training_portal` | PostgreSQL connection string |
+| `DB_USER` / `DB_PASSWORD` / `DB_NAME` | — | `admin` / `password` / `training_portal` | Compose-level Postgres credentials |
+| `SUPERADMIN_EMAIL` | yes | `admin@cpdemo.com` | Seed admin account (created on first boot) |
+| `SUPERADMIN_PASSWORD` | yes | `Cpwins!1` | Seed admin password — **change in production** |
+| `FRONTEND_URL` | yes | `http://localhost:9090` | Base URL used in emails and OAuth redirects |
+| `GUACAMOLE_SECRET_KEY` | yes | — | Guacamole JSON-auth secret; must match the `guacamole` service |
+| `GUACAMOLE_URL` | no | `http://guacamole:8080/guacamole` | Internal Guacamole URL (backend → broker) |
+| `GUACAMOLE_EXTERNAL_URL` | no | `http://localhost:8085/guacamole` | Browser-facing Guacamole URL |
+| `ALLOWED_DOMAINS` | no | `example.com` | Comma-separated email domains allowed to self-register |
+| `AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET` / `AZURE_TENANT_ID` | no | — | Azure AD SSO (leave empty for local auth only) |
+| `VSPHERE_HOST` / `VSPHERE_USER` / `VSPHERE_PASSWORD` / `VSPHERE_PORT` / `VSPHERE_VERIFY_SSL` | no | — / `administrator@vsphere.local` / — / `443` / `false` | vSphere fallback (prefer the UI) |
+| `PROXMOX_HOST` / `PROXMOX_USER` / `PROXMOX_PASSWORD` / `PROXMOX_NODE` | no | — / `root@pam` / — / — | Proxmox fallback (prefer the UI) |
+| `LOG_LEVEL` | no | `INFO` | Backend log level |
+| `PROVISIONING_MODE` | no | `parallel` | `parallel` or `sequential` VM provisioning |
+| `PGADMIN_EMAIL` / `PGADMIN_PASSWORD` | no | `admin@cpdemo.com` / `Cpwins!1` | pgAdmin login |
 
-# Superadmin Account
-SUPERADMIN_EMAIL=admin@cpdemo.com
-SUPERADMIN_PASSWORD=Cpwins!1
+> SMTP/email and Proxmox/vSphere connections are best configured from **Settings** in the UI rather than via environment variables.
 
-# Frontend URL
-FRONTEND_URL=http://localhost:9090
-
-# Guacamole Secret (generate with: python -c "import secrets; print(secrets.token_hex(16))")
-GUACAMOLE_SECRET_KEY=REDACTED_GUACAMOLE_SECRET_KEY
-
-# ============================================================================
-# OPTIONAL VARIABLES (Leave empty if not needed)
-# ============================================================================
-# Azure AD SSO (Optional - for enterprise single sign-on)
-AZURE_CLIENT_ID=
-AZURE_CLIENT_SECRET=
-AZURE_TENANT_ID=
-
-# Allowed email domains for registration (comma-separated)
-ALLOWED_DOMAINS=checkpoint.com,example.com
-
-# Guacamole URLs (defaults work for Docker Compose)
-GUACAMOLE_URL=http://guacamole:8080/guacamole
-GUACAMOLE_EXTERNAL_URL=http://localhost:8085/guacamole
-
-# vSphere (Optional - Can be configured in Settings > Private Cloud instead)
-VSPHERE_HOST=
-VSPHERE_USER=administrator@vsphere.local
-VSPHERE_PASSWORD=
-VSPHERE_PORT=443
-VSPHERE_VERIFY_SSL=false
-
-# Advanced
-LOG_LEVEL=INFO
-BACKEND_WS_URL=ws://localhost:8000
-PROVISIONING_MODE=parallel
-```
-
-> **Note:**  
-> **Proxmox** and **SMTP/Email** settings are configured via the **Settings** page in the UI.  
-> **vSphere** can also be configured via UI (recommended over environment variables).
-
-
----
-
-## Infrastructure Provider Support
-
-| Feature | VMware vSphere | Proxmox VE | Notes |
-|:--------|:--------------:|:----------:|:------|
-| **VM Cloning** | Linked & Full | Full Clone | vSphere linked clones reduce storage |
-| **Network Isolation** | Per-Port VLAN | VLAN Bridges | Requires dvSwitch for vSphere |
-| **Console Access** | WebMKS / noVNC | noVNC / SPICE | Browser-based, zero client install |
-| **Snapshots** | Create & Revert | Create & Revert | Template prep & student reset |
-| **NIC Types** | VMXNET3, E1000, E1000e | VirtIO, Realtek, E1000 | Auto-detected from hypervisor |
-| **Resource Pools** | DRS Integration | Pool Isolation | Logical resource separation |
-| **Datastore Selection** | Per-Class Choice | Default Storage | vSphere supports multi-datastore |
-
-### vSphere Requirements for Network Isolation
-
-For **per-student VLAN isolation**, your vSphere environment needs:
-
-| Component | Requirement |
-|:----------|:------------|
-| **License** | vSphere Enterprise Plus (for Distributed vSwitch) |
-| **Network** | Distributed vSwitch (dvSwitch) |
-| **Port Binding** | Early Binding or Static Binding |
-| **Physical Switch** | Trunk port with VLAN range (default: 100-3999) |
-
-> **Note:** Standard vSwitch does NOT support per-port VLAN overrides. Use **Shared** network mode if dvSwitch is unavailable.
-
----
-
-## Project Structure
+## Architecture
 
 ```
-training-portal/
-├── backend/                      # FastAPI Application
-│   ├── db/
-│   │   ├── models.py            # SQLAlchemy ORM Models
-│   │   └── database.py          # Database Session Management
-│   ├── routers/                 # API Route Controllers
-│   │   ├── auth.py              # Authentication & SSO
-│   │   ├── classes.py           # Class Management
-│   │   ├── templates.py         # Template CRUD
-│   │   ├── networks.py          # Network Designer API
-│   │   ├── infrastructure_connections.py  # Provider Config
-│   │   └── ...
-│   ├── services/                # Business Logic Layer
-│   │   ├── vsphere_service.py   # vSphere Integration (pyVmomi)
-│   │   ├── proxmox_service.py   # Proxmox Integration
-│   │   ├── provisioning_service.py  # VM Cloning Orchestration
-│   │   ├── email_service.py     # SMTP Email Verification
-│   │   ├── guacamole_service.py # Remote Console Ticket Generation
-│   │   └── class_status_scheduler.py  # Automated Lifecycle Manager
-│   ├── main.py                  # FastAPI Application Entry
-│   └── Dockerfile
-│
-├── frontend/                    # React 19 SPA
-│   ├── src/
-│   │   ├── components/          # Reusable UI Components
-│   │   │   ├── Layout.tsx       # App Shell with Navigation
-│   │   │   ├── templates/       # Template-specific Components
-│   │   │   ├── classes/         # Class Management Components
-│   │   │   └── monitoring/      # Admin Monitoring Components
-│   │   ├── pages/               # Route Pages
-│   │   │   ├── Dashboard.tsx    # Main Landing
-│   │   │   ├── Templates.tsx    # Template Management
-│   │   │   ├── NetworkDesigner.tsx  # Visual Topology Editor
-│   │   │   ├── CreateClass.tsx / TrainingClasses.tsx  # Class Creation & Management
-│   │   │   ├── Settings.tsx     # Provider & System Config
-│   │   │   ├── MyEnvironments.tsx  # Student Workspace
-│   │   │   ├── admin/ · auth/ · classes/  # Users, Register/Verify, Class views
-│   │   │   └── monitoring/      # Admin Views
-│   │   ├── context/             # React Context Providers
-│   │   │   ├── AuthContext.tsx  # User Session State
-│   │   │   └── ToastContext.tsx # Notification System
-│   │   ├── api.ts               # Axios HTTP Client
-│   │   └── App.tsx              # Root Component & Router
-│   ├── package.json
-│   ├── vite.config.ts           # Vite Build Configuration
-│   └── Dockerfile
-│
-├── guacamole/                   # Apache Guacamole Config (JSON auth)
-│   ├── guacamole.properties     # guacd host + JSON secret settings
-│   └── branding/                # Custom Guacamole CSS/JSON branding
-│
-├── docs/
-│   └── DEVELOPER_GUIDE.md       # Detailed Development Docs
-│
-├── docker-compose.yml           # Multi-Container Orchestration
-├── .env.example                 # Environment Variable Template
-└── README.md                    # This file
+Browser ──► Frontend (React 19 / Vite, :9090)
+                │  proxies /api and /auth
+                ▼
+            Backend (FastAPI, :8000) ──► PostgreSQL (:5432)
+                │            │
+                │            ├─ APScheduler  (class lifecycle)
+                │            ├─ pyVmomi      ──► VMware vSphere
+                │            └─ proxmoxer    ──► Proxmox VE
+                │
+                └─► Guacamole (:8080) ──► guacd ──► RDP / SSH / VNC to student VMs
 ```
 
----
+Compose services: `db` (postgres:15-alpine), `pgadmin`, `backend`, `frontend`, `guacd`, and `guacamole`. The database schema is created on first boot (`Base.metadata.create_all`) with additive, idempotent column migrations run at startup; there is no Alembic pipeline.
 
-## API Reference
+## Tech stack
 
-### Base URL
-- **Development:** `http://localhost:8000`
-- **Docker / Production:** The frontend proxies `/api/*` and `/auth/*` to the
-  `backend` service (`VITE_API_URL`, default `http://backend:8000`), so the API is
-  reached through the frontend origin rather than a separate public URL.
+| Layer | Technologies |
+|:------|:-------------|
+| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS 3, React Router 7, React Flow (`@xyflow/react`), Axios, Lucide icons |
+| Backend | FastAPI, SQLAlchemy, Pydantic, APScheduler, bcrypt / python-jose, MSAL (Azure AD), fastapi-mail |
+| Infrastructure | pyVmomi (vSphere), proxmoxer (Proxmox VE), Apache Guacamole (guacd + JSON auth), WebMKS/noVNC |
+| Data | PostgreSQL 15, pgAdmin |
+| Runtime | Docker Compose, Dokploy + Traefik (production) |
 
-### Authentication
-
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| `GET` | `/auth/login` | Initiate Azure AD SSO login |
-| `GET` | `/auth/callback` | Azure AD callback handler |
-| `POST` | `/auth/local-login` | Local superadmin authentication |
-| `POST` | `/auth/register` | New user registration |
-| `POST` | `/auth/verify-email` | Email verification with code |
-
-### Classes
-
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| `GET` | `/classes/` | List all classes |
-| `POST` | `/classes/` | Create a new class |
-| `GET` | `/classes/{id}` | Get class details |
-| `PUT` | `/classes/{id}` | Update class information |
-| `DELETE` | `/classes/{id}` | Delete a class |
-| `POST` | `/classes/{id}/provision` | Provision student environments |
-| `POST` | `/classes/{id}/start-all` | Start all VMs in class |
-| `POST` | `/classes/{id}/stop-all` | Stop all VMs in class |
-
-### Templates
-
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| `GET` | `/templates/` | List all templates |
-| `POST` | `/templates/` | Create a new template |
-| `GET` | `/templates/{id}` | Get template details |
-| `PUT` | `/templates/{id}` | Update template configuration |
-| `DELETE` | `/templates/{id}` | Delete a template |
-| `PUT` | `/templates/{id}/status` | Change template status |
-
-### Networks
-
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| `GET` | `/networks/` | List all defined networks |
-| `POST` | `/networks/` | Create a new network |
-| `GET` | `/networks/available` | Get infrastructure networks |
-| `GET` | `/networks/templates/{id}/detect-nics` | Detect NICs for template VMs |
-| `POST` | `/networks/templates/{id}/save-topology` | Save network topology |
-| `POST` | `/networks/create-infrastructure` | Create port group/bridge |
-
-### Infrastructure Connections
-
-| Method | Endpoint | Description |
-|:-------|:---------|:------------|
-| `GET` | `/infrastructure-connections/` | List all provider connections |
-| `POST` | `/infrastructure-connections/` | Add vSphere/Proxmox connection |
-| `PUT` | `/infrastructure-connections/{id}` | Update connection settings |
-| `DELETE` | `/infrastructure-connections/{id}` | Remove a connection |
-| `POST` | `/infrastructure-connections/{id}/test` | Test connection credentials |
-
-**Full API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs) (Swagger UI)
-
----
-
-## Development Workflow
-
-### Linting
+## Development
 
 ```bash
-# Frontend lint (ESLint)
-cd frontend
-npm run lint
+cd frontend && npm run lint      # ESLint
+cd frontend && npm run build     # type-check (tsc -b) + production build
 ```
 
-> **Note:** There is no automated test suite yet — validation is manual (see
-> [DEVELOPER_GUIDE.md → Manual Testing](docs/DEVELOPER_GUIDE.md#manual-testing)).
-
-### Building for Production
-
-```bash
-# Build Docker images
-docker compose build
-
-# Run in production mode
-docker compose up -d
-```
-
-### Database Migrations
-
-The schema is created automatically on first startup (`Base.metadata.create_all`).
-There is no Alembic pipeline; additive schema changes ship as standalone scripts in
-`backend/` (e.g. `migrate_infrastructure.py`, `migrate_logs.py`, `migrate_stage2.py`)
-and `backend/migrations/`. Run one inside the backend container when needed:
-
-```bash
-docker compose exec backend python migrate_stage2.py
-```
-
-### Viewing Logs
-
-```bash
-# All services
-docker-compose logs -f
-
-# Specific service
-docker-compose logs -f backend
-docker-compose logs -f frontend
-
-# Backend application logs
-tail -f backend/logs/app.log
-tail -f backend/logs/vsphere.log
-```
-
----
-
-## Security Considerations
-
-- **Authentication:** Supports Azure AD SSO with MSAL and local superadmin fallback
-- **RBAC:** Role-based permissions (Admin, Instructor, Student) with granular controls
-- **Audit Logging:** All actions logged with user attribution and timestamps
-- **Credential Storage:** Environment variables and database encryption for sensitive data
-- **CORS:** Configurable allowed origins for production security
-- **Email Verification:** Self-registration requires email verification codes
-
----
-
-## Contributing
-
-We welcome contributions! Here's how to get started:
-
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** your changes: `git commit -m 'Add amazing feature'`
-4. **Push** to your branch: `git push origin feature/amazing-feature`
-5. **Open** a Pull Request
-
-### Development Guidelines
-
-- Follow existing code style and structure
-- Add comprehensive comments for complex logic
-- Update documentation for new features
-- Test changes thoroughly before submitting PR
-- See [DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) for detailed guidelines
-
----
-
-## License
-
-This project is proprietary software developed by **Training Portal Team**  
-All rights reserved.
-
----
-
-## Support & Resources
-
-- **Developer Guide:** [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)
-- **API Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Report Issues:** [GitHub Issues](https://github.com/alshawwaf/training-portal/issues)
-- **Contact:** For enterprise support inquiries
-
----
-
-<p align="center">
-  <b>Built for Security Engineering Training Excellence</b>
-</p>
+There is no automated test suite yet; validation is manual. Backend logs are written to `backend/logs/` (`app.log`, rotating). For architecture details, adding routers/pages, and the production checklist, see [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md).
