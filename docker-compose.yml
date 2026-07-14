@@ -40,7 +40,10 @@ services:
 
   # FastAPI Backend
   backend:
-    build: ./backend
+    image: ghcr.io/alshawwaf/training-portal-backend:latest
+    pull_policy: always
+    # build disabled: prebuilt + published by .github/workflows/publish-image.yml; uncomment to build locally.
+    # build: ./backend
     container_name: training_portal_backend
     restart: always
     ports:
@@ -80,7 +83,10 @@ services:
 
   # React Frontend
   frontend:
-    build: ./frontend
+    image: ghcr.io/alshawwaf/training-portal-frontend:latest
+    pull_policy: always
+    # build disabled: prebuilt + published by .github/workflows/publish-image.yml; uncomment to build locally.
+    # build: ./frontend
     container_name: training_portal_frontend
     restart: always
     ports:
